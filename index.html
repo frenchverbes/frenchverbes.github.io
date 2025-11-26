@@ -1,348 +1,517 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Französisch Verben Quiz</title>
-  <link rel="icon" type="image/png" href="/images/favicon.png">
-  <style>
-    body { font-family: sans-serif; background: #f0f4f8; padding: 2rem; text-align: center; }
-    h1 { margin-bottom: 1rem; color: #333; }
-    #setup, #quiz, #result, #overview, #filter { display: none; margin-top: 2rem; }
-    select, button, input[type="number"], input[type="text"] {
-      font-size: 1rem;
-      margin: 0.5rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button { cursor: pointer; background-color: #007bff; color: white; border: none; }
-    button:hover { background-color: #0056b3; }
-    #question-box { font-size: 1.2rem; margin-top: 1rem; }
-    #feedback { margin-top: 1rem; font-weight: bold; min-height: 1.5rem; }
-    #total-time { margin-top: 1rem; font-size: 0.9rem; color: #666; }
-    #verb-list { text-align: left; max-width: 600px; margin: 1rem auto; background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    #verb-list ul { list-style: none; padding: 0; }
-    #verb-list li { position: relative; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
-    #verb-list li span.mastery { float: right; font-weight: bold; }
-    .info-icon {
-      cursor: pointer;
-      margin-left: 0.5rem;
-      color: #007bff;
-      font-weight: bold;
-    }
-    .details-container {
-      display: none;
-      margin-top: 0.5rem;
-    }
-    .detail-table {
-      border-collapse: collapse;
-      width: 100%;
-      font-size: 0.9rem;
-    }
-    .detail-table th, .detail-table td {
-      border: 1px solid #ddd;
-      padding: 0.4rem;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Französisch Verben Konjugation</title>
+    <style>
+        /* --- Allgemeine Styles --- */
+        body { font-family: Arial, sans-serif; padding: 0; background-color: #f4f4f9; margin: 0; display: flex; justify-content: center; }
+        
+        .main-content { 
+            flex-grow: 1; 
+            padding: 20px; 
+            max-width: 1000px;
+            width: 100%;
+        }
+        .container { 
+            max-width: 100%; 
+            margin: auto; 
+            background: #fff; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+        h1 { color: #333; border-bottom: 2px solid #5cb85c; padding-bottom: 10px; margin-top: 0; }
+        input[type="text"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+
+        /* --- Tabellen Styles --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; word-wrap: break-word; }
+        th { background-color: #5cb85c; color: white; }
+        th:first-child { width: 15%; }
+        .verb-title { text-align: center; font-size: 1.5em; margin-bottom: 15px; color: #333; }
+        .error { color: red; text-align: center; margin-top: 20px; }
+        .imparfait-info { margin-top: 30px; padding: 15px; background: #e0f7fa; border-left: 5px solid #00bcd4; }
+        
+        /* --- Modal (Overlay) Styles --- */
+        #verbModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        #verbModal.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        #modalContent {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 900px; 
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        .modal-title {
+            color: #333;
+            border-bottom: 2px solid #5cb85c;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        /* --- Gruppierte Liste Styles --- */
+        #modalListContainer {
+            overflow-y: auto;
+            margin-top: 10px;
+            padding-right: 15px;
+        }
+        #modalVerbList h4 {
+            color: #5cb85c;
+            border-bottom: 1px dotted #ccc;
+            padding-top: 15px;
+            margin-bottom: 5px;
+            text-transform: capitalize;
+        }
+        #modalVerbList ul.verb-group-list {
+            list-style-type: none; 
+            padding-left: 0;
+            margin-top: 5px;
+            columns: 2; /* Spaltenansicht für Cleaner-Look */
+        }
+        #modalVerbList li {
+            padding: 5px 0;
+            break-inside: avoid; 
+            display: flex; 
+            margin-bottom: 5px;
+        }
+        #modalVerbList .verb-number {
+            font-weight: bold;
+            color: #5cb85c;
+            margin-right: 8px;
+            min-width: 30px; 
+            text-align: right;
+        }
+        #modalVerbList a {
+            color: #333;
+            text-decoration: none;
+            display: inline-block;
+        }
+        #modalVerbList a:hover {
+            color: #00bcd4;
+            text-decoration: underline;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            color: #333;
+            font-size: 30px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .menu-trigger-button {
+             width: 100%; 
+             padding: 12px; 
+             margin-bottom: 20px; 
+             background-color: #00bcd4; 
+             border: none; 
+             border-radius: 4px; 
+             color: white; 
+             font-size: 18px; 
+             cursor: pointer; 
+             transition: background-color 0.2s;
+        }
+        .menu-trigger-button:hover {
+            background-color: #00a0b8;
+        }
+        .back-to-list-button {
+            background-color: #f4f4f4;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 8px 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Französisch Verben Quiz</h1>
-  <div id="setup">
-    <label>Wie viele Minuten möchtest du üben?</label><br>
-    <input id="minutes" type="number" value="10" min="1" max="120"> Minuten<br>
-    <button onclick="startSession()">Starten</button>
-    <button onclick="showOverview()" style="background-color: #6c757d;">Lernübersicht</button>
-    <button onclick="showFilter()" style="background-color: #17a2b8;">Filter</button>
-    <div id="total-time"></div>
-    <a href="https://cestca.vocatrainer.memorylab.app/#/lessons?tab=library">VocabTrainer</a>
-  </div>
 
-  <div id="filter">
-    <h2>Filtereinstellungen</h2>
-    <label>Verben ausschließen (Komma-getrennt):</label><br>
-    <input id="excluded-verbs" type="text" placeholder="z. B. être, avoir"><br>
-    <label>Zeiten ausschließen:</label><br>
-    <label><input type="checkbox" class="excluded-tense" value="present"> Présent</label>
-    <label><input type="checkbox" class="excluded-tense" value="imparfait"> Imparfait</label>
-    <label><input type="checkbox" class="excluded-tense" value="passe"> Passé composé</label><br>
-    <label>Personen ausschließen:</label><br>
-    <label><input type="checkbox" class="excluded-person" value="0"> je</label>
-    <label><input type="checkbox" class="excluded-person" value="1"> tu</label>
-    <label><input type="checkbox" class="excluded-person" value="2"> il/elle</label>
-    <label><input type="checkbox" class="excluded-person" value="3"> nous</label>
-    <label><input type="checkbox" class="excluded-person" value="4"> vous</label>
-    <label><input type="checkbox" class="excluded-person" value="5"> ils/elles</label><br><br>
-    <button onclick="hideFilter()">Zurück</button>
-  </div>
+    <div class="main-content">
+        <div class="container">
+            <h1>Französische Verben Konjugator 🇫🇷</h1>
 
-  <div id="quiz">
-    <div id="timer"></div>
-    <div id="question-box"></div>
-    <div><span id="prefix"></span><input type="text" id="answer" placeholder="Antwort..." autocomplete="off"></div>
-    <div>
-      <button id="submit-btn">Antwort überprüfen</button>
-      <button id="next-btn" style="display:none">Nächste Frage</button>
-      <button onclick="abortSession()" style="background-color:#dc3545;">Abbrechen</button>
+            <button class="menu-trigger-button" onclick="toggleModal(true)">Alle Verben durchsuchen (Gruppenansicht) 🔍</button>
+
+            <input type="text" id="searchInput" onkeyup="searchVerb()" placeholder="Direktsuche (Infinitiv oder Deutsch, akzentfrei)...">
+
+            <div id="result">
+                <p style="text-align: center;">Bitte geben Sie einen Suchbegriff ein oder wählen Sie ein Verb über den Knopf aus.</p>
+            </div>
+
+            <div id="general-info" class="imparfait-info">
+                </div>
+        </div>
     </div>
-    <div id="feedback"></div>
-  </div>
 
-  <div id="result">
-    <p>Fertig! 🎉</p>
-    <button onclick="restart()">Nochmal üben</button>
-  </div>
+    <div id="verbModal" onclick="if(event.target.id === 'verbModal') toggleModal(false)">
+        <div id="modalContent">
+            <span class="close-button" onclick="toggleModal(false)">&times;</span>
+            
+            <h3 id="modalTitle" class="modal-title"></h3>
 
-  <div id="overview">
-    <div id="verb-list"></div>
-    <button onclick="restart()">Zurück</button>
-  </div>
+            <div id="modalListContainer">
+                <input type="text" id="modalSearchInput" onkeyup="filterModalList()" placeholder="Liste filtern (akzentfrei)...">
+                <div id="modalVerbList">
+                    </div>
+            </div>
 
-  <script type="module">
-    import { verbs } from './verbs.js';
+            <div id="modalConjugationView" style="display: none;">
+                <button onclick="showModalView('list')" class="back-to-list-button">← Zurück zur Verbenliste</button>
+                <div id="modalConjugationTable">
+                    </div>
+            </div>
+        </div>
+    </div>
 
-    const persons = ["je", "tu", "il/elle", "nous", "vous", "ils/elles"];
-    const tenses = ["present", "imparfait", "passe"];
-    const tensesDisplay = { present: 'Présent', imparfait: 'Imparfait', passe: 'Passé composé' };
-    let excludedVerbs = [], excludedTenses = [], excludedPersons = [];
-    let sessionEnd, sessionStart, sessionLength;
-    let currentVerb, currentTense, currentPerson, correctAnswer;
-    let learnedStats = JSON.parse(localStorage.getItem("learnedStats") || "{}");
-    let totalMinutes = parseInt(localStorage.getItem("totalMinutes") || "0");
-    let interval = null;
+    <script>
+        let verbData = null;
+        let avoirPresent = null;
+        let etrePresent = null;
 
-    const setup = document.getElementById("setup");
-    const quiz = document.getElementById("quiz");
-    const result = document.getElementById("result");
-    const overview = document.getElementById("overview");
-    const filter = document.getElementById("filter");
-    const questionBox = document.getElementById("question-box");
-    const feedback = document.getElementById("feedback");
-    const timer = document.getElementById("timer");
-    const answerInput = document.getElementById("answer");
-    const prefix = document.getElementById("prefix");
-    const totalDisplay = document.getElementById("total-time");
-    const verbList = document.getElementById("verb-list");
-    const submitBtn = document.getElementById("submit-btn");
-    const nextBtn = document.getElementById("next-btn");
+        const pronomen = ["je", "tu", "il_elle_on", "nous", "vous", "ils_elles"];
+        const pronomenDisplay = ["je", "tu", "il/elle/on", "nous", "vous", "ils/elles"];
 
-    totalDisplay.textContent = `Bisher insgesamt geübt: ${totalMinutes} Minute(n)`;
-    setup.style.display = "block";
-
-    const synth = window.speechSynthesis;
-    let frenchVoice = null;
-
-    function loadVoices() {
-      const voices = synth.getVoices();
-      frenchVoice = voices.find(voice => voice.lang.startsWith('fr'));
-    }
-
-    synth.onvoiceschanged = loadVoices;
-
-    function speak(text) {
-      if (!synth) return;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'fr-FR';
-      if (frenchVoice) utterance.voice = frenchVoice;
-      synth.speak(utterance);
-    }
-
-    function computeOverallScore(verb) {
-      const stats = learnedStats[verb];
-      if (!stats) return 0;
-      let total = 0, count = 0;
-      tenses.forEach(t => {
-        if (stats[t]) {
-          Object.values(stats[t]).forEach(s => { total += s; count++; });
+        // Funktion zum Entfernen von Akzenten/Sonderzeichen für die Suche
+        function normalizeString(str) {
+            if (!str) return '';
+            return str.toLowerCase()
+                       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                       .replace(/ç/g, 'c');
         }
-      });
-      return count ? Math.round(total / count) : 0;
-    }
 
-    function showFilter() {
-      setup.style.display = "none";
-      filter.style.display = "block";
-    }
+        // 1. Daten laden und Hilfsverben finden
+        async function loadData() {
+            try {
+                // Datenquelle bestimmen (URL-Parameter > Fallback)
+                const urlParams = new URLSearchParams(window.location.search);
+                const jsonLink = urlParams.get('link');
+                const dataUrl = jsonLink || 'verbes.json'; // Primary source or fallback
+                
+                const response = await fetch(dataUrl);
 
-    function hideFilter() {
-      filter.style.display = "none";
-      setup.style.display = "block";
-    }
+                if (!response.ok) {
+                    throw new Error(`Konnte JSON-Daten von ${dataUrl} nicht laden: ${response.statusText}`);
+                }
+                const data = await response.json();
+                verbData = data;
+                
+                const avoirVerb = verbData.alle_verben.find(v => v.infinitiv === "avoir");
+                const etreVerb = verbData.alle_verben.find(v => v.infinitiv === "être");
 
-    function startSession() {
-      const minutes = parseInt(document.getElementById("minutes").value);
-      if (!minutes || minutes <= 0) return alert("Bitte eine gültige Zeit angeben.");
-      sessionLength = minutes;
-      sessionStart = Date.now();
-      sessionEnd = sessionStart + minutes * 60 * 1000;
+                avoirPresent = avoirVerb ? avoirVerb.present : null;
+                etrePresent = etreVerb ? etreVerb.present : null;
 
-      excludedVerbs = document.getElementById("excluded-verbs").value.split(",").map(v => v.trim()).filter(Boolean);
-      excludedTenses = Array.from(document.querySelectorAll(".excluded-tense:checked")).map(cb => cb.value);
-      excludedPersons = Array.from(document.querySelectorAll(".excluded-person:checked")).map(cb => parseInt(cb.value));
+                displayGeneralInfo(data.zusatz_informationen);
+                populateVerbList(); 
 
-      setup.style.display = "none";
-      quiz.style.display = "block";
-      nextQuestion();
-      updateTimer();
-    }
-
-    function updateTimer() {
-      clearInterval(interval);
-      interval = setInterval(() => {
-        const timeLeft = sessionEnd - Date.now();
-        if (timeLeft <= 0) { clearInterval(interval); finishSession(); }
-        else {
-          const min = Math.floor(timeLeft / 60000);
-          const sec = Math.floor((timeLeft % 60000) / 1000);
-          timer.textContent = `Verbleibend: ${min}:${sec.toString().padStart(2,'0')}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p class="error">Fehler beim Laden der Verben: ${error.message}</p>`;
+                console.error("Fehler beim Laden der JSON-Datei:", error);
+            }
         }
-      }, 1000);
-    }
 
-    function weightedRandomVerb() {
-      const keys = Object.keys(verbs);
-      const pool = keys.flatMap(key => {
-        const score = computeOverallScore(key);
-        const weight = Math.max(1, 5 - score);
-        return Array(weight).fill(key);
-      });
-      return pool[Math.floor(Math.random() * pool.length)];
-    }
+        // 2. Modale Liste befüllen (mit Gruppierung und fortlaufender Nummerierung)
+        function populateVerbList() {
+            const listDiv = document.getElementById('modalVerbList');
+            
+            // 1. Gruppieren der Verben
+            const groupedVerbs = verbData.alle_verben.reduce((acc, verb) => {
+                const groupName = verb.gruppe.replace(/_/g, ' ').toUpperCase();
+                if (!acc[groupName]) {
+                    acc[groupName] = [];
+                }
+                acc[groupName].push(verb);
+                return acc;
+            }, {});
 
-    function nextQuestion() {
-      let tries = 0;
-      const availableTenses = tenses.filter(t => !excludedTenses.includes(t));
-      const availablePersons = [0,1,2,3,4,5].filter(p => !excludedPersons.includes(p));
-      if (availableTenses.length === 0 || availablePersons.length === 0) {
-        alert("Bitte wähle mindestens eine Zeitform und eine Person aus.");
-        abortSession();
-        return;
-      }
-      do {
-        currentVerb = weightedRandomVerb();
-        currentTense = availableTenses[Math.floor(Math.random() * availableTenses.length)];
-        currentPerson = availablePersons[Math.floor(Math.random() * availablePersons.length)];
-        tries++;
-        if (tries > 100) {
-          alert("Keine gültige Kombination gefunden. Bitte überprüfe deine Filter.");
-          abortSession();
-          return;
+            // 2. Generieren des HTML
+            let html = '';
+            // Manuelle Sortierung der Gruppen-Keys
+            const groupOrder = [
+                'VERBES ER', 'VERBES IR', 'VERBES RE', 
+                'VERBES OIR', 'VERBES COCOS', 'VERBES PARTICULIERS'
+            ];
+            
+            let globalCounter = 1; // Fortlaufender Zähler
+            
+            groupOrder.forEach(group => {
+                if (groupedVerbs[group]) {
+                    // Verben innerhalb der Gruppe alphabetisch sortieren
+                    groupedVerbs[group].sort((a, b) => a.infinitiv.localeCompare(b.infinitiv));
+
+                    // HTML für Gruppe und Liste erzeugen
+                    html += `<h4>${group.replace('VERBES ', 'Verben ')} (${groupedVerbs[group].length})</h4><ul class="verb-group-list">`;
+                    
+                    groupedVerbs[group].forEach((verb) => {
+                        // FIX: Escape single quotes for reflexive verbs (e.g., s'asseoir -> s\'asseoir)
+                        const safeInfinitiv = verb.infinitiv.replace(/'/g, "\\'");
+                        
+                        html += `
+                            <li>
+                                <span class="verb-number">${globalCounter}.</span> 
+                                <a href="#" onclick="selectVerb('${safeInfinitiv}'); return false;">
+                                    ${verb.infinitiv} (${verb.uebersetzung})
+                                </a>
+                            </li>
+                        `;
+                        globalCounter++; // Zähler erhöhen
+                    });
+                    html += `</ul>`;
+                }
+            });
+            
+            listDiv.innerHTML = html;
         }
-      } while (excludedVerbs.includes(currentVerb));
 
-      const form = verbs[currentVerb][currentTense];
-      correctAnswer = form[currentPerson];
-      questionBox.textContent = `${currentVerb} – ${currentTense} – ${persons[currentPerson]}`;
-      prefix.textContent = persons[currentPerson] + ' ';
-      feedback.textContent = "";
-      answerInput.value = "";
-      answerInput.focus();
-      submitBtn.style.display = "inline-block";
-      nextBtn.style.display = "none";
-      speak(currentVerb);
-    }
+        // 3. Modal-Ansicht umschalten
+        function showModalView(view) {
+            const listContainer = document.getElementById('modalListContainer');
+            const conjView = document.getElementById('modalConjugationView');
+            const modalTitle = document.getElementById('modalTitle');
 
-    function submitAnswer() {
-      const expectedPrefix = persons[currentPerson].toLowerCase();
-      const escapeRegExp = str => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-      const clean = s => s.toLowerCase().replace(new RegExp('^' + escapeRegExp(expectedPrefix) + '\\s+'), '').trim();
-      const user = clean(answerInput.value);
-      const correct = clean(correctAnswer);
+            if (view === 'list') {
+                listContainer.style.display = 'block';
+                conjView.style.display = 'none';
+                modalTitle.textContent = 'Alphabetische Verbenliste (Gruppiert)';
+                document.getElementById('modalContent').scrollTop = 0; 
+            } else if (view === 'conjugation') {
+                listContainer.style.display = 'none';
+                conjView.style.display = 'block';
+                modalTitle.textContent = 'Konjugation';
+                document.getElementById('modalContent').scrollTop = 0;
+            }
+        }
 
-      learnedStats[currentVerb] = learnedStats[currentVerb] || {};
-      learnedStats[currentVerb][currentTense] = learnedStats[currentVerb][currentTense] || {};
-      const prev = learnedStats[currentVerb][currentTense][currentPerson] || 0;
-      let updated;
-      if (user === correct) {
-        updated = Math.min(5, prev + 1);
-        feedback.textContent = "✅ Richtig!";
-      } else {
-        updated = Math.max(0, prev - 1);
-        feedback.textContent = `❌ Falsch. Richtig wäre: ${correctAnswer}`;
-      }
-      learnedStats[currentVerb][currentTense][currentPerson] = updated;
-      localStorage.setItem("learnedStats", JSON.stringify(learnedStats));
-      submitBtn.style.display = "none";
-      nextBtn.style.display = "inline-block";
+        // 4. Filter für die Modalliste
+        function filterModalList() {
+            const input = document.getElementById('modalSearchInput');
+            const filter = normalizeString(input.value);
+            const listContainer = document.getElementById('modalVerbList');
+            
+            const listItems = listContainer.querySelectorAll('li');
+            const groupTitles = listContainer.querySelectorAll('h4');
+            
+            listItems.forEach(item => {
+                const text = normalizeString(item.textContent || item.innerText);
+                if (text.indexOf(filter) > -1) {
+                    item.style.display = "flex"; 
+                } else {
+                    item.style.display = "none";
+                }
+            });
+            
+            // Logik zur Anzeige der Gruppen-Titel (h4)
+            groupTitles.forEach(title => {
+                const groupList = title.nextElementSibling; 
+                if (groupList && groupList.tagName === 'UL') {
+                    const visibleItems = Array.from(groupList.querySelectorAll('li')).filter(li => li.style.display === 'flex');
+                    
+                    if (visibleItems.length > 0 || filter === '') {
+                        title.style.display = "";
+                        groupList.style.display = "";
+                    } else {
+                        title.style.display = "none";
+                        groupList.style.display = "none";
+                    }
+                }
+            });
+        }
 
-      const correctSpoken = correctAnswer.replace(new RegExp('^' + escapeRegExp(expectedPrefix) + '\\s+', 'i'), '');
-      speak((prefix.textContent.trim() + ' ' + correctSpoken).trim());
-    }
+        // 5. Verb über Modal auswählen
+        function selectVerb(infinitiv) {
+            // NOTE: infinitiv ist hier bereits das maskierte Verb (z.B. s\'asseoir), was OK ist.
+            // Die Suche im Array funktioniert trotzdem, da die JSON-Daten die unmaskierte Form enthalten.
+            const verb = verbData.alle_verben.find(v => v.infinitiv === infinitiv.replace(/\\'/g, "'"));
+            if (verb) {
+                displayConjugation(verb, 'modalConjugationTable');
+                showModalView('conjugation'); 
+            }
+        }
 
-    function finishSession() {
-      const actualMinutes = Math.round((Date.now() - sessionStart) / 60000);
-      totalMinutes += actualMinutes;
-      localStorage.setItem("totalMinutes", totalMinutes);
-      quiz.style.display = "none";
-      result.style.display = "block";
-    }
+        // 6. Modal (Overlay) umschalten/steuern
+        function toggleModal(show) {
+            const modal = document.getElementById('verbModal');
+            if (show) {
+                modal.classList.add('visible');
+                showModalView('list'); 
+                document.getElementById('modalSearchInput').value = '';
+                filterModalList();
+            } else {
+                modal.classList.remove('visible');
+            }
+        }
 
-    function abortSession() {
-      clearInterval(interval);
-      finishSession();
-    }
+        // 7. Verb suchen (Direktsuche im Hauptfenster)
+        function searchVerb() {
+            if (!verbData) return;
 
-    function toggleDetails(verb, container) {
-      if (container.innerHTML) {
-        container.style.display = container.style.display === 'none' ? 'block' : 'none';
-        return;
-      }
-      let html = '<table class="detail-table"><tr><th>Zeitform</th>';
-      persons.forEach(p => { html += `<th>${p}</th>`; });
-      html += '</tr>';
-      tenses.forEach(t => {
-        html += `<tr><td>${tensesDisplay[t]}</td>`;
-        persons.forEach((_, i) => {
-          const s = (learnedStats[verb] && learnedStats[verb][t] && learnedStats[verb][t][i]) || 0;
-          let icon = '❌'; if (s >= 5) icon = '✅'; else if (s >= 3) icon = '🟡';
-          html += `<td>${icon}</td>`;
-        });
-        html += '</tr>';
-      });
-      html += '</table>';
-      container.innerHTML = html;
-      container.style.display = 'block';
-    }
+            const query = document.getElementById('searchInput').value.trim();
+            const normalizedQuery = normalizeString(query);
+            const resultDiv = document.getElementById('result');
 
-    function showOverview() {
-      setup.style.display = "none";
-      overview.style.display = "block";
-      const entries = Object.keys(verbs).sort().map(key => {
-        const score = computeOverallScore(key);
-        let level = "❌ schlecht";
-        if (score >= 5) level = "✅ gemeistert";
-        else if (score >= 3) level = "🟡 ok";
-        return `<li data-verb="${key}">${key}<span class="mastery">${level}</span><span class="info-icon" title="Details">(i)</span><div class="details-container"></div></li>`;
-      }).join("");
-      verbList.innerHTML = `<h3>Dein Lernstand:</h3><ul>${entries}</ul>`;
-      document.querySelectorAll('.info-icon').forEach(el => {
-        el.addEventListener('click', e => {
-          const li = e.target.closest('li');
-          const verb = li.getAttribute('data-verb');
-          toggleDetails(verb, li.querySelector('.details-container'));
-        });
-      });
-    }
+            if (query.length < 2) {
+                resultDiv.innerHTML = '<p style="text-align: center;">Bitte geben Sie mindestens 2 Buchstaben ein.</p>';
+                return;
+            }
 
-    function restart() {
-      result.style.display = "none";
-      overview.style.display = "none";
-      filter.style.display = "none";
-      setup.style.display = "block";
-      totalDisplay.textContent = `Bisher insgesamt geübt: ${totalMinutes} Minute(n)`;
-    }
+            const foundVerb = verbData.alle_verben.find(v => {
+                const normalizedInfinitiv = normalizeString(v.infinitiv);
+                const normalizedUebersetzung = normalizeString(v.uebersetzung);
 
-    window.startSession = startSession;
-    window.abortSession = abortSession;
-    window.restart = restart;
-    window.showOverview = showOverview;
-    window.showFilter = showFilter;
-    window.hideFilter = hideFilter;
-    nextBtn.addEventListener("click", nextQuestion);
-    submitBtn.addEventListener("click", submitAnswer);
-    answerInput.addEventListener("keydown", e => {
-      if (e.key === "Enter" && submitBtn.style.display !== "none") submitAnswer();
-    });
-  </script>
+                return normalizedInfinitiv.includes(normalizedQuery) || 
+                       normalizedUebersetzung.includes(normalizedQuery);
+            });
+
+            if (foundVerb) {
+                displayConjugation(foundVerb, 'result');
+            } else {
+                resultDiv.innerHTML = '<p class="error">Verb nicht gefunden. Versuchen Sie es mit Infinitiv oder deutscher Übersetzung.</p>';
+            }
+        }
+
+        // 8. Allgemeine Informationen (Imparfait) anzeigen (Unverändert)
+        function displayGeneralInfo(info) {
+            if (!info || !info.imparfait_endungen) return;
+
+            const html = `
+                <h2>Imparfait Regeln</h2>
+                <p>Der Imparfait Stamm wird in der Regel von der 1. Person Plural (Nous) des Présent abgeleitet. Die Endungen sind:</p>
+                <table>
+                    <thead><tr><th>Pronomen</th><th>Endung</th></tr></thead>
+                    <tbody>
+                        ${pronomen.map(p => `<tr><td>${pronomenDisplay[pronomen.indexOf(p)]}</td><td>${info.imparfait_endungen[p]}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+                <h3>Spezialfälle (Imparfait)</h3>
+                ${['être', 'avoir'].map(verb => {
+                    if (info.imparfait_spezialfaelle[verb.toLowerCase()]) {
+                        const conj = info.imparfait_spezialfaelle[verb.toLowerCase()];
+                        return `
+                            <h4>${verb.charAt(0).toUpperCase() + verb.slice(1)}:</h4>
+                            <table>
+                                <thead><tr><th>Pronomen</th><th>Imparfait</th></tr></thead>
+                                <tbody>
+                                    ${pronomen.map((p, i) => `<tr><td>${pronomenDisplay[i]}</td><td>${conj[p]}</td></tr>`).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                    return '';
+                }).join('')}
+            `;
+            document.getElementById('general-info').innerHTML = html;
+        }
+
+
+        // 9. Konjugationstabelle erstellen und anzeigen (mit Ziel-ID)
+        function displayConjugation(verb, targetId) {
+            const targetDiv = document.getElementById(targetId);
+            const imparfaitEndungen = verbData.zusatz_informationen.imparfait_endungen;
+            const specialImparfaitForms = verbData.zusatz_informationen.imparfait_spezialfaelle;
+
+            // --- Passé Composé Logik ---
+            const participe = verb.passe_compose.participe_passe;
+            const hilfsverb = verb.passe_compose.hilfsverb;
+            const pcAuxiliaryPresent = (hilfsverb === 'avoir') ? avoirPresent : etrePresent;
+
+            if (!pcAuxiliaryPresent) {
+                targetDiv.innerHTML = `<p class="error">Fehler: Präsens-Formen des Hilfsverbs '${hilfsverb}' konnten nicht geladen werden.</p>`;
+                return;
+            }
+
+            const passeComposeForms = pronomen.map((p) => {
+                const auxPresentForm = pcAuxiliaryPresent[p];
+                return `${auxPresentForm} ${participe}`;
+            });
+
+            // --- Imparfait Logik ---
+            let imparfaitForms;
+            if (verb.imparfait.stamm === "ét-") {
+                imparfaitForms = pronomen.map((p) => specialImparfaitForms.être[p]);
+            } else if (verb.imparfait.stamm === "av-") {
+                imparfaitForms = pronomen.map((p) => specialImparfaitForms.avoir[p]);
+            } else if (verb.imparfait.stamm === "pleuv-" || verb.imparfait.stamm === "fall-") {
+                imparfaitForms = pronomen.map((p) => {
+                    return (p === 'il_elle_on') ? (verb.imparfait.stamm + imparfaitEndungen[p].slice(1)) : '-';
+                });
+            } else {
+                imparfaitForms = pronomen.map((p) => verb.imparfait.stamm + imparfaitEndungen[p].slice(1));
+            }
+
+            // --- Plus-que-parfait Logik ---
+            const pqpAuxiliaryImparfait = (hilfsverb === 'avoir') ? specialImparfaitForms.avoir : specialImparfaitForms.être;
+
+            const plusQueParfaitForms = pronomen.map((p) => {
+                const auxImparfait = pqpAuxiliaryImparfait[p];
+                return `${auxImparfait} ${participe}`;
+            });
+            
+            // --- HTML-Generierung ---
+            const tableHTML = `
+                <div class="verb-title">
+                    <strong>${verb.infinitiv}</strong> (Deutsch: ${verb.uebersetzung}) | Gruppe: ${verb.gruppe.replace(/_/g, ' ').toUpperCase()}
+                </div>
+                <div class="verb-title" style="font-size: 1.2em; color: #666;">
+                    Hilfsverb (PC / PQP): <strong>${hilfsverb.toUpperCase()}</strong> | Participe Passé: <strong>${participe}</strong>
+                </div>
+
+                <table class="conjugation-table">
+                    <thead>
+                        <tr>
+                            <th>Person</th>
+                            <th>Présent (Gegenwart)</th>
+                            <th>Passé Composé (Perfekt)</th>
+                            <th>Imparfait (Vergangenheit)</th>
+                            <th>Plus-que-parfait (Vorvergangenheit)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${pronomen.map((p, i) => `
+                            <tr>
+                                <td>${pronomenDisplay[i]}</td>
+                                <td>${verb.present[p]}</td>
+                                <td>${passeComposeForms[i]}</td>
+                                <td>${imparfaitForms[i]}</td>
+                                <td>${plusQueParfaitForms[i]}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            targetDiv.innerHTML = tableHTML;
+        }
+
+        // Starte das Laden der Daten, wenn die Seite bereit ist
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+
 </body>
 </html>
