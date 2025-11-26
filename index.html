@@ -425,16 +425,31 @@
                 <h2>Daten nicht geladen!</h2>
                 <p>Um die App mit Ihren eigenen Verben nutzen zu können, müssen Sie eine JSON-Datei bereitstellen.</p>
                 
-                <h3 style="margin-top: 25px;">Option 1: JSON per Link laden</h3>
+                <h3 style="margin-top: 25px;">Option 1: JSON per Kurz-ID laden</h3>
+                <p>Wenn Ihre Verben-Liste in der globalen <a href="./link_map.json" target="_blank">link_map.json</a> registriert wurde, können Sie sie direkt über eine einfache Nummer aufrufen:</p>
+                <pre>frenchverbes.github.io/5</pre>
+                
+                <h3 style="margin-top: 25px;">Option 2: JSON per Link laden</h3>
                 <p>Laden Sie Ihre Verben-Datei von einem externen Link (z.B. GitHub Gist oder einem Server). Hängen Sie den Link einfach als URL-Parameter an die Adresse dieser Seite an:</p>
-                <pre>IhreApp-URL/?link=https://ihre-domain.com/pfad/zu/ihrer/verben.json</pre>
+                <pre>frenchverbes.github.io/?link=https://ihre-domain.com/pfad/zu/ihrer/verben.json</pre>
                 <p>Der Link wird im Browser gespeichert und automatisch beim nächsten Besuch versucht.</p>
                 
-                <h3 style="margin-top: 25px;">Option 2: JSON-Datei hochladen</h3>
-                <p>Laden Sie eine lokale JSON-Datei von Ihrem Gerät hoch. Die Daten werden nur in Ihrem Browser verarbeitet.</p>
-                <input type="file" id="fileUploadInput" accept=".json" onchange="handleFileUpload(event)">
+                <h3 style="margin-top: 30px;">Option 3: JSON-Datei verwenden</h3>
+                <p>Laden Sie eine lokale JSON-Datei von Ihrem Gerät hoch.</p>
 
-                <h3 style="margin-top: 30px;">Option 3: Vorlage erstellen</h3>
+                <input type="file" id="fileUploadInput" accept=".json" onchange="storeLocalFileContent(event)" style="margin-bottom: 10px;">
+
+                <div id="fileActions" style="margin-bottom: 20px;">
+                    <button id="useLocalButton" onclick="useLocalFile()" disabled style="padding: 10px; background-color: #5cb85c; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.5; transition: opacity 0.2s;" title="Lädt die Datei nur einmalig in diesen Browser.">
+                        Lokal verwenden (nicht speichern)
+                    </button>
+                    <button id="uploadDpasteButton" onclick="startDpasteUpload()" disabled style="padding: 10px; background-color: #f0ad4e; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.5; margin-left: 10px; transition: opacity 0.2s;" title="Lädt die Datei für ein Jahr auf dpaste.com hoch und speichert den Link.">
+                        Auf dpaste hochladen & Link nutzen
+                    </button>
+                    <p id="fileStatus" style="margin-top: 10px; font-size: 0.9em; color: #666;"></p>
+                </div>
+                
+                <h3 style="margin-top: 30px;">Option 4: Vorlage erstellen</h3>
                 <p>Nutzen Sie diese Vorlage, um Ihre eigene Datei zu erstellen (stellen Sie sicher, dass sie dem vorgegebenen Format entspricht):</p>
                 <div id="templateMenuContainer" class="setup-view"> 
                     </div>
@@ -505,10 +520,10 @@
         let currentQuestionIndex = 0;
         let quizQuestions = [];
         const tenses = {
-            present: "Présent (Gegenwart)",
-            passe_compose: "Passé Composé (Perfekt)",
-            imparfait: "Imparfait (Vergangenheit)",
-            plus_que_parfait: "Plus-que-parfait (Vorvergangenheit)"
+            present: "Présent",
+            passe_compose: "Passé Composé",
+            imparfait: "Imparfait",
+            plus_que_parfait: "Plus-que-parfait"
         };
         const defaultTenses = ['present', 'imparfait', 'passe_compose', 'plus_que_parfait']; 
         const verbCounts = [10, 20, 30, 50]; 
@@ -516,6 +531,9 @@
         
         // --- KONSTANTEN ---
         const PRONOUN_STORAGE_KEY = 'frenchverbes_last_json_link';
+        const OBFUSCATED_API_KEY = 'OTk4MTdjMzA2ZDdlNTVhZQ=='; 
+        const API_USER_AGENT = 'FrenchVerbesApp/1.0 (GitHub Pages)';
+        
         const pronomen = ["je", "tu", "il_elle_on", "nous", "vous", "ils_elles"];
         const pronomenDisplay = ["je", "tu", "il/elle/on", "nous", "vous", "ils/elles"];
         const reflexivePronouns = {
@@ -536,7 +554,9 @@
             imparfait: "Imparfait",
             plus_que_parfait: "Plus-que-parfait"
         };
-
+        
+        // Globaler Speicher für den Inhalt der hochgeladenen Datei
+        let tempFileContent = null; 
 
         // --- JSON TEMPLATE DATEN (Minimalbeispiel) ---
         const jsonTemplate = {
@@ -699,7 +719,8 @@
                 return acc;
             }, {});
         }
-
+        
+        // [QUIZ FUNKTIONEN... (unverändert)]
         function initQuizSetupContent() {
             const groupedVerbs = groupVerbs();
             const sortedGroups = Object.keys(groupedVerbs).sort();
@@ -1030,7 +1051,7 @@
             
             if (view === 'list') {
                 listContainer.style.display = 'block';
-                modalTitle.textContent = 'Verbliste (Gruppiert)';
+                modalTitle.textContent = 'Verbliste';
             } else if (view === 'conjugation') {
                 conjView.style.display = 'block'; 
                 modalTitle.textContent = 'Konjugation';
@@ -1049,6 +1070,181 @@
                 questionView.style.display = 'block'; 
             }
             document.getElementById('modalContent').scrollTop = 0; 
+        }
+
+        // --- DATEI-UPLOAD / DPASTE LOGIK ---
+        
+        function updateFileActionButtons(fileName, statusText, enableButtons) {
+            const useLocalButton = document.getElementById('useLocalButton');
+            const uploadDpasteButton = document.getElementById('uploadDpasteButton');
+            const fileStatus = document.getElementById('fileStatus');
+            
+            useLocalButton.disabled = !enableButtons;
+            uploadDpasteButton.disabled = !enableButtons;
+            useLocalButton.style.opacity = enableButtons ? '1' : '0.5';
+            uploadDpasteButton.style.opacity = enableButtons ? '1' : '0.5';
+            fileStatus.textContent = statusText;
+            
+            // Setze den Dateinamen für den Status-Text, wenn er gegeben ist
+            if (fileName && enableButtons) {
+                const fileSizeKB = (document.getElementById('fileUploadInput').files[0].size / 1024).toFixed(2);
+                fileStatus.textContent = `Datei '${fileName}' (${fileSizeKB} KB) bereit.`;
+            }
+        }
+
+        // 1. Speichert den Inhalt der ausgewählten Datei temporär
+        function storeLocalFileContent(event) {
+            const file = event.target.files[0];
+            
+            if (!file) {
+                tempFileContent = null;
+                updateFileActionButtons(null, '', false);
+                return;
+            }
+
+            updateFileActionButtons(file.name, `Datei '${file.name}' (${(file.size / 1024).toFixed(2)} KB) wird geprüft...`, false);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    tempFileContent = e.target.result;
+                    // Teste, ob es gültiges JSON ist (wird beim Initialisieren benötigt)
+                    JSON.parse(tempFileContent); 
+                    updateFileActionButtons(file.name, `Datei '${file.name}' (${(file.size / 1024).toFixed(2)} KB) bereit.`, true);
+                } catch (error) {
+                    updateFileActionButtons(null, `Fehler: Die Datei ist kein gültiges JSON. (${error.message})`, false);
+                    tempFileContent = null;
+                }
+            };
+            reader.onerror = function() {
+                updateFileActionButtons(null, "Fehler beim Lesen der hochgeladenen Datei.", false);
+                tempFileContent = null;
+            };
+            reader.readAsText(file);
+        }
+
+        // 2. Nutzt die Datei lokal
+        function useLocalFile() {
+            if (!tempFileContent) return;
+            try {
+                const data = JSON.parse(tempFileContent);
+                // Link entfernen, da die Daten nur temporär geladen wurden
+                localStorage.removeItem(PRONOUN_STORAGE_KEY); 
+                initializeAppWithData(data);
+            } catch (error) {
+                showInitialSetup(`Fehler beim Parsen der JSON-Datei: ${error.message}. Bitte Vorlagenformat prüfen.`);
+            }
+        }
+
+        // 3. Startet den direkten Upload
+        async function startDpasteUpload() {
+            if (!tempFileContent) return;
+
+            if (!confirm("Sind Sie sicher, dass Sie diese Verben-Liste auf dpaste.com hochladen möchten? Sie erhalten danach einen Link, der in Ihrem Browser gespeichert wird.")) {
+                return;
+            }
+
+            const uploadButton = document.getElementById('uploadDpasteButton');
+            const originalText = uploadButton.textContent;
+            const fileStatus = document.getElementById('fileStatus');
+            
+            updateFileActionButtons(null, 'Lade hoch... (Bitte warten)', false);
+            uploadButton.textContent = "Lade hoch... (Bitte warten)";
+            
+            try {
+                const dpasteUrl = await uploadToDpaste(tempFileContent);
+                
+                fileStatus.innerHTML = `**Erfolg!** Ihr Link: <a href="${dpasteUrl}" target="_blank">${dpasteUrl}</a>. Die Seite wird neu geladen...`;
+                
+                // Speichere den dpaste Link, damit er bei loadData() verwendet wird
+                localStorage.setItem(PRONOUN_STORAGE_KEY, dpasteUrl);
+                // Lade die App neu, um den neuen Link zu nutzen
+                // Nutze replaceState, um den URL-Parameter sauber zu halten
+                window.location.replace(window.location.origin + window.location.pathname + '?link=' + encodeURIComponent(dpasteUrl));
+                
+            } catch (error) {
+                fileStatus.innerHTML = `<span style="color: red; font-weight: bold;">Fehler beim Hochladen: ${error.message}</span>`;
+                uploadButton.textContent = originalText;
+                // Aktiviere Buttons wieder nach Fehler
+                updateFileActionButtons(document.getElementById('fileUploadInput').files[0].name, fileStatus.textContent, true); 
+            }
+        }
+        
+
+        async function uploadToDpaste(content) {
+            // Entschlüsselung des API-Schlüssels (Base64-Dekodierung)
+            // HINWEIS: Dies ist KEINE sichere Methode zum Schutz des Schlüssels.
+            const API_KEY = atob(OBFUSCATED_API_KEY);
+            
+            const formData = new URLSearchParams();
+            formData.append('content', content);
+            formData.append('syntax', 'json'); 
+            formData.append('title', 'FrenchVerbes JSON List - ' + new Date().toLocaleDateString('de-DE'));
+            formData.append('expiry_days', 365); // 365 Tage Verfallsdatum
+
+            const response = await fetch('https://dpaste.com/api/v2/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`, 
+                    'User-Agent': API_USER_AGENT // Wichtig für dpaste TOS
+                },
+                body: formData
+            });
+
+            if (response.status === 201) {
+                // HTTP 201 Created - Die Antwort ist die URL als reiner Text
+                const dpasteUrl = await response.text();
+                return dpasteUrl.trim();
+            } else {
+                let errorText;
+                try {
+                    errorText = await response.text();
+                } catch {
+                    errorText = 'Unbekannter API-Fehler';
+                }
+                throw new Error(`Dpaste API-Fehler (${response.status}): ${errorText.substring(0, 100)}`);
+            }
+        }
+        
+        // --- DATEN-HANDHABUNG ---
+        
+        function initializeAppWithData(data) {
+            try {
+                if (!data || !data.alle_verben || !Array.isArray(data.alle_verben) || data.alle_verben.length === 0) {
+                    throw new Error("JSON-Datei ist leer oder hat das falsche Format ('alle_verben' fehlt).");
+                }
+                
+                verbData = data;
+                
+                const avoirVerb = verbData.alle_verben.find(v => v.infinitiv === "avoir");
+                const etreVerb = verbData.alle_verben.find(v => v.infinitiv === "être");
+
+                if (!avoirVerb || !etreVerb) {
+                    throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich. Bitte in die JSON-Datei aufnehmen.");
+                }
+
+                avoirPresent = avoirVerb.present;
+                etrePresent = etreVerb.present;
+                
+                if ('speechSynthesis' in window) {
+                     window.speechSynthesis.getVoices(); 
+                }
+                
+                // Hinweis: Speichern in LocalStorage ist jetzt in loadData() integriert.
+
+                document.getElementById('initialSetupScreen').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+                document.getElementById('searchInput').value = ''; 
+
+                document.getElementById('result').innerHTML = '<p style="text-align: center;">Bitte geben Sie einen Suchbegriff ein oder wählen Sie ein Verb über den Knopf aus.</p>';
+                
+                displayGeneralInfo(data.zusatz_informationen);
+                populateVerbList(); 
+
+            } catch (error) {
+                showInitialSetup(`Fehler in den Daten: ${error.message}`);
+                console.error("Fehler bei Initialisierung der Daten:", error);
+            }
         }
         
         function showInitialSetup(errorMessage) {
@@ -1075,6 +1271,10 @@
             } else {
                  errorDiv.innerHTML = messageHtml;
             }
+            // Deaktiviere die Buttons im Setup Screen
+            updateFileActionButtons(null, '', false);
+            // Lösche vorherige Dateiauswahl
+            document.getElementById('fileUploadInput').value = '';
         }
         
         function resetAndShowSetup() {
@@ -1157,71 +1357,10 @@
                     localStorage.setItem(PRONOUN_STORAGE_KEY, dataUrl);
                 }
                 
-                // Erfolgsfall: Initialisierung der App
-                initializeAppWithData(data); // Die linkSource wird hier nicht mehr für das Speichern benötigt
+                initializeAppWithData(data);
             } catch (error) {
                 showInitialSetup(`Fehler beim Laden der Verben vom Link (${dataUrl}): ${error.message}`);
             }
-        }
-
-        function initializeAppWithData(data) {
-            try {
-                if (!data || !data.alle_verben || !Array.isArray(data.alle_verben) || data.alle_verben.length === 0) {
-                    throw new Error("JSON-Datei ist leer oder hat das falsche Format ('alle_verben' fehlt).");
-                }
-                
-                verbData = data;
-                
-                const avoirVerb = verbData.alle_verben.find(v => v.infinitiv === "avoir");
-                const etreVerb = verbData.alle_verben.find(v => v.infinitiv === "être");
-
-                if (!avoirVerb || !etreVerb) {
-                    throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich. Bitte in die JSON-Datei aufnehmen.");
-                }
-
-                avoirPresent = avoirVerb.present;
-                etrePresent = etreVerb.present;
-                
-                if ('speechSynthesis' in window) {
-                     window.speechSynthesis.getVoices(); 
-                }
-                
-                // Der Speichervorgang im LocalStorage wurde nach loadData() verschoben.
-
-                document.getElementById('initialSetupScreen').style.display = 'none';
-                document.getElementById('appContent').style.display = 'block';
-                document.getElementById('searchInput').value = ''; 
-
-                document.getElementById('result').innerHTML = '<p style="text-align: center;">Bitte geben Sie einen Suchbegriff ein oder wählen Sie ein Verb über den Knopf aus.</p>';
-                
-                displayGeneralInfo(data.zusatz_informationen);
-                populateVerbList(); 
-
-            } catch (error) {
-                showInitialSetup(`Fehler in den Daten: ${error.message}`);
-                console.error("Fehler bei Initialisierung der Daten:", error);
-            }
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    // Den Link entfernen, da die Daten lokal hochgeladen wurden
-                    localStorage.removeItem(PRONOUN_STORAGE_KEY); 
-                    initializeAppWithData(data, 'file_upload');
-                } catch (error) {
-                    showInitialSetup(`Fehler beim Parsen der JSON-Datei: ${error.message}. Bitte Vorlagenformat prüfen.`);
-                }
-            };
-            reader.onerror = function() {
-                showInitialSetup("Fehler beim Lesen der hochgeladenen Datei.");
-            };
-            reader.readAsText(file);
         }
 
         // --- DISPLAY FUNKTIONEN ---
@@ -1387,7 +1526,7 @@
                 </div>
 
                 <div class="verb-title" style="font-size: 1.2em; color: #666;">
-                    Hilfsverb (PC / PQP): <strong>${hilfsverb.toUpperCase()}</strong> | Participe Passé: <strong>${participe}</strong>
+                    Hilfsverb: <strong>${hilfsverb.toUpperCase()}</strong> | Participe Passé: <strong>${participe}</strong>
                 </div>
 
                 <table class="conjugation-table">
