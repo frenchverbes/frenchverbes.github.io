@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Französisch Verben Konjugation</title>
+    <title>FrenchVerbes</title>
     <style>
         /* --- Allgemeine Styles --- */
         body { font-family: Arial, sans-serif; padding: 0; background-color: #f4f4f9; margin: 0; display: flex; justify-content: center; }
@@ -13,6 +13,7 @@
             padding: 20px; 
             max-width: 1000px;
             width: 100%;
+            position: relative; /* Für den Reset Button */
         }
         .container { 
             max-width: 100%; 
@@ -29,10 +30,94 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; word-wrap: break-word; }
         th { background-color: #5cb85c; color: white; }
-        th:first-child { width: 15%; }
-        .verb-title { text-align: center; font-size: 1.5em; margin-bottom: 15px; color: #333; }
+        
+        /* --- Mobile Responsive Table CSS --- */
+        @media screen and (max-width: 600px) {
+            .container { padding: 15px; }
+            
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            tr {
+                border: 1px solid #ccc;
+                margin-bottom: 10px;
+                padding: 10px 0;
+                border-radius: 4px;
+            }
+            
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50% !important; 
+                text-align: right !important;
+                white-space: normal;
+            }
+            
+            td:before {
+                position: absolute;
+                top: 10px; /* Vertikale Position des Labels */
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                content: attr(data-label);
+                color: #5cb85c;
+            }
+        }
+        /* --- Ende Mobile Responsive Table CSS --- */
+
         .error { color: red; text-align: center; margin-top: 20px; }
         .imparfait-info { margin-top: 30px; padding: 15px; background: #e0f7fa; border-left: 5px solid #00bcd4; }
+        
+        /* --- Verb Toggle (Deutsch/Französisch) Styles (NUR FÜRS QUIZ) --- */
+        .verb-title-container {
+            text-align: center; 
+            margin-bottom: 15px; 
+            color: #333;
+            font-size: 1.4em;
+        }
+        .verb-toggle {
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            transition: color 0.2s; 
+        }
+        /* Style für das Quiz-Toggle */
+        #quizQuestionView .verb-toggle:hover {
+            color: #00bcd4;
+        }
+        #quizQuestionView .verb-toggle .infinitiv {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00bcd4;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            white-space: nowrap;
+            z-index: 10;
+            font-size: 0.7em;
+            font-weight: normal;
+            pointer-events: none;
+        }
+        #quizQuestionView .verb-toggle:hover .infinitiv,
+        #quizQuestionView .verb-toggle.active .infinitiv {
+            display: block;
+        }
         
         /* --- Modal (Overlay) Styles --- */
         #verbModal {
@@ -56,10 +141,10 @@
         }
         #modalContent {
             background: white;
-            padding: 30px;
+            padding: 30px; 
             border-radius: 10px;
             width: 90%;
-            max-width: 900px; 
+            max-width: 1000px; 
             max-height: 90vh;
             display: flex;
             flex-direction: column;
@@ -74,6 +159,178 @@
             text-align: center;
         }
 
+        /* --- BUTTON GRUPPE FÜR HAUPTSEITE --- */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
+
+        .menu-trigger-button {
+            flex-grow: 1; 
+            padding: 12px; 
+            background-color: #00bcd4; 
+            border: none; 
+            border-radius: 4px; 
+            color: white; 
+            font-size: 18px; 
+            cursor: pointer; 
+            transition: background-color 0.2s;
+        }
+        .menu-trigger-button:hover {
+            background-color: #00a0b8;
+        }
+        .back-to-list-button {
+            background-color: #f4f4f4;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 8px 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        /* NEUER BUTTON: Reset Data */
+        #resetDataButton {
+            position: absolute;
+            top: 10px; 
+            right: 10px; 
+            background-color: #f44336; 
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10; 
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        #resetDataButton:hover {
+            opacity: 1;
+        }
+        /* Ende NEUER BUTTON */
+
+
+        /* --- TEMPLATE STYLES --- */
+        #templateMenuContainer {
+            margin-bottom: 15px;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f9f9f9;
+            min-width: 250px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        /* Wenn templateMenuContainer im setup screen ist, soll dropdown-content links aligniert sein */
+        #initialSetupScreen .dropdown-content {
+            right: auto;
+            left: 0;
+        }
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .template-button {
+            background-color: #f0ad4e;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .template-button:hover {
+            background-color: #ec971f;
+        }
+        
+        /* --- QUIZ STYLES --- */
+        .quiz-option {
+            display: block; 
+            margin: 8px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+        .quiz-option:hover {
+            background-color: #f0f0f0;
+        }
+        .quiz-option input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        .quiz-start-button {
+            background-color: #5cb85c; 
+            color: white; 
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            margin-top: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .quiz-start-button:hover {
+            background-color: #4cae4c;
+        }
+        .quiz-question-container {
+            text-align: center;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .question-text {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .question-text button {
+            background: none;
+            border: none;
+            margin-left: 10px;
+            padding: 0;
+            line-height: 1;
+        }
+        .quiz-result {
+            margin-top: 15px;
+            font-size: 1.1em;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .quiz-result.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .quiz-result.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
         /* --- Gruppierte Liste Styles --- */
         #modalListContainer {
             overflow-y: auto;
@@ -91,7 +348,7 @@
             list-style-type: none; 
             padding-left: 0;
             margin-top: 5px;
-            columns: 2; /* Spaltenansicht für Cleaner-Look */
+            columns: 2; 
         }
         #modalVerbList li {
             padding: 5px 0;
@@ -115,7 +372,6 @@
             color: #00bcd4;
             text-decoration: underline;
         }
-        
         .close-button {
             position: absolute;
             top: 5px;
@@ -125,29 +381,36 @@
             cursor: pointer;
             line-height: 1;
         }
-        .menu-trigger-button {
-             width: 100%; 
-             padding: 12px; 
-             margin-bottom: 20px; 
-             background-color: #00bcd4; 
-             border: none; 
-             border-radius: 4px; 
-             color: white; 
-             font-size: 18px; 
-             cursor: pointer; 
-             transition: background-color 0.2s;
+        
+        /* --- Initial Setup Screen Styles --- */
+        #initialSetupScreen {
+            padding: 20px;
+            border: 2px dashed #00bcd4;
+            border-radius: 8px;
+            background-color: #e0f7fa;
+            margin-top: 50px;
         }
-        .menu-trigger-button:hover {
-            background-color: #00a0b8;
+        #initialSetupScreen h2, #initialSetupScreen h3 {
+            color: #00bcd4;
+            border-bottom: none;
         }
-        .back-to-list-button {
+        #initialSetupScreen pre {
             background-color: #f4f4f4;
-            color: #333;
-            border: 1px solid #ccc;
-            padding: 8px 15px;
-            margin-bottom: 15px;
-            cursor: pointer;
+            padding: 10px;
             border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        #fileUploadInput {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #templateMenuContainer.setup-view {
+            justify-content: flex-start;
         }
     </style>
 </head>
@@ -155,38 +418,78 @@
 
     <div class="main-content">
         <div class="container">
-            <h1>Französische Verben Konjugator 🇫🇷</h1>
+            <h1>FrenchVerbes</h1>
+            
+            <div id="initialSetupScreen" style="display: none;">
+                <div class="initial-error-message"></div>
+                <h2>Daten nicht geladen!</h2>
+                <p>Um die App mit Ihren eigenen Verben nutzen zu können, müssen Sie eine JSON-Datei bereitstellen.</p>
+                
+                <h3 style="margin-top: 25px;">Option 1: JSON per Link laden</h3>
+                <p>Laden Sie Ihre Verben-Datei von einem externen Link (z.B. GitHub Gist oder einem Server). Hängen Sie den Link einfach als URL-Parameter an die Adresse dieser Seite an:</p>
+                <pre>IhreApp-URL/?link=https://ihre-domain.com/pfad/zu/ihrer/verben.json</pre>
+                <p>Der Link wird im Browser gespeichert und automatisch beim nächsten Besuch versucht.</p>
+                
+                <h3 style="margin-top: 25px;">Option 2: JSON-Datei hochladen</h3>
+                <p>Laden Sie eine lokale JSON-Datei von Ihrem Gerät hoch. Die Daten werden nur in Ihrem Browser verarbeitet.</p>
+                <input type="file" id="fileUploadInput" accept=".json" onchange="handleFileUpload(event)">
 
-            <button class="menu-trigger-button" onclick="toggleModal(true)">Alle Verben durchsuchen (Gruppenansicht) 🔍</button>
-
-            <input type="text" id="searchInput" onkeyup="searchVerb()" placeholder="Direktsuche (Infinitiv oder Deutsch, akzentfrei)...">
-
-            <div id="result">
-                <p style="text-align: center;">Bitte geben Sie einen Suchbegriff ein oder wählen Sie ein Verb über den Knopf aus.</p>
+                <h3 style="margin-top: 30px;">Option 3: Vorlage erstellen</h3>
+                <p>Nutzen Sie diese Vorlage, um Ihre eigene Datei zu erstellen (stellen Sie sicher, dass sie dem vorgegebenen Format entspricht):</p>
+                <div id="templateMenuContainer" class="setup-view"> 
+                    </div>
             </div>
+            <div id="appContent" style="display: none;">
+                
+                <button id="resetDataButton" onclick="resetAndShowSetup()" title="Daten zurücksetzen und Setup-Ansicht öffnen">Daten-Setup</button>
 
-            <div id="general-info" class="imparfait-info">
+                <div id="mainButtonGroup">
+                    <div class="button-group">
+                        <button class="menu-trigger-button" onclick="openModalView('list')">Verbliste</button>
+                        <button class="menu-trigger-button" style="background-color: #5cb85c;" onclick="openModalView('quizSetup')">Quiz mich!</button>
+                    </div>
                 </div>
-        </div>
+
+                <input type="text" id="searchInput" onkeyup="searchVerb()" placeholder="Direktsuche (Infinitiv oder Deutsch)...">
+
+                <div id="result">
+                    <p style="text-align: center;">Bitte geben Sie einen Suchbegriff ein oder wählen Sie ein Verb über den Knopf aus.</p>
+                </div>
+
+                <div id="general-info" class="imparfait-info">
+                </div>
+            </div>
+            </div>
     </div>
 
-    <div id="verbModal" onclick="if(event.target.id === 'verbModal') toggleModal(false)">
+    <div id="verbModal" onclick="if(event.target.id === 'verbModal') closeModal()">
         <div id="modalContent">
-            <span class="close-button" onclick="toggleModal(false)">&times;</span>
+            <span class="close-button" onclick="closeModal()">&times;</span>
             
             <h3 id="modalTitle" class="modal-title"></h3>
 
             <div id="modalListContainer">
-                <input type="text" id="modalSearchInput" onkeyup="filterModalList()" placeholder="Liste filtern (akzentfrei)...">
+                <input type="text" id="modalSearchInput" onkeyup="filterModalList()" placeholder="Liste filtern...">
                 <div id="modalVerbList">
-                    </div>
+                </div>
             </div>
 
             <div id="modalConjugationView" style="display: none;">
-                <button onclick="showModalView('list')" class="back-to-list-button">← Zurück zur Verbenliste</button>
+                <button id="modalBackButton" onclick="backFromConjugation()" class="back-to-list-button">← Zurück zur Liste</button>
                 <div id="modalConjugationTable">
-                    </div>
+                </div>
             </div>
+            
+            <div id="quizSetupView" style="display: none;">
+                <div id="quizSetupContent">
+                </div>
+            </div>
+            
+            <div id="quizQuestionView" style="display: none;">
+                <div id="quizQuestionContent">
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -194,55 +497,200 @@
         let verbData = null;
         let avoirPresent = null;
         let etrePresent = null;
-
+        // Speichert den letzten Modal-Bildschirm, von dem die Konjugation aufgerufen wurde
+        let lastModalScreen = 'list'; 
+        
+        // --- QUIZ GLOBALE VARIABLEN ---
+        let quizVerbs = [];
+        let currentQuestionIndex = 0;
+        let quizQuestions = [];
+        const tenses = {
+            present: "Présent (Gegenwart)",
+            passe_compose: "Passé Composé (Perfekt)",
+            imparfait: "Imparfait (Vergangenheit)",
+            plus_que_parfait: "Plus-que-parfait (Vorvergangenheit)"
+        };
+        const defaultTenses = ['present', 'imparfait', 'passe_compose', 'plus_que_parfait']; 
+        const verbCounts = [10, 20, 30, 50]; 
+        const defaultVerbCount = 10;
+        
+        // --- KONSTANTEN ---
+        const PRONOUN_STORAGE_KEY = 'frenchverbes_last_json_link';
         const pronomen = ["je", "tu", "il_elle_on", "nous", "vous", "ils_elles"];
         const pronomenDisplay = ["je", "tu", "il/elle/on", "nous", "vous", "ils/elles"];
+        const reflexivePronouns = {
+            "je": "me", "tu": "te", "il_elle_on": "se", "nous": "nous", "vous": "vous", "ils_elles": "se"
+        };
+        // SVG für den Lautsprecher
+        const speakerSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#00bcd4" viewBox="0 0 16 16" style="vertical-align: middle; cursor: pointer;">
+          <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.791 3.945-2.007 5.303z"/>
+          <path d="M10.194 12.725A6.474 6.474 0 0 0 12.025 8c0-1.336-.507-2.584-1.331-3.522l-.708.707c.691.801 1.058 1.841 1.058 2.815s-.367 2.014-1.058 2.815z"/>
+          <path d="M8.542 11.276A4.475 4.475 0 0 0 9.025 8c0-.964-.31-1.905-.903-2.617l-.71.71c.459.683.71 1.547.71 2.091s-.251 1.408-.71 2.091z"/>
+          <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.2H1.5A.5.5 0 0 1 1 9.7V6.3a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>
+        </svg>`;
 
-        // Funktion zum Entfernen von Akzenten/Sonderzeichen für die Suche
+        // Labels für responsive Tabellen (müssen der Reihenfolge in pronomenDisplay entsprechen)
+        const tableLabels = {
+            present: "Présent",
+            passe_compose: "Passé Composé",
+            imparfait: "Imparfait",
+            plus_que_parfait: "Plus-que-parfait"
+        };
+
+
+        // --- JSON TEMPLATE DATEN (Minimalbeispiel) ---
+        const jsonTemplate = {
+            "alle_verben": [
+                {
+                    "infinitiv": "parler",
+                    "uebersetzung": "sprechen",
+                    "gruppe": "verbes_er",
+                    "present": {
+                        "je": "je parle",
+                        "tu": "tu parles",
+                        "il_elle_on": "il/elle/on parle",
+                        "nous": "nous parlons",
+                        "vous": "vous parlez",
+                        "ils_elles": "ils/elles parlent"
+                    },
+                    "imparfait": {
+                        "stamm": "parl-"
+                    },
+                    "passe_compose": {
+                        "hilfsverb": "avoir",
+                        "participe_passe": "parlé"
+                    }
+                },
+                {
+                    "infinitiv": "avoir",
+                    "uebersetzung": "haben",
+                    "gruppe": "verbes_particuliers",
+                    "present": {
+                        "je": "j'ai",
+                        "tu": "tu as",
+                        "il_elle_on": "il/elle/on a",
+                        "nous": "nous avons",
+                        "vous": "vous avez",
+                        "ils_elles": "ils/elles ont"
+                    },
+                    "imparfait": {
+                        "stamm": "av-"
+                    },
+                    "passe_compose": {
+                        "hilfsverb": "avoir",
+                        "participe_passe": "eu"
+                    }
+                },
+                {
+                    "infinitiv": "être",
+                    "uebersetzung": "sein",
+                    "gruppe": "verbes_particuliers",
+                    "present": {
+                        "je": "je suis",
+                        "tu": "tu es",
+                        "il_elle_on": "il/elle/on est",
+                        "nous": "nous sommes",
+                        "vous": "vous êtes",
+                        "ils_elles": "ils/elles sont"
+                    },
+                    "imparfait": {
+                        "stamm": "ét-"
+                    },
+                    "passe_compose": {
+                        "hilfsverb": "être",
+                        "participe_passe": "été"
+                    }
+                }
+            ],
+            "zusatz_informationen": {
+                "imparfait_endungen": {
+                    "je": "-ais",
+                    "tu": "-ais",
+                    "il_elle_on": "-ait",
+                    "nous": "-ions",
+                    "vous": "-iez",
+                    "ils_elles": "-aient"
+                },
+                "imparfait_spezialfaelle": {
+                    "avoir": {
+                        "je": "j'avais",
+                        "tu": "tu avais",
+                        "il_elle_on": "il/elle/on avait",
+                        "nous": "nous avions",
+                        "vous": "vous aviez",
+                        "ils_elles": "ils/elles avaient"
+                    },
+                    "être": {
+                        "je": "j'étais",
+                        "tu": "tu étais",
+                        "il_elle_on": "il/elle/on était",
+                        "nous": "nous étions",
+                        "vous": "vous étiez",
+                        "ils_elles": "ils/elles étaient"
+                    }
+                }
+            }
+        };
+
+        // --- HILFSFUNKTIONEN ---
+
         function normalizeString(str) {
             if (!str) return '';
             return str.toLowerCase()
-                       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                       .replace(/ç/g, 'c');
+                                 .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                                 .replace(/ç/g, 'c');
         }
-
-        // 1. Daten laden und Hilfsverben finden
-        async function loadData() {
-            try {
-                // Datenquelle bestimmen (URL-Parameter > Fallback)
-                const urlParams = new URLSearchParams(window.location.search);
-                const jsonLink = urlParams.get('link');
-                const dataUrl = jsonLink || 'verbes.json'; // Primary source or fallback
+        
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
                 
-                const response = await fetch(dataUrl);
-
-                if (!response.ok) {
-                    throw new Error(`Konnte JSON-Daten von ${dataUrl} nicht laden: ${response.statusText}`);
+                const utterance = new SpeechSynthesisUtterance(text);
+                const voices = window.speechSynthesis.getVoices();
+                const frenchVoice = voices.find(voice => voice.lang === 'fr-FR' || voice.lang.startsWith('fr'));
+                
+                if (frenchVoice) {
+                    utterance.voice = frenchVoice;
+                } else {
+                    utterance.lang = 'fr-FR'; 
                 }
-                const data = await response.json();
-                verbData = data;
                 
-                const avoirVerb = verbData.alle_verben.find(v => v.infinitiv === "avoir");
-                const etreVerb = verbData.alle_verben.find(v => v.infinitiv === "être");
-
-                avoirPresent = avoirVerb ? avoirVerb.present : null;
-                etrePresent = etreVerb ? etreVerb.present : null;
-
-                displayGeneralInfo(data.zusatz_informationen);
-                populateVerbList(); 
-
-            } catch (error) {
-                document.getElementById('result').innerHTML = `<p class="error">Fehler beim Laden der Verben: ${error.message}</p>`;
-                console.error("Fehler beim Laden der JSON-Datei:", error);
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn('Text-zu-Sprache-Funktion wird von diesem Browser nicht unterstützt.');
             }
         }
 
-        // 2. Modale Liste befüllen (mit Gruppierung und fortlaufender Nummerierung)
-        function populateVerbList() {
-            const listDiv = document.getElementById('modalVerbList');
+        // --- TEMPLATE FUNKTIONEN ---
+
+        function downloadTemplate() {
+            const templateJson = JSON.stringify(jsonTemplate, null, 2);
+            const blob = new Blob([templateJson], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             
-            // 1. Gruppieren der Verben
-            const groupedVerbs = verbData.alle_verben.reduce((acc, verb) => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'verbes_template.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyTemplate() {
+            const templateJson = JSON.stringify(jsonTemplate, null, 2);
+            navigator.clipboard.writeText(templateJson).then(() => {
+                alert("JSON-Vorlage in die Zwischenablage kopiert!");
+            }).catch(err => {
+                console.error('Kopieren fehlgeschlagen:', err);
+                alert("Kopieren fehlgeschlagen. Bitte manuell kopieren.");
+            });
+        }
+        
+        // --- QUIZ FUNKTIONEN ---
+
+        function groupVerbs() {
+            return verbData.alle_verben.reduce((acc, verb) => {
                 const groupName = verb.gruppe.replace(/_/g, ' ').toUpperCase();
                 if (!acc[groupName]) {
                     acc[groupName] = [];
@@ -250,27 +698,553 @@
                 acc[groupName].push(verb);
                 return acc;
             }, {});
+        }
 
-            // 2. Generieren des HTML
+        function initQuizSetupContent() {
+            const groupedVerbs = groupVerbs();
+            const sortedGroups = Object.keys(groupedVerbs).sort();
+            
+            // 1. Tense Checkboxes
+            let tenseCheckboxes = Object.keys(tenses).map(tenseKey => `
+                <label class="quiz-option">
+                    <input type="checkbox" name="tense" value="${tenseKey}" ${defaultTenses.includes(tenseKey) ? 'checked' : ''}>
+                    ${tenses[tenseKey]}
+                </label>
+            `).join('');
+
+            // 2. Group Checkboxes
+            let groupCheckboxes = sortedGroups.map(groupKey => `
+                <label class="quiz-option">
+                    <input type="checkbox" name="verbGroup" value="${groupKey}" checked>
+                    ${groupKey.replace('VERBES ', 'Verben ')} (${groupedVerbs[groupKey].length} Verben)
+                </label>
+            `).join('');
+            
+            // 3. Pronoun Checkboxes (Alle sind standardmäßig gecheckt)
+            let pronounCheckboxes = pronomenDisplay.map((pDisplay, index) => {
+                const pKey = pronomen[index];
+                const isChecked = true; 
+                return `
+                    <label class="quiz-option">
+                        <input type="checkbox" name="pronoun" value="${pKey}" ${isChecked ? 'checked' : ''}>
+                        ${pDisplay}
+                    </label>
+                `;
+            }).join('');
+
+
+            // 4. Verb Count Dropdown
+            let verbCountOptions = verbCounts.map(count => 
+                `<option value="${count}" ${count === defaultVerbCount ? 'selected' : ''}>${count} Fragen</option>`
+            ).join('');
+
+            const setupHtml = `
+                <form id="quizSettingsForm">
+                    <div style="display: flex; gap: 30px; margin-bottom: 30px; flex-wrap: wrap;">
+                        
+                        <div style="flex: 1; min-width: 250px;">
+                            <h3>1. Verben Gruppen</h3>
+                            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto;">
+                                ${groupCheckboxes}
+                            </div>
+                        </div>
+
+                        <div style="flex: 1; min-width: 250px;">
+                            <h3>2. Zeitformen</h3>
+                            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto;">
+                                ${tenseCheckboxes}
+                            </div>
+                        </div>
+                        
+                        <div style="flex: 1; min-width: 250px;">
+                            <h3>3. Personalpronomen</h3>
+                            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto;">
+                                ${pronounCheckboxes}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>4. Anzahl der Fragen</h3>
+                    <select id="verbCountSelect" name="verbCount" style="padding: 10px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; width: 200px; margin-bottom: 20px;">
+                        ${verbCountOptions}
+                    </select>
+                    
+                    <button type="submit" class="quiz-start-button">Quiz starten</button>
+                </form>
+            `;
+            
+            document.getElementById('quizSetupContent').innerHTML = setupHtml;
+            document.getElementById('quizSettingsForm').onsubmit = function(e) {
+                e.preventDefault();
+                startQuiz(groupedVerbs); 
+            };
+        }
+        
+        function startQuiz(groupedVerbs) {
+            const selectedTenses = Array.from(document.querySelectorAll('#quizSettingsForm input[name="tense"]:checked'))
+                                       .map(input => input.value);
+            const selectedGroups = Array.from(document.querySelectorAll('#quizSettingsForm input[name="verbGroup"]:checked'))
+                                       .map(input => input.value);
+            const selectedPronouns = Array.from(document.querySelectorAll('#quizSettingsForm input[name="pronoun"]:checked'))
+                                       .map(input => input.value); 
+
+            const questionCount = parseInt(document.getElementById('verbCountSelect').value, 10);
+
+            if (selectedTenses.length === 0 || selectedGroups.length === 0 || selectedPronouns.length === 0) {
+                alert("Bitte wählen Sie mindestens eine Zeitform, eine Verb-Gruppe und ein Personalpronomen aus.");
+                return;
+            }
+
+            quizVerbs = [];
+            selectedGroups.forEach(groupKey => {
+                if (groupedVerbs[groupKey]) {
+                    quizVerbs.push(...groupedVerbs[groupKey]);
+                }
+            });
+
+            if (quizVerbs.length === 0) {
+                alert("Es wurden keine Verben in den ausgewählten Gruppen gefunden.");
+                return;
+            }
+            
+            quizQuestions = [];
+            for (let i = 0; i < questionCount; i++) {
+                quizQuestions.push(generateRandomQuestion(quizVerbs, selectedTenses, selectedPronouns)); 
+            }
+
+            currentQuestionIndex = 0;
+            displayQuestion();
+        }
+        
+        function generateRandomQuestion(verbs, selectedTenses, selectedPronouns) {
+            const randomVerb = verbs[Math.floor(Math.random() * verbs.length)];
+            const randomTenseKey = selectedTenses[Math.floor(Math.random() * selectedTenses.length)];
+            const randomPronounKey = selectedPronouns[Math.floor(Math.random() * selectedPronouns.length)];
+
+            const randomPronounIndex = pronomen.indexOf(randomPronounKey);
+            const pronounKey = pronomen[randomPronounIndex];
+            const pronounDisplay = pronomenDisplay[randomPronounIndex];
+            
+            const correctConjugation = getConjugation(randomVerb, randomTenseKey, pronounKey);
+            
+            return {
+                verb: randomVerb,
+                tenseKey: randomTenseKey,
+                tenseDisplay: tenses[randomTenseKey],
+                pronounKey: pronounKey,
+                pronounDisplay: pronounDisplay,
+                correctAnswer: correctConjugation
+            };
+        }
+        
+        function getConjugation(verb, tenseKey, pronounKey) {
+            const participe = verb.passe_compose.participe_passe;
+            const hilfsverb = verb.passe_compose.hilfsverb;
+            const imparfaitEndungen = verbData.zusatz_informationen.imparfait_endungen;
+            const specialImparfaitForms = verbData.zusatz_informationen.imparfait_spezialfaelle;
+            
+            const isPronominal = verb.infinitiv.startsWith("s'") || verb.infinitiv.startsWith("se ");
+            
+            if (tenseKey === 'present') {
+                return verb.present[pronounKey];
+            } 
+            
+            if (tenseKey === 'imparfait') {
+                let imparfaitForm;
+                if (verb.imparfait.stamm === "ét-") {
+                    imparfaitForm = specialImparfaitForms.être[pronounKey];
+                } else if (verb.imparfait.stamm === "av-") {
+                    imparfaitForm = specialImparfaitForms.avoir[pronounKey];
+                } else if ((verb.imparfait.stamm === "pleuv-" || verb.imparfait.stamm === "fall-") && pronounKey !== 'il_elle_on') {
+                    return '-';
+                } else {
+                    imparfaitForm = verb.imparfait.stamm + imparfaitEndungen[pronounKey].slice(1);
+                }
+
+                if (isPronominal) {
+                    let ref_p = reflexivePronouns[pronounKey];
+                    if (imparfaitForm.charAt(0).toLowerCase() === 'a' || imparfaitForm.charAt(0).toLowerCase() === 'e' || imparfaitForm.charAt(0).toLowerCase() === 'i') {
+                        if (ref_p === 'me' || ref_p === 'te' || ref_p === 'se') {
+                            ref_p = ref_p.slice(0, -1) + "'"; 
+                        }
+                    }
+                    return `${ref_p} ${imparfaitForm}`;
+                }
+                
+                return imparfaitForm;
+            } 
+            
+            const isPqp = tenseKey === 'plus_que_parfait';
+            const auxForms = isPqp ? specialImparfaitForms : { avoir: avoirPresent, être: etrePresent };
+            const auxVerbForms = (hilfsverb === 'avoir') ? auxForms.avoir : auxForms.être;
+            
+            let conjugation = auxVerbForms[pronounKey] + (participe ? ` ${participe}` : '');
+            
+            if (isPronominal) {
+                let aux = auxVerbForms[pronounKey];
+                let ref_p = reflexivePronouns[pronounKey];
+
+                if (['a', 'e', 'i', 'o', 'u', 'y'].includes(aux.charAt(0).toLowerCase())) {
+                    if (ref_p === 'me' || ref_p === 'te' || ref_p === 'se') {
+                        ref_p = ref_p.slice(0, -1) + "'";
+                    }
+                }
+                
+                conjugation = `${ref_p} ${aux}${participe ? ` ${participe}` : ''}`;
+            }
+
+            return conjugation;
+        }
+
+        function displayQuestion() {
+            showModalView('quizQuestion');
+            
+            if (currentQuestionIndex >= quizQuestions.length) {
+                const correctCount = quizQuestions.filter(q => q.isCorrect).length;
+                document.getElementById('quizQuestionContent').innerHTML = `
+                    <h2>Quiz beendet.</h2>
+                    <p style="font-size: 1.5em; margin-top: 20px;">Sie haben ${correctCount} von ${quizQuestions.length} Fragen richtig beantwortet.</p>
+                    <button onclick="openModalView('quizSetup')" class="quiz-start-button" style="background-color: #00bcd4;">Neues Quiz starten</button>
+                `;
+                document.getElementById('modalTitle').textContent = 'Quiz beendet';
+                return;
+            }
+
+            const currentQ = quizQuestions[currentQuestionIndex];
+            
+            const questionHtml = `
+                <div class="quiz-question-container">
+                    <p style="font-size: 1.2em; color: #666; margin-bottom: 5px;">Frage ${currentQuestionIndex + 1} von ${quizQuestions.length}</p>
+                    <p style="font-size: 1.5em; font-weight: bold;">Konjugieren Sie:</p>
+                    <div class="question-text">
+                        <strong class="verb-toggle" onclick="this.classList.toggle('active')" title="Klicken/Hovern Sie für den französischen Infinitiv">
+                            ${currentQ.verb.uebersetzung}
+                            <span class="infinitiv">${currentQ.verb.infinitiv}</span>
+                        </strong>
+                        <span style="font-size: 0.7em; font-weight: normal; color: #5cb85c; margin-left: 10px;">in ${currentQ.tenseDisplay}</span>
+                        
+                        <button onclick="speakText('${currentQ.verb.infinitiv}')" title="Aussprache des Infinitivs">${speakerSVG}</button>
+                    </div>
+                    
+                    <form id="quizAnswerForm" onsubmit="checkAnswer(event, ${currentQuestionIndex})">
+                        <div style="display: flex; align-items: center; justify-content: center; margin-top: 20px; margin-bottom: 10px;">
+                            <p style="font-size: 1.8em; font-weight: bold; color: #333; margin: 0 15px 0 0; min-width: 100px; text-align: right;">${currentQ.pronounDisplay}:</p>
+                            <input type="text" id="answerInput" placeholder="Ihre Konjugation" required style="padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; max-width: 400px; margin: 0;">
+                        </div>
+                        
+                        <button type="submit" class="quiz-start-button" style="padding: 10px 20px; font-size: 1em; margin-top: 10px;">Prüfen</button>
+                    </form>
+                    
+                    <div id="quizFeedback"></div>
+                </div>
+            `;
+            
+            document.getElementById('quizQuestionContent').innerHTML = questionHtml;
+            document.getElementById('modalTitle').textContent = `Quiz: ${currentQ.verb.infinitiv}`;
+            document.getElementById('answerInput').focus();
+        }
+
+        function checkAnswer(event, index) {
+            event.preventDefault();
+            
+            const input = document.getElementById('answerInput');
+            const feedbackDiv = document.getElementById('quizFeedback');
+            const submitButton = document.querySelector('#quizAnswerForm button');
+            
+            const userAnswer = input.value.trim().toLowerCase();
+            const correctConjugation = quizQuestions[index].correctAnswer.toLowerCase();
+            
+            const normalizedUserAnswer = normalizeString(userAnswer);
+            const normalizedCorrectAnswer = normalizeString(correctConjugation);
+
+            quizQuestions[index].userAnswer = userAnswer; 
+            let feedbackHtml = '';
+
+            if (userAnswer === correctConjugation) {
+                quizQuestions[index].isCorrect = true;
+                feedbackHtml = `<div class="quiz-result correct">Korrekt! Volle Punktzahl.</div>`;
+            } else if (normalizedUserAnswer === normalizedCorrectAnswer) {
+                quizQuestions[index].isCorrect = true; 
+                quizQuestions[index].isPartiallyCorrect = true; 
+                feedbackHtml = `<div class="quiz-result" style="background-color: #ffeb3b; color: #333; border: 1px solid #ffc107;">**Halb richtig!** Akzente/Schreibweise fehlen. Korrekt wäre: **${correctConjugation}**.</div>`;
+            } else {
+                quizQuestions[index].isCorrect = false;
+                feedbackHtml = `<div class="quiz-result incorrect">Falsch! Korrekt ist: **${correctConjugation}**</div>`;
+            }
+            
+            feedbackDiv.innerHTML = feedbackHtml + `<button onclick="nextQuestion()" class="quiz-start-button" style="background-color: #00bcd4; margin-top: 10px;">Nächste Frage</button>`;
+            input.disabled = true;
+            submitButton.disabled = true;
+            submitButton.style.display = 'none';
+        }
+        
+        function nextQuestion() {
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        // --- MODAL/ANSICHT STEUERUNG ---
+        
+        function openModalView(view) {
+            if (!verbData) return; 
+            
+            // Setze den letzten Bildschirm, von dem die Konjugation aufgerufen wurde
+            lastModalScreen = view; 
+            
+            const modal = document.getElementById('verbModal');
+            modal.classList.add('visible');
+            
+            showModalView(view); 
+
+            if (view === 'list') {
+                document.getElementById('modalSearchInput').value = '';
+                filterModalList();
+            } else if (view === 'quizSetup') {
+                initQuizSetupContent(); 
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('verbModal').classList.remove('visible');
+            window.speechSynthesis.cancel(); 
+        }
+
+        // NEUE FUNKTION: Zurück von der Konjugationsansicht im Modal
+        function backFromConjugation() {
+            // lastModalScreen wurde beim Öffnen des Modals gesetzt ('list' oder 'quizSetup')
+            showModalView(lastModalScreen);
+        }
+
+        function showModalView(view) {
+            const listContainer = document.getElementById('modalListContainer');
+            const conjView = document.getElementById('modalConjugationView');
+            const setupView = document.getElementById('quizSetupView'); 
+            const questionView = document.getElementById('quizQuestionView'); 
+            const modalTitle = document.getElementById('modalTitle');
+            const backButton = document.getElementById('modalBackButton'); 
+
+            listContainer.style.display = 'none';
+            conjView.style.display = 'none';
+            setupView.style.display = 'none';
+            questionView.style.display = 'none';
+            
+            if (view === 'list') {
+                listContainer.style.display = 'block';
+                modalTitle.textContent = 'Verbliste (Gruppiert)';
+            } else if (view === 'conjugation') {
+                conjView.style.display = 'block'; 
+                modalTitle.textContent = 'Konjugation';
+                
+                // Aktualisiere den Zurück-Button basierend auf lastModalScreen
+                if (lastModalScreen === 'list') {
+                    backButton.textContent = '← Zurück zur Verbliste';
+                } else if (lastModalScreen === 'quizSetup') {
+                    backButton.textContent = '← Zurück zu den Quiz-Einstellungen';
+                }
+                
+            } else if (view === 'quizSetup') { 
+                setupView.style.display = 'block'; 
+                modalTitle.textContent = 'Quiz Einstellungen';
+            } else if (view === 'quizQuestion') { 
+                questionView.style.display = 'block'; 
+            }
+            document.getElementById('modalContent').scrollTop = 0; 
+        }
+        
+        function showInitialSetup(errorMessage) {
+            document.getElementById('initialSetupScreen').style.display = 'block';
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('initialSetupScreen').querySelector('h2').textContent = 'Daten nicht geladen!';
+            
+            let messageHtml = `<p style="color: red; font-weight: bold;">Fehler: ${errorMessage}</p>`;
+            
+            document.getElementById('templateMenuContainer').innerHTML = `
+                <div class="dropdown">
+                    <button class="template-button">JSON-Vorlage</button>
+                    <div class="dropdown-content">
+                        <a onclick="downloadTemplate()">Herunterladen (verbes_template.json)</a>
+                        <a onclick="copyTemplate()">In Zwischenablage kopieren</a>
+                    </div>
+                </div>
+            `;
+            
+            const setupScreen = document.getElementById('initialSetupScreen');
+            let errorDiv = setupScreen.querySelector('.initial-error-message');
+            if (!errorDiv) {
+                 setupScreen.insertAdjacentHTML('afterbegin', `<div class="initial-error-message">${messageHtml}</div>`);
+            } else {
+                 errorDiv.innerHTML = messageHtml;
+            }
+        }
+        
+        function resetAndShowSetup() {
+            if (confirm("Möchten Sie die aktuell geladenen Daten verwerfen und zur Daten-Setup-Ansicht zurückkehren?")) {
+                verbData = null; // Daten löschen
+                localStorage.removeItem(PRONOUN_STORAGE_KEY); // Gespeicherten Link löschen
+                closeModal(); // Modal schließen, falls offen
+                // URL Parameter löschen, damit er nicht sofort wieder lädt
+                const url = new URL(window.location.href);
+                url.searchParams.delete('link');
+                history.replaceState(null, '', url.toString());
+                
+                showInitialSetup("Daten wurden zurückgesetzt. Bitte laden Sie eine neue Datei oder einen neuen Link.");
+            }
+        }
+
+
+        async function loadData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const newLink = urlParams.get('link');
+            const savedLink = localStorage.getItem(PRONOUN_STORAGE_KEY);
+            // Enferne den nachgestellten Schrägstrich
+            const pathName = window.location.pathname.replace(/\/$/, ""); 
+            let dataUrl = null;
+            let loadingSource = null;
+
+            if (newLink) {
+                // Prio 1: URL Parameter (?link=...)
+                dataUrl = newLink;
+                loadingSource = newLink;
+            } else {
+                // Prio 2: Path ID (frenchverbes.github.io/5)
+                const potentialPathID = pathName.substring(1); 
+                // Prüft, ob es sich um eine reine Ziffer handelt
+                if (potentialPathID && /^\d+$/.test(potentialPathID)) {
+                    document.getElementById('initialSetupScreen').querySelector('h2').textContent = `Lade Daten für ID #${potentialPathID}...`;
+                    try {
+                        // Lade die Zuordnungsdatei
+                        const mapResponse = await fetch('link_map.json');
+                        if (!mapResponse.ok) {
+                            throw new Error("Konnte die Zuordnungsdatei (link_map.json) nicht laden. Stellen Sie sicher, dass sie existiert.");
+                        }
+                        const linkMap = await mapResponse.json();
+                        
+                        if (linkMap[potentialPathID]) {
+                            dataUrl = linkMap[potentialPathID];
+                            loadingSource = `Mapped ID #${potentialPathID}`;
+                        } else {
+                             throw new Error(`Die Nummer #${potentialPathID} ist nicht in der Zuordnungsdatei registriert.`);
+                        }
+                    } catch (error) {
+                        showInitialSetup(`Fehler bei Kurz-ID (${potentialPathID}): ${error.message}`);
+                        return; // Stoppe, wenn Kurz-ID fehlschlägt
+                    }
+                }
+                
+                // Prio 3: Saved Link
+                else if (savedLink) {
+                    dataUrl = savedLink;
+                    loadingSource = savedLink;
+                }
+            }
+            
+            if (!dataUrl) {
+                showInitialSetup("Es wurde weder ein Link noch eine Kurz-ID gefunden.");
+                return;
+            }
+            
+            // Lade Daten mit der ermittelten dataUrl
+            try {
+                const response = await fetch(dataUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Konnte Daten von ${dataUrl} nicht laden: ${response.statusText}.`);
+                }
+                const data = await response.json();
+                
+                // Nur speichern, wenn die Quelle ein Link ist (kein temporärer File-Upload)
+                if (loadingSource && (loadingSource.startsWith('http') || loadingSource.startsWith('Mapped ID'))) {
+                    localStorage.setItem(PRONOUN_STORAGE_KEY, dataUrl);
+                }
+                
+                // Erfolgsfall: Initialisierung der App
+                initializeAppWithData(data); // Die linkSource wird hier nicht mehr für das Speichern benötigt
+            } catch (error) {
+                showInitialSetup(`Fehler beim Laden der Verben vom Link (${dataUrl}): ${error.message}`);
+            }
+        }
+
+        function initializeAppWithData(data) {
+            try {
+                if (!data || !data.alle_verben || !Array.isArray(data.alle_verben) || data.alle_verben.length === 0) {
+                    throw new Error("JSON-Datei ist leer oder hat das falsche Format ('alle_verben' fehlt).");
+                }
+                
+                verbData = data;
+                
+                const avoirVerb = verbData.alle_verben.find(v => v.infinitiv === "avoir");
+                const etreVerb = verbData.alle_verben.find(v => v.infinitiv === "être");
+
+                if (!avoirVerb || !etreVerb) {
+                    throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich. Bitte in die JSON-Datei aufnehmen.");
+                }
+
+                avoirPresent = avoirVerb.present;
+                etrePresent = etreVerb.present;
+                
+                if ('speechSynthesis' in window) {
+                     window.speechSynthesis.getVoices(); 
+                }
+                
+                // Der Speichervorgang im LocalStorage wurde nach loadData() verschoben.
+
+                document.getElementById('initialSetupScreen').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+                document.getElementById('searchInput').value = ''; 
+
+                document.getElementById('result').innerHTML = '<p style="text-align: center;">Bitte geben Sie einen Suchbegriff ein oder wählen Sie ein Verb über den Knopf aus.</p>';
+                
+                displayGeneralInfo(data.zusatz_informationen);
+                populateVerbList(); 
+
+            } catch (error) {
+                showInitialSetup(`Fehler in den Daten: ${error.message}`);
+                console.error("Fehler bei Initialisierung der Daten:", error);
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    // Den Link entfernen, da die Daten lokal hochgeladen wurden
+                    localStorage.removeItem(PRONOUN_STORAGE_KEY); 
+                    initializeAppWithData(data, 'file_upload');
+                } catch (error) {
+                    showInitialSetup(`Fehler beim Parsen der JSON-Datei: ${error.message}. Bitte Vorlagenformat prüfen.`);
+                }
+            };
+            reader.onerror = function() {
+                showInitialSetup("Fehler beim Lesen der hochgeladenen Datei.");
+            };
+            reader.readAsText(file);
+        }
+
+        // --- DISPLAY FUNKTIONEN ---
+
+        function populateVerbList() {
+            const listDiv = document.getElementById('modalVerbList');
+            const groupedVerbs = groupVerbs();
+
             let html = '';
-            // Manuelle Sortierung der Gruppen-Keys
             const groupOrder = [
                 'VERBES ER', 'VERBES IR', 'VERBES RE', 
                 'VERBES OIR', 'VERBES COCOS', 'VERBES PARTICULIERS'
             ];
             
-            let globalCounter = 1; // Fortlaufender Zähler
+            let globalCounter = 1; 
             
             groupOrder.forEach(group => {
                 if (groupedVerbs[group]) {
-                    // Verben innerhalb der Gruppe alphabetisch sortieren
                     groupedVerbs[group].sort((a, b) => a.infinitiv.localeCompare(b.infinitiv));
 
-                    // HTML für Gruppe und Liste erzeugen
                     html += `<h4>${group.replace('VERBES ', 'Verben ')} (${groupedVerbs[group].length})</h4><ul class="verb-group-list">`;
                     
                     groupedVerbs[group].forEach((verb) => {
-                        // FIX: Escape single quotes for reflexive verbs (e.g., s'asseoir -> s\'asseoir)
                         const safeInfinitiv = verb.infinitiv.replace(/'/g, "\\'");
                         
                         html += `
@@ -281,7 +1255,7 @@
                                 </a>
                             </li>
                         `;
-                        globalCounter++; // Zähler erhöhen
+                        globalCounter++;
                     });
                     html += `</ul>`;
                 }
@@ -290,26 +1264,6 @@
             listDiv.innerHTML = html;
         }
 
-        // 3. Modal-Ansicht umschalten
-        function showModalView(view) {
-            const listContainer = document.getElementById('modalListContainer');
-            const conjView = document.getElementById('modalConjugationView');
-            const modalTitle = document.getElementById('modalTitle');
-
-            if (view === 'list') {
-                listContainer.style.display = 'block';
-                conjView.style.display = 'none';
-                modalTitle.textContent = 'Alphabetische Verbenliste (Gruppiert)';
-                document.getElementById('modalContent').scrollTop = 0; 
-            } else if (view === 'conjugation') {
-                listContainer.style.display = 'none';
-                conjView.style.display = 'block';
-                modalTitle.textContent = 'Konjugation';
-                document.getElementById('modalContent').scrollTop = 0;
-            }
-        }
-
-        // 4. Filter für die Modalliste
         function filterModalList() {
             const input = document.getElementById('modalSearchInput');
             const filter = normalizeString(input.value);
@@ -327,7 +1281,6 @@
                 }
             });
             
-            // Logik zur Anzeige der Gruppen-Titel (h4)
             groupTitles.forEach(title => {
                 const groupList = title.nextElementSibling; 
                 if (groupList && groupList.tagName === 'UL') {
@@ -344,31 +1297,16 @@
             });
         }
 
-        // 5. Verb über Modal auswählen
         function selectVerb(infinitiv) {
-            // NOTE: infinitiv ist hier bereits das maskierte Verb (z.B. s\'asseoir), was OK ist.
-            // Die Suche im Array funktioniert trotzdem, da die JSON-Daten die unmaskierte Form enthalten.
             const verb = verbData.alle_verben.find(v => v.infinitiv === infinitiv.replace(/\\'/g, "'"));
             if (verb) {
+                // Setze den zurück-Pfad für das Modal
+                lastModalScreen = 'list';
                 displayConjugation(verb, 'modalConjugationTable');
                 showModalView('conjugation'); 
             }
         }
 
-        // 6. Modal (Overlay) umschalten/steuern
-        function toggleModal(show) {
-            const modal = document.getElementById('verbModal');
-            if (show) {
-                modal.classList.add('visible');
-                showModalView('list'); 
-                document.getElementById('modalSearchInput').value = '';
-                filterModalList();
-            } else {
-                modal.classList.remove('visible');
-            }
-        }
-
-        // 7. Verb suchen (Direktsuche im Hauptfenster)
         function searchVerb() {
             if (!verbData) return;
 
@@ -386,17 +1324,17 @@
                 const normalizedUebersetzung = normalizeString(v.uebersetzung);
 
                 return normalizedInfinitiv.includes(normalizedQuery) || 
-                       normalizedUebersetzung.includes(normalizedQuery);
+                                       normalizedUebersetzung.includes(normalizedQuery);
             });
 
             if (foundVerb) {
+                // Da dies in der Hauptansicht ist, gibt es keinen modalen "Zurück"-Pfad zu setzen.
                 displayConjugation(foundVerb, 'result');
             } else {
                 resultDiv.innerHTML = '<p class="error">Verb nicht gefunden. Versuchen Sie es mit Infinitiv oder deutscher Übersetzung.</p>';
             }
         }
 
-        // 8. Allgemeine Informationen (Imparfait) anzeigen (Unverändert)
         function displayGeneralInfo(info) {
             if (!info || !info.imparfait_endungen) return;
 
@@ -429,55 +1367,25 @@
             document.getElementById('general-info').innerHTML = html;
         }
 
-
-        // 9. Konjugationstabelle erstellen und anzeigen (mit Ziel-ID)
         function displayConjugation(verb, targetId) {
             const targetDiv = document.getElementById(targetId);
-            const imparfaitEndungen = verbData.zusatz_informationen.imparfait_endungen;
-            const specialImparfaitForms = verbData.zusatz_informationen.imparfait_spezialfaelle;
-
-            // --- Passé Composé Logik ---
+            
             const participe = verb.passe_compose.participe_passe;
             const hilfsverb = verb.passe_compose.hilfsverb;
-            const pcAuxiliaryPresent = (hilfsverb === 'avoir') ? avoirPresent : etrePresent;
 
-            if (!pcAuxiliaryPresent) {
-                targetDiv.innerHTML = `<p class="error">Fehler: Präsens-Formen des Hilfsverbs '${hilfsverb}' konnten nicht geladen werden.</p>`;
-                return;
-            }
-
-            const passeComposeForms = pronomen.map((p) => {
-                const auxPresentForm = pcAuxiliaryPresent[p];
-                return `${auxPresentForm} ${participe}`;
-            });
-
-            // --- Imparfait Logik ---
-            let imparfaitForms;
-            if (verb.imparfait.stamm === "ét-") {
-                imparfaitForms = pronomen.map((p) => specialImparfaitForms.être[p]);
-            } else if (verb.imparfait.stamm === "av-") {
-                imparfaitForms = pronomen.map((p) => specialImparfaitForms.avoir[p]);
-            } else if (verb.imparfait.stamm === "pleuv-" || verb.imparfait.stamm === "fall-") {
-                imparfaitForms = pronomen.map((p) => {
-                    return (p === 'il_elle_on') ? (verb.imparfait.stamm + imparfaitEndungen[p].slice(1)) : '-';
-                });
-            } else {
-                imparfaitForms = pronomen.map((p) => verb.imparfait.stamm + imparfaitEndungen[p].slice(1));
-            }
-
-            // --- Plus-que-parfait Logik ---
-            const pqpAuxiliaryImparfait = (hilfsverb === 'avoir') ? specialImparfaitForms.avoir : specialImparfaitForms.être;
-
-            const plusQueParfaitForms = pronomen.map((p) => {
-                const auxImparfait = pqpAuxiliaryImparfait[p];
-                return `${auxImparfait} ${participe}`;
-            });
+            const passeComposeForms = pronomen.map((p) => getConjugation(verb, 'passe_compose', p));
+            const imparfaitForms = pronomen.map((p) => getConjugation(verb, 'imparfait', p));
+            const plusQueParfaitForms = pronomen.map((p) => getConjugation(verb, 'plus_que_parfait', p));
             
-            // --- HTML-Generierung ---
             const tableHTML = `
-                <div class="verb-title">
-                    <strong>${verb.infinitiv}</strong> (Deutsch: ${verb.uebersetzung}) | Gruppe: ${verb.gruppe.replace(/_/g, ' ').toUpperCase()}
+                <div class="verb-title-container">
+                    <strong>
+                        ${verb.infinitiv} (${verb.uebersetzung})
+                    </strong> 
+                    <button onclick="speakText('${verb.infinitiv}')" title="Aussprache des Infinitivs" style="background: none; border: none; padding: 0; line-height: 1;">${speakerSVG}</button>
+                    | Gruppe: ${verb.gruppe.replace(/_/g, ' ').toUpperCase()}
                 </div>
+
                 <div class="verb-title" style="font-size: 1.2em; color: #666;">
                     Hilfsverb (PC / PQP): <strong>${hilfsverb.toUpperCase()}</strong> | Participe Passé: <strong>${participe}</strong>
                 </div>
@@ -486,20 +1394,20 @@
                     <thead>
                         <tr>
                             <th>Person</th>
-                            <th>Présent (Gegenwart)</th>
-                            <th>Passé Composé (Perfekt)</th>
-                            <th>Imparfait (Vergangenheit)</th>
-                            <th>Plus-que-parfait (Vorvergangenheit)</th>
+                            <th>${tableLabels.present}</th>
+                            <th>${tableLabels.passe_compose}</th>
+                            <th>${tableLabels.imparfait}</th>
+                            <th>${tableLabels.plus_que_parfait}</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${pronomen.map((p, i) => `
                             <tr>
-                                <td>${pronomenDisplay[i]}</td>
-                                <td>${verb.present[p]}</td>
-                                <td>${passeComposeForms[i]}</td>
-                                <td>${imparfaitForms[i]}</td>
-                                <td>${plusQueParfaitForms[i]}</td>
+                                <td data-label="Person">${pronomenDisplay[i]}</td>
+                                <td data-label="${tableLabels.present}">${verb.present[p]}</td>
+                                <td data-label="${tableLabels.passe_compose}">${passeComposeForms[i]}</td>
+                                <td data-label="${tableLabels.imparfait}">${imparfaitForms[i]}</td>
+                                <td data-label="${tableLabels.plus_que_parfait}">${plusQueParfaitForms[i]}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -509,7 +1417,6 @@
             targetDiv.innerHTML = tableHTML;
         }
 
-        // Starte das Laden der Daten, wenn die Seite bereit ist
         document.addEventListener('DOMContentLoaded', loadData);
     </script>
 
