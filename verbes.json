@@ -1,0 +1,1572 @@
+{
+  "alle_verben": [
+    {
+      "infinitiv": "manger",
+      "uebersetzung": "essen",
+      "present": {
+        "je": "mange",
+        "tu": "manges",
+        "il_elle_on": "mange",
+        "nous": "mangeons",
+        "vous": "mangez",
+        "ils_elles": "mangent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "mangé"
+      },
+      "imparfait": {
+        "stamm": "mang-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "commencer",
+      "uebersetzung": "anfangen",
+      "present": {
+        "je": "commence",
+        "tu": "commences",
+        "il_elle_on": "commence",
+        "nous": "commençons",
+        "vous": "commencez",
+        "ils_elles": "commencent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "commencé"
+      },
+      "imparfait": {
+        "stamm": "commenc-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "nettoyer",
+      "uebersetzung": "putzen",
+      "present": {
+        "je": "nettoie",
+        "tu": "nettoies",
+        "il_elle_on": "nettoie",
+        "nous": "nettoyons",
+        "vous": "nettoyez",
+        "ils_elles": "nettoient"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "nettoyé"
+      },
+      "imparfait": {
+        "stamm": "nettoy-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "se lever",
+      "uebersetzung": "aufstehen",
+      "present": {
+        "je": "me lève",
+        "tu": "te lèves",
+        "il_elle_on": "se lève",
+        "nous": "nous levons",
+        "vous": "vous levez",
+        "ils_elles": "se lèvent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "levé"
+      },
+      "imparfait": {
+        "stamm": "lev-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "répéter",
+      "uebersetzung": "wiederholen",
+      "present": {
+        "je": "répète",
+        "tu": "répètes",
+        "il_elle_on": "répète",
+        "nous": "répétons",
+        "vous": "répétez",
+        "ils_elles": "répètent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "répété"
+      },
+      "imparfait": {
+        "stamm": "répét-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "jeter",
+      "uebersetzung": "werfen",
+      "present": {
+        "je": "jette",
+        "tu": "jettes",
+        "il_elle_on": "jette",
+        "nous": "jetons",
+        "vous": "jetez",
+        "ils_elles": "jettent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "jeté"
+      },
+      "imparfait": {
+        "stamm": "jet-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "appeler",
+      "uebersetzung": "rufen",
+      "present": {
+        "je": "appelle",
+        "tu": "appelles",
+        "il_elle_on": "appelle",
+        "nous": "appelons",
+        "vous": "appelez",
+        "ils_elles": "appellent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "appelé"
+      },
+      "imparfait": {
+        "stamm": "appel-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "s'appeler",
+      "uebersetzung": "heißen",
+      "present": {
+        "je": "m'appelle",
+        "tu": "t'appelles",
+        "il_elle_on": "s'appelle",
+        "nous": "nous appelons",
+        "vous": "vous appelez",
+        "ils_elles": "s'appellent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "appelé"
+      },
+      "imparfait": {
+        "stamm": "appel-"
+      },
+      "gruppe": "verbes_er"
+    },
+    {
+      "infinitiv": "couvrir",
+      "uebersetzung": "bedecken",
+      "present": {
+        "je": "couvre",
+        "tu": "couvres",
+        "il_elle_on": "couvre",
+        "nous": "couvrons",
+        "vous": "couvrez",
+        "ils_elles": "couvrent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "couvert"
+      },
+      "imparfait": {
+        "stamm": "couvr-"
+      },
+      "gruppe": "verbes_cocos"
+    },
+    {
+      "infinitiv": "ouvrir",
+      "uebersetzung": "öffnen",
+      "present": {
+        "je": "ouvre",
+        "tu": "ouvres",
+        "il_elle_on": "ouvre",
+        "nous": "ouvrons",
+        "vous": "ouvrez",
+        "ils_elles": "ouvrent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "ouvert"
+      },
+      "imparfait": {
+        "stamm": "ouvr-"
+      },
+      "gruppe": "verbes_cocos"
+    },
+    {
+      "infinitiv": "cueillir",
+      "uebersetzung": "pflücken",
+      "present": {
+        "je": "cueille",
+        "tu": "cueilles",
+        "il_elle_on": "cueille",
+        "nous": "cueillons",
+        "vous": "cueillez",
+        "ils_elles": "ceuillent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "cueilli"
+      },
+      "imparfait": {
+        "stamm": "cueill-"
+      },
+      "gruppe": "verbes_cocos"
+    },
+    {
+      "infinitiv": "offrir",
+      "uebersetzung": "anbieten",
+      "present": {
+        "je": "offre",
+        "tu": "offres",
+        "il_elle_on": "offre",
+        "nous": "offrons",
+        "vous": "offrez",
+        "ils_elles": "offrent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "offert"
+      },
+      "imparfait": {
+        "stamm": "offr-"
+      },
+      "gruppe": "verbes_cocos"
+    },
+    {
+      "infinitiv": "souffrir",
+      "uebersetzung": "leiden",
+      "present": {
+        "je": "souffre",
+        "tu": "souffres",
+        "il_elle_on": "souffre",
+        "nous": "souffrons",
+        "vous": "souffrez",
+        "ils_elles": "souffrent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "souffert"
+      },
+      "imparfait": {
+        "stamm": "souffr-"
+      },
+      "gruppe": "verbes_cocos"
+    },
+    {
+      "infinitiv": "mourir",
+      "uebersetzung": "sterben",
+      "present": {
+        "je": "meurs",
+        "tu": "meurs",
+        "il_elle_on": "meurt",
+        "nous": "mourons",
+        "vous": "mourez",
+        "ils_elles": "meurent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "mort"
+      },
+      "imparfait": {
+        "stamm": "mour-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "courir",
+      "uebersetzung": "laufen",
+      "present": {
+        "je": "cours",
+        "tu": "cours",
+        "il_elle_on": "court",
+        "nous": "courons",
+        "vous": "courez",
+        "ils_elles": "courent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "couru"
+      },
+      "imparfait": {
+        "stamm": "cour-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "venir",
+      "uebersetzung": "kommen",
+      "present": {
+        "je": "viens",
+        "tu": "viens",
+        "il_elle_on": "vient",
+        "nous": "venons",
+        "vous": "venez",
+        "ils_elles": "viennent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "venu"
+      },
+      "imparfait": {
+        "stamm": "ven-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "devenir",
+      "uebersetzung": "werden",
+      "present": {
+        "je": "deviens",
+        "tu": "deviens",
+        "il_elle_on": "devient",
+        "nous": "devenons",
+        "vous": "devenez",
+        "ils_elles": "deviennent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "devenu"
+      },
+      "imparfait": {
+        "stamm": "deven-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "tenir",
+      "uebersetzung": "halten",
+      "present": {
+        "je": "tiens",
+        "tu": "tiens",
+        "il_elle_on": "tient",
+        "nous": "tenons",
+        "vous": "tenez",
+        "ils_elles": "tiennent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "tenu"
+      },
+      "imparfait": {
+        "stamm": "ten-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "finir",
+      "uebersetzung": "beenden",
+      "present": {
+        "je": "finis",
+        "tu": "finis",
+        "il_elle_on": "finit",
+        "nous": "finissons",
+        "vous": "finissez",
+        "ils_elles": "finissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "fini"
+      },
+      "imparfait": {
+        "stamm": "finiss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "choisir",
+      "uebersetzung": "wählen",
+      "present": {
+        "je": "choisis",
+        "tu": "choisis",
+        "il_elle_on": "choisit",
+        "nous": "choisissons",
+        "vous": "choisissez",
+        "ils_elles": "choisissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "choisi"
+      },
+      "imparfait": {
+        "stamm": "choisiss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "obéir",
+      "uebersetzung": "gehorchen",
+      "present": {
+        "je": "obéis",
+        "tu": "obéis",
+        "il_elle_on": "obéit",
+        "nous": "obéissons",
+        "vous": "obéissez",
+        "ils_elles": "obéissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "obéi"
+      },
+      "imparfait": {
+        "stamm": "obéiss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "maigrir",
+      "uebersetzung": "abnehmen",
+      "present": {
+        "je": "maigris",
+        "tu": "maigris",
+        "il_elle_on": "maigrit",
+        "nous": "maigrissons",
+        "vous": "maigrissez",
+        "ils_elles": "maigrissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "maigri"
+      },
+      "imparfait": {
+        "stamm": "maigriss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "punir",
+      "uebersetzung": "bestrafen",
+      "present": {
+        "je": "punis",
+        "tu": "punis",
+        "il_elle_on": "punit",
+        "nous": "punissons",
+        "vous": "punissez",
+        "ils_elles": "punissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "puni"
+      },
+      "imparfait": {
+        "stamm": "puniss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "remplir",
+      "uebersetzung": "füllen",
+      "present": {
+        "je": "remplis",
+        "tu": "remplis",
+        "il_elle_on": "remplit",
+        "nous": "remplissons",
+        "vous": "remplissez",
+        "ils_elles": "remplissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "rempli"
+      },
+      "imparfait": {
+        "stamm": "rempliss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "grossir",
+      "uebersetzung": "zunehmen",
+      "present": {
+        "je": "grossis",
+        "tu": "grossis",
+        "il_elle_on": "grossit",
+        "nous": "grossissons",
+        "vous": "grossissez",
+        "ils_elles": "grossissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "grossi"
+      },
+      "imparfait": {
+        "stamm": "grossiss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "réfléchir",
+      "uebersetzung": "nachdenken",
+      "present": {
+        "je": "réfléchis",
+        "tu": "réfléchis",
+        "il_elle_on": "réfléchit",
+        "nous": "réfléchissons",
+        "vous": "réfléchissez",
+        "ils_elles": "réfléchissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "réfléchi"
+      },
+      "imparfait": {
+        "stamm": "réfléchiss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "rougir",
+      "uebersetzung": "erröten",
+      "present": {
+        "je": "rougis",
+        "tu": "rougis",
+        "il_elle_on": "rougit",
+        "nous": "rougissons",
+        "vous": "rougissez",
+        "ils_elles": "rougissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "rougi"
+      },
+      "imparfait": {
+        "stamm": "rougiss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "vieillir",
+      "uebersetzung": "altern",
+      "present": {
+        "je": "vieillis",
+        "tu": "vieillis",
+        "il_elle_on": "vieillit",
+        "nous": "vieillissons",
+        "vous": "vieillissez",
+        "ils_elles": "vieillissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "vieilli"
+      },
+      "imparfait": {
+        "stamm": "vieilliss-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "dormir",
+      "uebersetzung": "schlafen",
+      "present": {
+        "je": "dors",
+        "tu": "dors",
+        "il_elle_on": "dort",
+        "nous": "dormons",
+        "vous": "dormez",
+        "ils_elles": "dorment"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "dormi"
+      },
+      "imparfait": {
+        "stamm": "dorm-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "partir",
+      "uebersetzung": "weggehen",
+      "present": {
+        "je": "pars",
+        "tu": "pars",
+        "il_elle_on": "part",
+        "nous": "partons",
+        "vous": "partez",
+        "ils_elles": "partent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "parti"
+      },
+      "imparfait": {
+        "stamm": "part-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "sortir",
+      "uebersetzung": "hinausgehen",
+      "present": {
+        "je": "sors",
+        "tu": "sors",
+        "il_elle_on": "sort",
+        "nous": "sortons",
+        "vous": "sortez",
+        "ils_elles": "sortent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "sorti"
+      },
+      "imparfait": {
+        "stamm": "sort-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "mentir",
+      "uebersetzung": "lügen",
+      "present": {
+        "je": "mens",
+        "tu": "mens",
+        "il_elle_on": "ment",
+        "nous": "mentons",
+        "vous": "mentez",
+        "ils_elles": "mentent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "menti"
+      },
+      "imparfait": {
+        "stamm": "ment-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "sentir",
+      "uebersetzung": "fühlen",
+      "present": {
+        "je": "sens",
+        "tu": "sens",
+        "il_elle_on": "sent",
+        "nous": "sentons",
+        "vous": "sentez",
+        "ils_elles": "sentent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "senti"
+      },
+      "imparfait": {
+        "stamm": "sent-"
+      },
+      "gruppe": "verbes_ir"
+    },
+    {
+      "infinitiv": "servir",
+      "uebersetzung": "dienen",
+      "present": {
+        "je": "sers",
+        "tu": "sers",
+        "il_elle_on": "sert",
+        "nous": "servons",
+        "vous": "servez",
+        "ils_elles": "servent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "servi"
+      },
+      "imparfait": {
+        "stamm": "serv-"
+      },
+      "gruppe": "verbes_ir"
+    },
+  {
+      "infinitiv": "attendre",
+      "uebersetzung": "warten",
+      "present": {
+        "je": "attends",
+        "tu": "attends",
+        "il_elle_on": "attend",
+        "nous": "attendons",
+        "vous": "attendez",
+        "ils_elles": "attendent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "attendu"
+      },
+      "imparfait": {
+        "stamm": "attend-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "descendre",
+      "uebersetzung": "hinuntergehen",
+      "present": {
+        "je": "descends",
+        "tu": "descends",
+        "il_elle_on": "descend",
+        "nous": "descendons",
+        "vous": "descendez",
+        "ils_elles": "descendent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "descendu"
+      },
+      "imparfait": {
+        "stamm": "descend-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "entendre",
+      "uebersetzung": "hören",
+      "present": {
+        "je": "entends",
+        "tu": "entends",
+        "il_elle_on": "entend",
+        "nous": "entendons",
+        "vous": "entendez",
+        "ils_elles": "entendent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "entendu"
+      },
+      "imparfait": {
+        "stamm": "entend-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "prendre",
+      "uebersetzung": "nehmen",
+      "present": {
+        "je": "prends",
+        "tu": "prends",
+        "il_elle_on": "prend",
+        "nous": "prenons",
+        "vous": "prenez",
+        "ils_elles": "prennent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "pris"
+      },
+      "imparfait": {
+        "stamm": "pren-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "répondre",
+      "uebersetzung": "antworten",
+      "present": {
+        "je": "réponds",
+        "tu": "réponds",
+        "il_elle_on": "répond",
+        "nous": "répondons",
+        "vous": "répondez",
+        "ils_elles": "répondent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "répondu"
+      },
+      "imparfait": {
+        "stamm": "répond-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "vendre",
+      "uebersetzung": "verkaufen",
+      "present": {
+        "je": "vends",
+        "tu": "vends",
+        "il_elle_on": "vend",
+        "nous": "vendons",
+        "vous": "vendez",
+        "ils_elles": "vendent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "vendu"
+      },
+      "imparfait": {
+        "stamm": "vend-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "faire",
+      "uebersetzung": "machen",
+      "present": {
+        "je": "fais",
+        "tu": "fais",
+        "il_elle_on": "fait",
+        "nous": "faisons",
+        "vous": "faites",
+        "ils_elles": "font"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "fait"
+      },
+      "imparfait": {
+        "stamm": "fais-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "dire",
+      "uebersetzung": "sagen",
+      "present": {
+        "je": "dis",
+        "tu": "dis",
+        "il_elle_on": "dit",
+        "nous": "disons",
+        "vous": "dites",
+        "ils_elles": "disent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "dit"
+      },
+      "imparfait": {
+        "stamm": "dis-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "ecrire",
+      "uebersetzung": "schreiben",
+      "present": {
+        "je": "écris",
+        "tu": "écris",
+        "il_elle_on": "écrit",
+        "nous": "écrivons",
+        "vous": "écrivez",
+        "ils_elles": "écrivent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "écrit"
+      },
+      "imparfait": {
+        "stamm": "écriv-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "conduire",
+      "uebersetzung": "fahren, führen",
+      "present": {
+        "je": "conduis",
+        "tu": "conduis",
+        "il_elle_on": "conduit",
+        "nous": "conduisons",
+        "vous": "conduisez",
+        "ils_elles": "conduisent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "conduit"
+      },
+      "imparfait": {
+        "stamm": "conduis-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "construire",
+      "uebersetzung": "bauen",
+      "present": {
+        "je": "construis",
+        "tu": "construis",
+        "il_elle_on": "construit",
+        "nous": "construisons",
+        "vous": "construisez",
+        "ils_elles": "construisent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "construit"
+      },
+      "imparfait": {
+        "stamm": "construis-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "traduire",
+      "uebersetzung": "übersetzen",
+      "present": {
+        "je": "traduis",
+        "tu": "traduis",
+        "il_elle_on": "traduit",
+        "nous": "traduisons",
+        "vous": "traduisez",
+        "ils_elles": "traduisent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "traduit"
+      },
+      "imparfait": {
+        "stamm": "traduis-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "produire",
+      "uebersetzung": "produzieren",
+      "present": {
+        "je": "produis",
+        "tu": "produis",
+        "il_elle_on": "produit",
+        "nous": "produisons",
+        "vous": "produisez",
+        "ils_elles": "produisent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "produit"
+      },
+      "imparfait": {
+        "stamm": "produis-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "apprendre",
+      "uebersetzung": "lernen",
+      "present": {
+        "je": "apprends",
+        "tu": "apprends",
+        "il_elle_on": "apprend",
+        "nous": "apprenons",
+        "vous": "apprenez",
+        "ils_elles": "apprennent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "appris"
+      },
+      "imparfait": {
+        "stamm": "appren-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "comprendre",
+      "uebersetzung": "verstehen",
+      "present": {
+        "je": "comprends",
+        "tu": "comprends",
+        "il_elle_on": "comprend",
+        "nous": "comprenons",
+        "vous": "comprenez",
+        "ils_elles": "comprennent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "compris"
+      },
+      "imparfait": {
+        "stamm": "compren-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "surprendre",
+      "uebersetzung": "überraschen",
+      "present": {
+        "je": "surprends",
+        "tu": "surprends",
+        "il_elle_on": "surprend",
+        "nous": "surprenons",
+        "vous": "surprenez",
+        "ils_elles": "surprennent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "surpris"
+      },
+      "imparfait": {
+        "stamm": "surpren-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "mettre",
+      "uebersetzung": "setzen, legen, stellen",
+      "present": {
+        "je": "mets",
+        "tu": "mets",
+        "il_elle_on": "met",
+        "nous": "mettons",
+        "vous": "mettez",
+        "ils_elles": "mettent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "mis"
+      },
+      "imparfait": {
+        "stamm": "mett-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "promettre",
+      "uebersetzung": "versprechen",
+      "present": {
+        "je": "promets",
+        "tu": "promets",
+        "il_elle_on": "promet",
+        "nous": "promettons",
+        "vous": "promettez",
+        "ils_elles": "promettent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "promis"
+      },
+      "imparfait": {
+        "stamm": "promett-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "permettre",
+      "uebersetzung": "erlauben",
+      "present": {
+        "je": "permets",
+        "tu": "permets",
+        "il_elle_on": "permet",
+        "nous": "permettons",
+        "vous": "permettez",
+        "ils_elles": "permettent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "permis"
+      },
+      "imparfait": {
+        "stamm": "permett-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "battre",
+      "uebersetzung": "schlagen",
+      "present": {
+        "je": "bats",
+        "tu": "bats",
+        "il_elle_on": "bat",
+        "nous": "battons",
+        "vous": "battez",
+        "ils_elles": "battent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "battu"
+      },
+      "imparfait": {
+        "stamm": "batt-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "connaître",
+      "uebersetzung": "kennen",
+      "present": {
+        "je": "connais",
+        "tu": "connais",
+        "il_elle_on": "connaît",
+        "nous": "connaissons",
+        "vous": "connaissez",
+        "ils_elles": "connaissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "connu"
+      },
+      "imparfait": {
+        "stamm": "connaiss-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "naitre",
+      "uebersetzung": "geboren werden",
+      "present": {
+        "je": "nais",
+        "tu": "nais",
+        "il_elle_on": "nait",
+        "nous": "naissons",
+        "vous": "naissez",
+        "ils_elles": "naissent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "né"
+      },
+      "imparfait": {
+        "stamm": "naiss-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "lire",
+      "uebersetzung": "lesen",
+      "present": {
+        "je": "lis",
+        "tu": "lis",
+        "il_elle_on": "lit",
+        "nous": "lisons",
+        "vous": "lisez",
+        "ils_elles": "lisent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "lu"
+      },
+      "imparfait": {
+        "stamm": "lis-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "boire",
+      "uebersetzung": "trinken",
+      "present": {
+        "je": "bois",
+        "tu": "bois",
+        "il_elle_on": "boit",
+        "nous": "buvons",
+        "vous": "buvez",
+        "ils_elles": "boivent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "bu"
+      },
+      "imparfait": {
+        "stamm": "buv-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "vivre",
+      "uebersetzung": "leben",
+      "present": {
+        "je": "vis",
+        "tu": "vis",
+        "il_elle_on": "vit",
+        "nous": "vivons",
+        "vous": "vivez",
+        "ils_elles": "vivent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "vécu"
+      },
+      "imparfait": {
+        "stamm": "viv-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "plaire",
+      "uebersetzung": "gefallen",
+      "present": {
+        "je": "plais",
+        "tu": "plais",
+        "il_elle_on": "plaît",
+        "nous": "plaisons",
+        "vous": "plaisez",
+        "ils_elles": "plaisent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "plu"
+      },
+      "imparfait": {
+        "stamm": "plais-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "croire",
+      "uebersetzung": "glauben",
+      "present": {
+        "je": "crois",
+        "tu": "crois",
+        "il_elle_on": "croit",
+        "nous": "croyons",
+        "vous": "croyez",
+        "ils_elles": "croient"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "cru"
+      },
+      "imparfait": {
+        "stamm": "croy-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "rire",
+      "uebersetzung": "lachen",
+      "present": {
+        "je": "ris",
+        "tu": "ris",
+        "il_elle_on": "rit",
+        "nous": "rions",
+        "vous": "riez",
+        "ils_elles": "rient"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "ri"
+      },
+      "imparfait": {
+        "stamm": "ri-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "sourire",
+      "uebersetzung": "lächeln",
+      "present": {
+        "je": "souris",
+        "tu": "souris",
+        "il_elle_on": "sourit",
+        "nous": "sourions",
+        "vous": "souriez",
+        "ils_elles": "sourient"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "souri"
+      },
+      "imparfait": {
+        "stamm": "souri-"
+      },
+      "gruppe": "verbes_re"
+    },
+    {
+      "infinitiv": "suivre",
+      "uebersetzung": "folgen",
+      "present": {
+        "je": "suis",
+        "tu": "suis",
+        "il_elle_on": "suit",
+        "nous": "suivons",
+        "vous": "suivez",
+        "ils_elles": "suivent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "suivi"
+      },
+      "imparfait": {
+        "stamm": "suiv-"
+      },
+      "gruppe": "verbes_re"
+    },
+  {
+      "infinitiv": "pleuvoir",
+      "uebersetzung": "regnen",
+      "present": {
+        "je": "-",
+        "tu": "-",
+        "il_elle_on": "il pleut",
+        "nous": "-",
+        "vous": "-",
+        "ils_elles": "-"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "plu"
+      },
+      "imparfait": {
+        "stamm": "pleuv-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "voir",
+      "uebersetzung": "sehen",
+      "present": {
+        "je": "vois",
+        "tu": "vois",
+        "il_elle_on": "voit",
+        "nous": "voyons",
+        "vous": "voyez",
+        "ils_elles": "voient"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "vu"
+      },
+      "imparfait": {
+        "stamm": "voy-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "savoir",
+      "uebersetzung": "wissen",
+      "present": {
+        "je": "sais",
+        "tu": "sais",
+        "il_elle_on": "sait",
+        "nous": "savons",
+        "vous": "savez",
+        "ils_elles": "savent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "su"
+      },
+      "imparfait": {
+        "stamm": "sav-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "devoir",
+      "uebersetzung": "müssen, sollen",
+      "present": {
+        "je": "dois",
+        "tu": "dois",
+        "il_elle_on": "doit",
+        "nous": "devons",
+        "vous": "devez",
+        "ils_elles": "doivent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "dû"
+      },
+      "imparfait": {
+        "stamm": "dev-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "pouvoir",
+      "uebersetzung": "können, dürfen",
+      "present": {
+        "je": "peux",
+        "tu": "peux",
+        "il_elle_on": "peut",
+        "nous": "pouvons",
+        "vous": "pouvez",
+        "ils_elles": "peuvent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "pu"
+      },
+      "imparfait": {
+        "stamm": "pouv-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "vouloir",
+      "uebersetzung": "wollen",
+      "present": {
+        "je": "veux",
+        "tu": "veux",
+        "il_elle_on": "veut",
+        "nous": "voulons",
+        "vous": "voulez",
+        "ils_elles": "veulent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "voulu"
+      },
+      "imparfait": {
+        "stamm": "voul-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "falloir",
+      "uebersetzung": "müssen (unpersönlich)",
+      "present": {
+        "je": "-",
+        "tu": "-",
+        "il_elle_on": "il faut",
+        "nous": "-",
+        "vous": "-",
+        "ils_elles": "-"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "fallu"
+      },
+      "imparfait": {
+        "stamm": "fall-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "valoir",
+      "uebersetzung": "wert sein",
+      "present": {
+        "je": "vaux",
+        "tu": "vaux",
+        "il_elle_on": "vaut",
+        "nous": "valons",
+        "vous": "valez",
+        "ils_elles": "valent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "valu"
+      },
+      "imparfait": {
+        "stamm": "val-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "s'asseoir",
+      "uebersetzung": "sich setzen",
+      "present": {
+        "je": "m'assieds",
+        "tu": "t'assieds",
+        "il_elle_on": "s'assied",
+        "nous": "nous asseyons",
+        "vous": "vous asseyez",
+        "ils_elles": "s'asseyent"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "assis"
+      },
+      "imparfait": {
+        "stamm": "assey-"
+      },
+      "gruppe": "verbes_oir"
+    },
+    {
+      "infinitiv": "recevoir",
+      "uebersetzung": "erhalten",
+      "present": {
+        "je": "reçois",
+        "tu": "reçois",
+        "il_elle_on": "reçoit",
+        "nous": "recevons",
+        "vous": "recevez",
+        "ils_elles": "reçoivent"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "reçu"
+      },
+      "imparfait": {
+        "stamm": "recev-"
+      },
+      "gruppe": "verbes_oir"
+    },
+  {
+      "infinitiv": "avoir",
+      "uebersetzung": "haben",
+      "present": {
+        "je": "j'ai",
+        "tu": "tu as",
+        "il_elle_on": "il/elle/on a",
+        "nous": "nous avons",
+        "vous": "vous avez",
+        "ils_elles": "ils/elles ont"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "eu"
+      },
+      "imparfait": {
+        "stamm": "av-"
+      },
+      "gruppe": "verbes_particuliers"
+    },
+    {
+      "infinitiv": "être",
+      "uebersetzung": "sein",
+      "present": {
+        "je": "je suis",
+        "tu": "tu es",
+        "il_elle_on": "il/elle/on est",
+        "nous": "nous sommes",
+        "vous": "vous êtes",
+        "ils_elles": "ils/elles sont"
+      },
+      "passe_compose": {
+        "hilfsverb": "avoir",
+        "participe_passe": "été"
+      },
+      "imparfait": {
+        "stamm": "ét-"
+      },
+      "gruppe": "verbes_particuliers"
+    },
+    {
+      "infinitiv": "aller",
+      "uebersetzung": "gehen",
+      "present": {
+        "je": "je vais",
+        "tu": "tu vas",
+        "il_elle_on": "il/elle/on va",
+        "nous": "nous allons",
+        "vous": "vous allez",
+        "ils_elles": "ils/elles vont"
+      },
+      "passe_compose": {
+        "hilfsverb": "être",
+        "participe_passe": "allé"
+      },
+      "imparfait": {
+        "stamm": "all-"
+      },
+      "gruppe": "verbes_particuliers"
+    }
+  ],
+  "zusatz_informationen": {
+    "imparfait_endungen": {
+      "je": "-ais",
+      "tu": "-ais",
+      "il_elle_on": "-ait",
+      "nous": "-ions",
+      "vous": "-iez",
+      "ils_elles": "-aient"
+    },
+    "imparfait_spezialfaelle": {
+      "être": {
+        "je": "étais",
+        "tu": "étais",
+        "il_elle_on": "était",
+        "nous": "étions",
+        "vous": "étiez",
+        "ils_elles": "étaient"
+      },
+      "avoir": {
+        "je": "avais",
+        "tu": "avais",
+        "il_elle_on": "avait",
+        "nous": "avions",
+        "vous": "aviez",
+        "ils_elles": "avaient"
+      }
+    }
+  }
+}
