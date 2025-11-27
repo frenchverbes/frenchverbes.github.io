@@ -4,51 +4,536 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FrenchVerbes</title>
-    /* --- NEUE CSS VARIABLEN FÜR DARK MODE --- */
-:root {
-    --bg-color: #f4f4f9;
-    --card-bg: #fff;
-    --text-color: #333;
-    --border-color: #ddd;
-    --highlight-green: #5cb85c;
-    --highlight-blue: #00bcd4;
-    --input-bg: #fff;
-    --imparfait-bg: #e0f7fa;
-    --imparfait-border: #00bcd4;
-}
+    <style>
+    /* --- CSS VARIABLEN FÜR DARK MODE --- */
+    :root {
+        --bg-color: #f4f4f9;
+        --card-bg: #fff;
+        --text-color: #333;
+        --border-color: #ddd;
+        --highlight-green: #5cb85c; /* Hellgrün */
+        --highlight-blue: #00bcd4; /* Türkis */
+        --input-bg: #fff;
+        --imparfait-bg: #e0f7fa;
+        --imparfait-border: #00bcd4;
+        --error-color: red;
+        --button-default: #00bcd4;
+        --button-default-hover: #00a0b8;
+        --button-quiz: #5cb85c;
+        --button-quiz-hover: #4cae4c;
+        --button-reset-bg: #f44336;
+        --quiz-result-correct-bg: #d4edda;
+        --quiz-result-correct-text: #155724;
+        --quiz-result-incorrect-bg: #f8d7da;
+        --quiz-result-incorrect-text: #721c24;
+    }
 
-/* Dark Mode Overrides */
-body.dark-mode {
-    --bg-color: #1e1e1e;
-    --card-bg: #2d2d30;
-    --text-color: #cccccc;
-    --border-color: #444;
-    --highlight-green: #6edb7d;
-    --highlight-blue: #4fc3f7;
-    --input-bg: #3c3c3c;
-    --imparfait-bg: #20404a;
-    --imparfait-border: #4fc3f7;
-}
+    /* Dark Mode Overrides */
+    body.dark-mode {
+        --bg-color: #1e1e1e;
+        --card-bg: #2d2d30;
+        --text-color: #cccccc;
+        --border-color: #444;
+        --highlight-green: #6edb7d; /* Dunkelgrün Highlight */
+        --highlight-blue: #4fc3f7; /* Dunkel Türkis Highlight */
+        --input-bg: #3c3c3c;
+        --imparfait-bg: #20404a;
+        --imparfait-border: #4fc3f7;
+        --error-color: #ff6e6e;
+        --button-default: #4fc3f7;
+        --button-default-hover: #03a9f4;
+        --button-quiz: #6edb7d;
+        --button-quiz-hover: #5cb85c;
+        --button-reset-bg: #c62828;
+        --quiz-result-correct-bg: #388e3c;
+        --quiz-result-correct-text: #d4edda;
+        --quiz-result-incorrect-bg: #c62828;
+        --quiz-result-incorrect-text: #f8d7da;
+    }
 
-/* Wenden Sie Variablen auf bestehende Regeln an */
-body { background-color: var(--bg-color); }
-.container { background: var(--card-bg); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-h1 { color: var(--text-color); border-bottom-color: var(--highlight-green); }
-input[type="text"] { background-color: var(--input-bg); color: var(--text-color); border-color: var(--border-color); }
-table { border-color: var(--border-color); }
-th, td { border-color: var(--border-color); }
-th { background-color: var(--highlight-green); color: white; }
-.imparfait-info { background: var(--imparfait-bg); border-left-color: var(--imparfait-border); }
+    /* --- Allgemeine Styles --- */
+    body { 
+        font-family: Arial, sans-serif; 
+        padding: 0; 
+        margin: 0; 
+        display: flex; 
+        justify-content: center; 
+        background-color: var(--bg-color); /* Variable */
+        color: var(--text-color); /* Variable */
+    }
+    
+    .main-content { 
+        flex-grow: 1; 
+        padding: 20px; 
+        max-width: 1000px;
+        width: 100%;
+        position: relative;
+    }
+    .container { 
+        max-width: 100%; 
+        margin: auto; 
+        background: var(--card-bg); /* Variable */
+        padding: 30px; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    }
+    body.dark-mode .container {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    }
+    h1 { 
+        color: var(--text-color); /* Variable */
+        border-bottom: 2px solid var(--highlight-green); /* Variable */
+        padding-bottom: 10px; 
+        margin-top: 0; 
+    }
+    input[type="text"] { 
+        width: 100%; 
+        padding: 12px; 
+        margin-bottom: 20px; 
+        border: 1px solid var(--border-color); /* Variable */
+        border-radius: 4px; 
+        box-sizing: border-box; 
+        font-size: 16px;
+        background-color: var(--input-bg); /* Variable */
+        color: var(--text-color); /* Variable */
+    }
 
-/* Dark Mode Spezifika */
-body.dark-mode h1 { border-bottom-color: var(--highlight-green); }
-body.dark-mode .container { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); }
-body.dark-mode #initialSetupScreen { background-color: #2b3336; border-color: var(--highlight-blue); }
-body.dark-mode #initialSetupScreen h2, body.dark-mode #initialSetupScreen h3 { color: var(--highlight-blue); }
-body.dark-mode #initialSetupScreen pre { background-color: var(--input-bg); }
-body.dark-mode .quiz-result.correct { background-color: #388e3c; color: #d4edda; }
-body.dark-mode .quiz-result.incorrect { background-color: #c62828; color: #f8d7da; }
-/* --- ENDE DARK MODE CSS --- */
+    /* --- Tabellen Styles --- */
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 20px; 
+        table-layout: fixed;
+        border: 1px solid var(--border-color); /* Variable */
+    }
+    th, td { 
+        border: 1px solid var(--border-color); /* Variable */
+        padding: 10px; 
+        text-align: left; 
+        word-wrap: break-word; 
+        color: var(--text-color);
+    }
+    th { 
+        background-color: var(--highlight-green); /* Variable */
+        color: white; 
+    }
+    body.dark-mode th {
+        background-color: #388e3c; /* Dunklere Basis für Dark Mode */
+    }
+    
+    /* --- Mobile Responsive Table CSS --- */
+    @media screen and (max-width: 600px) {
+        .container { padding: 15px; }
+        
+        table, thead, tbody, th, td, tr {
+            display: block;
+        }
+        
+        thead tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+        
+        tr {
+            border: 1px solid var(--border-color); /* Variable */
+            margin-bottom: 10px;
+            padding: 10px 0;
+            border-radius: 4px;
+        }
+        
+        td {
+            border: none;
+            border-bottom: 1px solid var(--border-color); /* Variable */
+            position: relative;
+            padding-left: 50% !important; 
+            text-align: right !important;
+            white-space: normal;
+        }
+        
+        td:before {
+            position: absolute;
+            top: 10px;
+            left: 6px;
+            width: 45%;
+            padding-right: 10px;
+            white-space: nowrap;
+            text-align: left;
+            font-weight: bold;
+            content: attr(data-label);
+            color: var(--highlight-green); /* Variable */
+        }
+    }
+    /* --- Ende Mobile Responsive Table CSS --- */
+
+    .error { 
+        color: var(--error-color); /* Variable */
+        text-align: center; 
+        margin-top: 20px; 
+    }
+    .imparfait-info { 
+        margin-top: 30px; 
+        padding: 15px; 
+        background: var(--imparfait-bg); /* Variable */
+        border-left: 5px solid var(--imparfait-border); /* Variable */
+        color: var(--text-color);
+    }
+    
+    /* --- Verb Toggle (Deutsch/Französisch) Styles (NUR FÜRS QUIZ) --- */
+    .verb-title-container {
+        text-align: center; 
+        margin-bottom: 15px; 
+        color: var(--text-color); /* Variable */
+        font-size: 1.4em;
+    }
+    .verb-toggle {
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        transition: color 0.2s; 
+    }
+    /* Style für das Quiz-Toggle */
+    #quizQuestionView .verb-toggle:hover {
+        color: var(--highlight-blue); /* Variable */
+    }
+    #quizQuestionView .verb-toggle .infinitiv {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--highlight-blue); /* Variable */
+        color: white;
+        padding: 3px 8px;
+        border-radius: 3px;
+        white-space: nowrap;
+        z-index: 10;
+        font-size: 0.7em;
+        font-weight: normal;
+        pointer-events: none;
+    }
+    #quizQuestionView .verb-toggle:hover .infinitiv,
+    #quizQuestionView .verb-toggle.active .infinitiv {
+        display: block;
+    }
+    
+    /* --- Modal (Overlay) Styles --- */
+    #verbModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    }
+    #verbModal.visible {
+        visibility: visible;
+        opacity: 1;
+    }
+    #modalContent {
+        background: var(--card-bg); /* Variable */
+        padding: 30px; 
+        border-radius: 10px;
+        width: 90%;
+        max-width: 1000px; 
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        position: relative;
+        color: var(--text-color);
+    }
+    .modal-title {
+        color: var(--text-color);
+        border-bottom: 2px solid var(--highlight-green); /* Variable */
+        padding-bottom: 10px;
+        margin-top: 0;
+        text-align: center;
+    }
+
+    /* --- BUTTON GRUPPE FÜR HAUPTSEITE --- */
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px; 
+        margin-bottom: 20px; 
+    }
+
+    .menu-trigger-button {
+        flex-grow: 1; 
+        padding: 12px; 
+        background-color: var(--button-default); /* Variable */
+        border: none; 
+        border-radius: 4px; 
+        color: white; 
+        font-size: 18px; 
+        cursor: pointer; 
+        transition: background-color 0.2s;
+    }
+    .menu-trigger-button:hover {
+        background-color: var(--button-default-hover); /* Variable */
+    }
+    .menu-trigger-button:nth-child(2) {
+        background-color: var(--button-quiz); /* Variable */
+    }
+    .menu-trigger-button:nth-child(2):hover {
+        background-color: var(--button-quiz-hover); /* Variable */
+    }
+    .back-to-list-button {
+        background-color: #f4f4f4;
+        color: var(--text-color);
+        border: 1px solid var(--border-color); /* Variable */
+        padding: 8px 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    body.dark-mode .back-to-list-button {
+        background-color: #444;
+        border: 1px solid #666;
+    }
+    /* NEUER BUTTON: Reset Data */
+    #resetDataButton {
+        position: absolute;
+        top: 10px; 
+        right: 10px; 
+        background-color: var(--button-reset-bg); /* Variable */
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        z-index: 10; 
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+    #resetDataButton:hover {
+        opacity: 1;
+    }
+    /* ENDE NEUER BUTTON */
+
+
+    /* --- TEMPLATE STYLES --- */
+    #templateMenuContainer {
+        margin-bottom: 15px;
+    }
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: var(--card-bg); /* Variable */
+        min-width: 250px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+    /* Wenn templateMenuContainer im setup screen ist, soll dropdown-content links aligniert sein */
+    #initialSetupScreen .dropdown-content {
+        right: auto;
+        left: 0;
+    }
+    .dropdown-content a {
+        color: var(--text-color); /* Variable */
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        cursor: pointer;
+    }
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+    body.dark-mode .dropdown-content a:hover {
+        background-color: #444;
+    }
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+    .template-button {
+        background-color: #f0ad4e;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .template-button:hover {
+        background-color: #ec971f;
+    }
+    
+    /* --- QUIZ STYLES --- */
+    .quiz-option {
+        display: block; 
+        margin: 8px 0;
+        padding: 10px;
+        border: 1px solid var(--border-color); /* Variable */
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.1s;
+    }
+    .quiz-option:hover {
+        background-color: #f0f0f0;
+    }
+    body.dark-mode .quiz-option:hover {
+        background-color: #3c3c3c;
+    }
+    .quiz-option input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    
+    .quiz-start-button {
+        background-color: var(--highlight-green); /* Variable */
+        color: white; 
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        margin-top: 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .quiz-start-button:hover {
+        background-color: var(--button-quiz-hover); /* Variable */
+    }
+    .quiz-question-container {
+        text-align: center;
+        padding: 20px;
+        background: var(--imparfait-bg); /* Variable */
+        border-radius: 8px;
+    }
+    .question-text {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: var(--text-color); /* Variable */
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .question-text button {
+        fill: var(--highlight-blue); /* SVG Farbe */
+    }
+    .quiz-result {
+        margin-top: 15px;
+        font-size: 1.1em;
+        padding: 10px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    .quiz-result.correct {
+        background-color: var(--quiz-result-correct-bg); /* Variable */
+        color: var(--quiz-result-correct-text); /* Variable */
+        border: 1px solid #c3e6cb;
+    }
+    .quiz-result.incorrect {
+        background-color: var(--quiz-result-incorrect-bg); /* Variable */
+        color: var(--quiz-result-incorrect-text); /* Variable */
+        border: 1px solid #f5c6cb;
+    }
+    /* --- Gruppierte Liste Styles --- */
+    #modalListContainer {
+        overflow-y: auto;
+        margin-top: 10px;
+        padding-right: 15px;
+    }
+    #modalVerbList h4 {
+        color: var(--highlight-green); /* Variable */
+        border-bottom: 1px dotted var(--border-color); /* Variable */
+        padding-top: 15px;
+        margin-bottom: 5px;
+        text-transform: capitalize;
+    }
+    #modalVerbList ul.verb-group-list {
+        list-style-type: none; 
+        padding-left: 0;
+        margin-top: 5px;
+        columns: 2; 
+    }
+    #modalVerbList li {
+        padding: 5px 0;
+        break-inside: avoid; 
+        display: flex; 
+        margin-bottom: 5px;
+    }
+    #modalVerbList .verb-number {
+        font-weight: bold;
+        color: var(--highlight-green); /* Variable */
+        margin-right: 8px;
+        min-width: 30px; 
+        text-align: right;
+    }
+    #modalVerbList a {
+        color: var(--text-color); /* Variable */
+        text-decoration: none;
+        display: inline-block;
+    }
+    #modalVerbList a:hover {
+        color: var(--highlight-blue); /* Variable */
+        text-decoration: underline;
+    }
+    .close-button {
+        position: absolute;
+        top: 5px;
+        right: 15px;
+        color: var(--text-color); /* Variable */
+        font-size: 30px;
+        cursor: pointer;
+        line-height: 1;
+    }
+    
+    /* --- Initial Setup Screen Styles --- */
+    #initialSetupScreen {
+        padding: 20px;
+        border: 2px dashed var(--highlight-blue); /* Variable */
+        border-radius: 8px;
+        background-color: var(--imparfait-bg); /* Variable */
+        margin-top: 50px;
+    }
+    #initialSetupScreen h2, #initialSetupScreen h3 {
+        color: var(--highlight-blue); /* Variable */
+        border-bottom: none;
+    }
+    #initialSetupScreen pre {
+        background-color: #f4f4f4;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 0.9em;
+        color: var(--text-color);
+    }
+    body.dark-mode #initialSetupScreen pre {
+        background-color: #3c3c3c;
+    }
+    #fileUploadInput {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid var(--border-color); /* Variable */
+        border-radius: 4px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    #templateMenuContainer.setup-view {
+        justify-content: flex-start;
+    }
+    .initial-error-message p {
+        color: var(--error-color) !important;
+    }
+</style>
 </head>
 <body>
 
