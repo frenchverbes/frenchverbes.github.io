@@ -23,8 +23,8 @@ const PRONOUN_MAP = {
 };
 
 // UI Zustände
-let allVerbes = {};
-let verbList = [];
+let allVerbes = {}; // Internes Objekt-Format: { 'infinitiv': { ...data } }
+let verbList = [];  // Array-Format: [ { infinitiv: 'x', ... } ]
 let groupNames = [];
 let currentQuiz = {
     questions: [],
@@ -55,6 +55,8 @@ function initializeDarkMode() {
     }
 }
 // -----------------------
+
+// --- DATENLADE-FUNKTIONEN ---
 
 async function loadData() {
     initializeDarkMode();
@@ -118,7 +120,8 @@ async function loadData() {
 }
 
 /**
- * Ladefunktion mit KORREKTUR für dpaste.com Endungen und JSON-Parsing.
+ * Ladefunktion mit KORRIGIERTEM Fokus auf dpaste.com Endungen und JSON-Parsing.
+ * Jetzt mit Fallback-Logik (Proxy), um CORS-Probleme zu umgehen.
  */
 async function loadVerbsFromLink(originalLink) {
     let link = originalLink;
@@ -154,7 +157,6 @@ async function loadVerbsFromLink(originalLink) {
 
     // 3. Fallback: Proxy-Fetch bei Fehler (um CORS/Content-Type-Probleme zu umgehen)
     if (!fetchSuccessful) {
-        // HINWEIS: Raw-Inhalte müssen URL-codiert sein. 
         // Wir verwenden einen generischen Proxy, falls der direkte Zugriff fehlschlägt.
         const proxyLink = `https://api.allorigins.win/raw?url=${encodeURIComponent(finalLink)}`;
         try {
@@ -182,33 +184,12 @@ async function loadVerbsFromLink(originalLink) {
         throw new Error(`Die Datei ist kein gültiges JSON. (Syntax-Fehler: ${e.message})`);
     }
 
-    // 5. PRÜFUNG: DATENSTRUKTUR
+    // 5. PRÜFUNG: DATENSTRUKTUR (KORRIGIERT für Array-Format)
     parseVerbes(json);
     
     localStorage.setItem('verbsLink', originalLink);
 }
 
-/**
- * Funktion zum Parsen der Verben mit BEREINIGTER Fehlerbehandlung für Hilfsverben.
- */
-function parseVerbes(data) {
-    if (!data || !data.alle_verben || typeof data.alle_verben !== 'object') {
-         throw new Error("Fehlendes oder ungültiges 'alle_verben'-Objekt in der JSON-Datei.");
-    }
-    
-    allVerbes = data.alle_verben;
-    verbList = Object.keys(allVerbes).map(infinitiv => ({
-        infinitiv,
-        ...allVerbes[infinitiv]
-    }));
-
-    // Diese Prüfung löst das Problem mit den zusammengesetzten Zeiten aus.
-    if (!allVerbes['avoir'] || !allVerbes['être']) {
-        throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich.");
-    }
-
-    groupNames = [...new Set(verbList.map(v => v.gruppe))].sort();
-}
 
 /**
  * Funktion für lokalen Upload oder dpaste-Upload
@@ -232,7 +213,7 @@ function handleFileUpload(shouldUpload) {
         try {
             const json = JSON.parse(e.target.result);
             
-            if (!json || !json.alle_verben || typeof json.alle_verben !== 'object') {
+            if (!json || !json.alle_verben) {
                 throw new Error("JSON-Datei ist leer oder hat das falsche Format ('alle_verben' fehlt).");
             }
 
@@ -309,10 +290,10 @@ async function uploadToDpaste(json, filename) {
         }
 
         const pasteUrl = await response.text(); 
-        const linkWithJsonExtension = pasteUrl.trim() + '.json';
+        // Wichtig: Wir speichern den Basislink ohne .txt, aber laden ihn mit .txt
         
-        localStorage.setItem('verbsLink', pasteUrl.trim()); // Speichert den Basislink ohne .json
-        statusDiv.innerHTML = `<strong>Erfolg!</strong> Ihr Link: <a href="${linkWithJsonExtension}" target="_blank">${pasteUrl.trim()}</a>. Die Seite wird neu geladen...`;
+        localStorage.setItem('verbsLink', pasteUrl.trim()); 
+        statusDiv.innerHTML = `<strong>Erfolg!</strong> Ihr Link: <a href="${pasteUrl.trim()}" target="_blank">${pasteUrl.trim()}</a>. Die Seite wird neu geladen...`;
         
         setTimeout(() => {
             window.location.reload(); 
@@ -334,6 +315,57 @@ function resetAndShowSetup() {
     }
 }
 
+/**
+ * Funktion zum Parsen der Verben mit KORREKTUR für Array-Format und Hilfsverben.
+ * Passt sich an die Struktur: { "alle_verben": [ { "infinitiv": "x", ... } ] } an.
+ */
+function parseVerbes(data) {
+    // 1. Prüft, ob 'alle_verben' ein Array ist (Ihr Format)
+    if (!data || !data.alle_verben || !Array.isArray(data.alle_verben)) {
+         throw new Error("Fehlendes oder ungültiges 'alle_verben'-Array in der JSON-Datei.");
+    }
+    
+    // 2. Konvertiert das Array von Verben in ein Objekt für schnelle Zugriffe (wichtig für die Quiz-Logik)
+    const verbesAsObject = data.alle_verben.reduce((acc, verb) => {
+        if (verb.infinitiv) {
+            // Speichert die Verben im Objektformat, um sie über den Infinitiv schnell abrufen zu können
+            acc[verb.infinitiv] = {
+                deutsch: verb.uebersetzung,
+                gruppe: verb.gruppe,
+                hilfsverb: verb.passe_compose ? verb.passe_compose.hilfsverb : 'avoir', // Default
+                participe_passe: verb.passe_compose ? verb.passe_compose.participe_passe : '',
+                conjugaison: {
+                    present: verb.present,
+                    imparfait: verb.imparfait // Hier werden die Stammformen gespeichert
+                }
+            };
+        }
+        return acc;
+    }, {});
+    
+    // 3. Setzt die globalen Variablen
+    allVerbes = verbesAsObject;
+    verbList = data.alle_verben.map(v => ({ 
+        ...v, 
+        // Fügt fehlende Keys hinzu, die die alte Struktur brauchte, basierend auf den neuen Daten
+        deutsch: v.uebersetzung,
+        hilfsverb: v.passe_compose ? v.passe_compose.hilfsverb : 'avoir',
+        participe_passe: v.passe_compose ? v.passe_compose.participe_passe : '',
+        // Vereinfacht die Konjugationsdaten für die Abruf-Logik (z.B. im Detail-View)
+        conjugaison: {
+            present: v.present,
+            imparfait: v.imparfait
+        }
+    }));
+
+
+    // 4. Prüfung der Hilfsverben
+    if (!allVerbes['avoir'] || !allVerbes['être']) {
+        throw new new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich.");
+    }
+
+    groupNames = [...new Set(verbList.map(v => v.gruppe))].sort();
+}
 
 // --- SETUP & UI FUNKTIONEN (unverändert) ---
 
@@ -354,41 +386,39 @@ function setupApp(data) {
     }
 }
 
-// JSON-Vorlage Funktion (Korrigiert um die Hilfsverben hervorzuheben)
+// JSON-Vorlage Funktion (Korrigiert auf Ihr Array-Format)
 function getTemplateJson() {
      return {
         "anmerkungen": "Optionale Notizen für diese Verbliste",
-        "alle_verben": {
-            "être": {
-                "deutsch": "sein",
-                "gruppe": "Auxiliaire",
-                "hilfsverb": "être",
-                "participe_passe": "été",
-                "conjugaison": {
-                    "present": { "je": "suis", "tu": "es", "il_elle_on": "est", "nous": "sommes", "vous": "êtes", "ils_elles": "sont" },
-                    "imparfait": { "je": "étais", "tu": "étais", "il_elle_on": "était", "nous": "étions", "vous": "étiez", "ils_elles": "étaient" }
-                    // Fügen Sie hier alle Zeiten ein, die Sie abfragen möchten
-                }
+        "alle_verben": [
+            {
+                "infinitiv": "être",
+                "uebersetzung": "sein",
+                "present": { "je": "suis", "tu": "es", "il_elle_on": "est", "nous": "sommes", "vous": "êtes", "ils_elles": "sont" },
+                "passe_compose": { "hilfsverb": "avoir", "participe_passe": "été" },
+                "imparfait": { "stamm": "ét-" },
+                "gruppe": "Auxiliaire"
             },
-            "avoir": {
-                "deutsch": "haben",
-                "gruppe": "Auxiliaire",
-                "hilfsverb": "avoir", 
-                "participe_passe": "eu",
-                "conjugaison": {
-                    "present": { "je": "ai", "tu": "as", "il_elle_on": "a", "nous": "avons", "vous": "avez", "ils_elles": "ont" },
-                    "imparfait": { "je": "avais", "tu": "avais", "il_elle_on": "avait", "nous": "avions", "vous": "aviez", "ils_elles": "avaient" }
-                }
+            {
+                "infinitiv": "avoir",
+                "uebersetzung": "haben",
+                "present": { "je": "ai", "tu": "as", "il_elle_on": "a", "nous": "avons", "vous": "avez", "ils_elles": "ont" },
+                "passe_compose": { "hilfsverb": "avoir", "participe_passe": "eu" },
+                "imparfait": { "stamm": "av-" },
+                "gruppe": "Auxiliaire"
             },
-            "parler": {
-                "deutsch": "sprechen",
-                "gruppe": "er",
-                "hilfsverb": "avoir",
-                "participe_passe": "parlé",
-                "conjugaison": {
-                    "present": { "je": "parle", "tu": "parles", "il_elle_on": "parle", "nous": "parlons", "vous": "parlez", "ils_elles": "parlent" },
-                    "imparfait": { "je": "parlais", "tu": "parlais", "il_elle_on": "parlait", "nous": "parlions", "vous": "parliez", "ils_elles": "parlaient" }
-                }
+            {
+                "infinitiv": "parler",
+                "uebersetzung": "sprechen",
+                "present": { "je": "parle", "tu": "parles", "il_elle_on": "parle", "nous": "parlons", "vous": "parlez", "ils_elles": "parlent" },
+                "passe_compose": { "hilfsverb": "avoir", "participe_passe": "parlé" },
+                "imparfait": { "stamm": "parl-" },
+                "gruppe": "er"
+            }
+        ],
+        "zusatz_informationen": {
+            "imparfait_endungen": {
+                "je": "-ais", "tu": "-ais", "il_elle_on": "-ait", "nous": "-ions", "vous": "-iez", "ils_elles": "-aient"
             }
         }
     };
@@ -441,7 +471,7 @@ function handleSearch(event) {
 
     const foundVerb = verbList.find(v => 
         v.infinitiv.toLowerCase().includes(query) || 
-        v.deutsch.toLowerCase().includes(query)
+        v.uebersetzung.toLowerCase().includes(query)
     );
 
     if (foundVerb) {
@@ -469,21 +499,70 @@ function debounce(func, delay) {
     };
 }
 
-// --- UI HILFSFUNKTIONEN (unverändert) ---
+// --- UI HILFSFUNKTIONEN ---
+
+// Hilfsfunktion zur Ermittlung der konjugierten Form für Imparfait und Passé Composé
+function getConjugatedForm(verb, tenseKey, pronounKey) {
+    const conjugationData = verb.conjugaison || verb; // Nimmt die vereinfachte Struktur oder die Originaldaten
+
+    if (tenseKey === 'present') {
+        return conjugationData.present ? (conjugationData.present[pronounKey] || '-') : '-';
+    }
+    
+    if (tenseKey === 'imparfait' || tenseKey === 'plus_que_parfait') {
+        // Logik für Imparfait: Stamm + Endung
+        const imparfaitEndungen = getTemplateJson().zusatz_informationen.imparfait_endungen;
+        if (imparfaitEndungen && conjugationData.imparfait && conjugationData.imparfait.stamm) {
+            if (verb.infinitiv === 'être' && getTemplateJson().zusatz_informationen.imparfait_spezialfaelle && getTemplateJson().zusatz_informationen.imparfait_spezialfaelle.être) {
+                 // Sollte nur passieren, wenn die Spezialfälle in der Datei sind
+                 return getTemplateJson().zusatz_informationen.imparfait_spezialfaelle.être[pronounKey] || '-';
+            }
+            return conjugationData.imparfait.stamm + (imparfaitEndungen[pronounKey] || '-');
+        }
+        return '-';
+    }
+    
+    // Logik für zusammengesetzte Zeiten (PC, PQP)
+    if (tenseKey === 'passe_compose' || tenseKey === 'plus_que_parfait') {
+        const auxVerbInfinitiv = verb.hilfsverb || (verb.passe_compose ? verb.passe_compose.hilfsverb : 'avoir');
+        const participePasse = verb.participe_passe || (verb.passe_compose ? verb.passe_compose.participe_passe : '');
+
+        if (!allVerbes[auxVerbInfinitiv]) return '-'; // Hilfsverb nicht in der Liste
+
+        const auxVerb = allVerbes[auxVerbInfinitiv];
+        const auxConjugationTense = (tenseKey === 'passe_compose') ? 'present' : 'imparfait';
+
+        let auxForm = '-';
+        if (auxVerb.conjugaison && auxVerb.conjugaison[auxConjugationTense] && auxVerb.conjugaison[auxConjugationTense][pronounKey]) {
+            auxForm = auxVerb.conjugaison[auxConjugationTense][pronounKey];
+        } else {
+            // Für Aux-Verben müssen wir die Konjugation direkt aus dem Present/Imparfait-Objekt in allVerbes nehmen
+            const auxData = auxVerb.conjugaison;
+            if (auxData && auxData[auxConjugationTense] && auxData[auxConjugationTense][pronounKey]) {
+                auxForm = auxData[auxConjugationTense][pronounKey];
+            }
+        }
+        
+        // Finales Format: Hilfsverb-Form + Participe Passé
+        return auxForm !== '-' ? `${auxForm} ${participePasse}`.trim() : '-';
+    }
+
+    return '-';
+}
 
 function displayVerbDetails(verb, targetElement) {
-    const conjugations = verb.conjugaison || {};
+    const conjugations = verb.conjugaison || verb;
     const tenseKeys = Object.keys(TENSE_MAP);
 
     let html = `
-        <h2>${verb.infinitiv} (${verb.deutsch})</h2>
-        <p>| Gruppe: ${verb.gruppe} | Hilfsverb (PC / PQP): <strong>${verb.hilfsverb || 'N/A'}</strong> | Participe Passé: <strong>${verb.participe_passe || 'N/A'}</strong></p>
+        <h2>${verb.infinitiv} (${verb.uebersetzung})</h2>
+        <p>| Gruppe: ${verb.gruppe} | Hilfsverb (PC / PQP): <strong>${verb.hilfsverb || verb.passe_compose.hilfsverb || 'N/A'}</strong> | Participe Passé: <strong>${verb.participe_passe || verb.passe_compose.participe_passe || 'N/A'}</strong></p>
         <button onclick="speakText('${verb.infinitiv}', 'fr-FR')" title="Aussprache des Infinitivs" style="margin-bottom: 20px;">🔊 Aussprache des Infinitivs</button>
     `;
 
     for (const tenseKey of tenseKeys) {
-        const tenseData = conjugations[tenseKey];
-        if (tenseData) {
+        // Wir zeigen eine Tabelle, wenn die Daten vorhanden sind oder wenn es eine zusammengesetzte Zeit ist
+        if (conjugations[tenseKey] || ['passe_compose', 'plus_que_parfait'].includes(tenseKey)) {
             html += `
                 <h3>${TENSE_MAP[tenseKey]}</h3>
                 <table>
@@ -496,11 +575,12 @@ function displayVerbDetails(verb, targetElement) {
                     <tbody>
             `;
 
-            for (const [pronounKey, conjugation] of Object.entries(PRONOUN_MAP)) {
-                const conjugatedForm = tenseData[pronounKey] || '-';
+            for (const [pronounKey, pronounDisplay] of Object.entries(PRONOUN_MAP)) {
+                const conjugatedForm = getConjugatedForm(verb, tenseKey, pronounKey);
+                
                 html += `
                     <tr>
-                        <td data-label="Person">${conjugation}</td>
+                        <td data-label="Person">${pronounDisplay}</td>
                         <td data-label="${TENSE_MAP[tenseKey].split('(')[0].trim()}">${conjugatedForm}</td>
                     </tr>
                 `;
@@ -521,7 +601,7 @@ function displayGroupedVerbList(filterQuery = '') {
     
     const filteredVerbs = verbList.filter(v => 
         v.infinitiv.toLowerCase().includes(filterQuery) || 
-        v.deutsch.toLowerCase().includes(filterQuery)
+        v.uebersetzung.toLowerCase().includes(filterQuery)
     );
 
     if (filteredVerbs.length === 0) {
@@ -542,7 +622,7 @@ function displayGroupedVerbList(filterQuery = '') {
             ul += `
                 <li>
                     <span class="verb-number">${index + 1}.</span> 
-                    <a href="#" onclick="showModal('conjugation', '${verb.infinitiv}', event)" title="${verb.deutsch}">${verb.infinitiv}</a>
+                    <a href="#" onclick="showModal('conjugation', '${verb.infinitiv}', event)" title="${verb.uebersetzung}">${verb.infinitiv}</a>
                 </li>
             `;
         });
@@ -571,7 +651,8 @@ function showModal(view, infinitiv = null, event = null) {
             break;
         case 'conjugation':
             if (infinitiv) {
-                const verb = allVerbes[infinitiv];
+                // Holt die Daten aus der 'allVerbes' Struktur, die jetzt ein Objekt ist
+                const verb = allVerbes[infinitiv]; 
                 document.getElementById('modalTitle').textContent = `Konjugation: ${infinitiv}`;
                 displayVerbDetails(verb, document.getElementById('modalVerbDetails'));
                 document.getElementById('conjugationView').style.display = 'block';
@@ -608,7 +689,7 @@ function speakText(text, lang = 'fr-FR') {
     }
 }
 
-// --- QUIZ LOGIK (unverändert) ---
+// --- QUIZ LOGIK (korrigiert für Array-Struktur) ---
 
 function generateQuizCheckboxes() {
     const groupContainer = document.getElementById('verbGroupCheckboxes');
@@ -660,7 +741,8 @@ function startQuiz() {
         return;
     }
     
-    const pool = verbList.filter(v => selectedGroups.includes(v.gruppe) && v.conjugaison);
+    // Pool filtert basierend auf dem VerbList Array
+    const pool = verbList.filter(v => selectedGroups.includes(v.gruppe) && (v.present || v.passe_compose));
     
     if (pool.length === 0) {
          alert('Es wurden keine Verben in den ausgewählten Gruppen gefunden.');
@@ -670,21 +752,23 @@ function startQuiz() {
     const allPossibleQuestions = [];
     pool.forEach(verb => {
         selectedTenses.forEach(tenseKey => {
-            if (verb.conjugaison && verb.conjugaison[tenseKey]) {
-                selectedPronouns.forEach(pronounKey => {
-                    if (verb.conjugaison[tenseKey][pronounKey]) {
-                        allPossibleQuestions.push({
-                            infinitiv: verb.infinitiv,
-                            deutsch: verb.deutsch,
-                            tense: tenseKey,
-                            pronounKey: pronounKey,
-                            correctAnswer: verb.conjugaison[tenseKey][pronounKey],
-                            auxVerb: verb.hilfsverb,
-                            participePasse: verb.participe_passe
-                        });
-                    }
-                });
-            }
+            selectedPronouns.forEach(pronounKey => {
+                const correctAnswer = getConjugatedForm(verb, tenseKey, pronounKey);
+                
+                // Fügt nur Fragen hinzu, die eine tatsächliche Antwort haben (kein '-')
+                if (correctAnswer !== '-') { 
+                    allPossibleQuestions.push({
+                        infinitiv: verb.infinitiv,
+                        deutsch: verb.uebersetzung,
+                        tense: tenseKey,
+                        pronounKey: pronounKey,
+                        correctAnswer: correctAnswer,
+                        // Zusätzliche Daten für die Überprüfung zusammengesetzter Zeiten
+                        auxVerb: verb.hilfsverb || (verb.passe_compose ? verb.passe_compose.hilfsverb : 'avoir'),
+                        participePasse: verb.participe_passe || (verb.passe_compose ? verb.passe_compose.participe_passe : '')
+                    });
+                }
+            });
         });
     });
 
@@ -736,42 +820,22 @@ function checkAnswer() {
     const question = currentQuiz.questions[currentQuiz.current];
     
     const userAnswer = input.value.trim().toLowerCase();
-    let correctAnswer = question.correctAnswer.toLowerCase();
+    const correctAnswer = question.correctAnswer.toLowerCase();
     let feedbackMessage = '';
     let isCorrect = false;
 
-    if (question.tense === 'passe_compose' || question.tense === 'plus_que_parfait') {
-        const auxVerbTenseKey = (question.tense === 'passe_compose') ? 'present' : 'imparfait';
-        
-        // Die Konjugation des Hilfsverbs muss aus der allVerbes-Struktur gelesen werden
-        const auxConjugation = allVerbes[question.auxVerb].conjugaison[auxVerbTenseKey][question.pronounKey];
-        correctAnswer = `${auxConjugation} ${question.participePasse}`.toLowerCase().trim();
-        
-        const simplifiedUserAnswer = removeAccents(userAnswer);
-        const simplifiedCorrectAnswer = removeAccents(correctAnswer);
+    const simplifiedUserAnswer = removeAccents(userAnswer);
+    const simplifiedCorrectAnswer = removeAccents(correctAnswer);
 
-        if (userAnswer === correctAnswer) {
-            isCorrect = true;
-            feedbackMessage = 'Korrekt! Volle Punktzahl.';
-            currentQuiz.score++;
-        } else if (simplifiedUserAnswer === simplifiedCorrectAnswer) {
-            feedbackMessage = `<strong>Halb richtig!</strong> Akzente/Schreibweise fehlen. Korrekt wäre: <strong>${correctAnswer}</strong>`;
-        } else {
-            feedbackMessage = `Falsch! Korrekt ist: <strong>${correctAnswer}</strong>`;
-        }
+    if (userAnswer === correctAnswer) {
+        isCorrect = true;
+        feedbackMessage = 'Korrekt! Volle Punktzahl.';
+        currentQuiz.score++;
+    } else if (simplifiedUserAnswer === simplifiedCorrectAnswer) {
+        // Dies fängt Fehler wie 'mange' statt 'mangé' ab, wenn nur Akzente fehlen sollen
+        feedbackMessage = `<strong>Halb richtig!</strong> Akzente/Schreibweise fehlen. Korrekt wäre: <strong>${correctAnswer}</strong>`;
     } else {
-         const simplifiedUserAnswer = removeAccents(userAnswer);
-        const simplifiedCorrectAnswer = removeAccents(correctAnswer);
-        
-        if (userAnswer === correctAnswer) {
-            isCorrect = true;
-            feedbackMessage = 'Korrekt! Volle Punktzahl.';
-            currentQuiz.score++;
-        } else if (simplifiedUserAnswer === simplifiedCorrectAnswer) {
-            feedbackMessage = `<strong>Halb richtig!</strong> Akzente/Schreibweise fehlen. Korrekt wäre: <strong>${correctAnswer}</strong>`;
-        } else {
-            feedbackMessage = `Falsch! Korrekt ist: <strong>${correctAnswer}</strong>`;
-        }
+        feedbackMessage = `Falsch! Korrekt ist: <strong>${correctAnswer}</strong>`;
     }
 
     feedbackDiv.innerHTML = feedbackMessage;
@@ -803,6 +867,7 @@ function showQuizResult() {
 }
 
 function removeAccents(str) {
+    // Entfernt Akzente für die "fast richtig" Prüfung
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
