@@ -56,7 +56,6 @@ function initializeDarkMode() {
 }
 // -----------------------
 
-// --- DATENLADE-FUNKTIONEN ---
 async function loadData() {
     initializeDarkMode();
     document.getElementById('resetDataButton').style.display = 'none';
@@ -124,15 +123,10 @@ async function loadData() {
 async function loadVerbsFromLink(originalLink) {
     let link = originalLink;
 
-    // KORRIGIERTE LOGIK: Stellt sicher, dass wir die .json Endung verwenden, 
-    // um den reinen JSON-Inhalt von dpaste zu erhalten.
+    // Führt immer zu einer .json-Endung für dpaste, um den Rohinhalt zu erzwingen
     if (link.includes('dpaste.com')) {
-        if (link.endsWith('/')) {
-            link = link.slice(0, -1);
-        }
-        if (!link.endsWith('.json')) {
-            link += '.json';
-        }
+        if (link.endsWith('/')) link = link.slice(0, -1);
+        if (!link.endsWith('.json')) link += '.json';
     }
 
     const response = await fetch(link);
@@ -140,15 +134,19 @@ async function loadVerbsFromLink(originalLink) {
         throw new Error(`HTTP-Fehler! Status: ${response.status} beim Versuch, ${link} zu laden.`);
     }
     
-    // Versucht, den Text als JSON zu parsen.
+    // 1. VERSUCH: JSON-PARSING
+    let json;
     try {
-        const json = await response.json();
-        parseVerbes(json);
-        localStorage.setItem('verbsLink', originalLink);
+        json = await response.json();
     } catch (e) {
-        // Wenn json() fehlschlägt, ist die Datei kein gültiges JSON.
+        // Wenn json() fehlschlägt, ist die Datei KEIN GÜLTIGES JSON.
         throw new Error(`Die Datei von ${link} ist kein gültiges JSON. (Details: ${e.message})`);
     }
+
+    // 2. PRÜFUNG: DATENSTRUKTUR (wird nur ausgeführt, wenn 1. erfolgreich war)
+    parseVerbes(json);
+    
+    localStorage.setItem('verbsLink', originalLink);
 }
 
 /**
@@ -285,6 +283,7 @@ function parseVerbes(data) {
     // Diese Prüfung löst das sekundäre Problem aus.
     // Sie wird nur ausgelöst, wenn das JSON-Parsing ERFOLGREICH war.
     if (!allVerbes['avoir'] || !allVerbes['être']) {
+        // Hier wurde der Fehlertext gekürzt und präzisiert, um die Verwechslung zu vermeiden.
         throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich.");
     }
 
