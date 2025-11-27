@@ -122,38 +122,67 @@ async function loadData() {
  */
 async function loadVerbsFromLink(originalLink) {
     let link = originalLink;
+    let finalLink = link;
 
-    // KORRIGIERTE LOGIK: Stellt sicher, dass wir die .txt Endung verwenden, 
-    // um den reinen JSON-Inhalt (als Text) von dpaste zu erhalten.
+    // 1. Dpaste Link auf .txt korrigieren (Raw-Text-URL)
     if (link.includes('dpaste.com')) {
-        // Entfernt am Ende .json oder einen Schrägstrich, wenn vorhanden
         link = link.replace(/.json$/, '');
         if (link.endsWith('/')) link = link.slice(0, -1);
-        
-        // Hängt immer .txt an, wenn es sich um eine dpaste-Seite handelt, um den Raw-Text zu erhalten.
         if (!link.endsWith('.txt')) {
-            link += '.txt';
+            finalLink = link + '.txt';
+        } else {
+            finalLink = link;
+        }
+    }
+    
+    // 2. Erster Versuch: Direkter Fetch (Standard)
+    let rawText = null;
+    let fetchSuccessful = false;
+    let firstError = null;
+
+    try {
+        const response = await fetch(finalLink);
+        if (!response.ok) {
+            throw new Error(`HTTP-Status ${response.status}`);
+        }
+        rawText = await response.text();
+        fetchSuccessful = true;
+    } catch (e) {
+        firstError = e.message;
+        console.warn("Direkter Fetch fehlgeschlagen (wahrscheinlich CORS/Content-Type-Problem). Versuche Proxy...");
+    }
+
+    // 3. Fallback: Proxy-Fetch bei Fehler (um CORS/Content-Type-Probleme zu umgehen)
+    if (!fetchSuccessful) {
+        // HINWEIS: Raw-Inhalte müssen URL-codiert sein. 
+        // Wir verwenden einen generischen Proxy, falls der direkte Zugriff fehlschlägt.
+        const proxyLink = `https://api.allorigins.win/raw?url=${encodeURIComponent(finalLink)}`;
+        try {
+            const response = await fetch(proxyLink);
+            if (!response.ok) {
+                 throw new Error(`Proxy-HTTP-Status ${response.status}`);
+            }
+            rawText = await response.text();
+            fetchSuccessful = true;
+        } catch (e) {
+            throw new Error(`Laden von ${finalLink} fehlgeschlagen. Grund: ${firstError} (Direkt) und ${e.message} (Proxy).`);
         }
     }
 
-    const response = await fetch(link);
-    if (!response.ok) {
-        throw new Error(`HTTP-Fehler! Status: ${response.status} beim Versuch, ${link} zu laden.`);
+    if (!rawText) {
+         throw new Error("Laden fehlgeschlagen: Konnte keinen Inhalt von der URL abrufen.");
     }
     
-    // Daten als reinen Text abrufen
-    const rawText = await response.text();
-
-    // 1. VERSUCH: JSON-PARSING (auf dem reinen Text)
+    // 4. JSON-PARSING (auf dem erhaltenen Text)
     let json;
     try {
         json = JSON.parse(rawText);
     } catch (e) {
-        // Wenn JSON.parse() fehlschlägt, ist der Inhalt KEIN GÜLTIGES JSON.
-        throw new Error(`Die Datei von ${link} ist kein gültiges JSON. (Syntax-Fehler: ${e.message})`);
+        // Syntax-Fehler in der JSON-Datei selbst
+        throw new Error(`Die Datei ist kein gültiges JSON. (Syntax-Fehler: ${e.message})`);
     }
 
-    // 2. PRÜFUNG: DATENSTRUKTUR (wird nur ausgeführt, wenn 1. erfolgreich war)
+    // 5. PRÜFUNG: DATENSTRUKTUR
     parseVerbes(json);
     
     localStorage.setItem('verbsLink', originalLink);
@@ -163,7 +192,6 @@ async function loadVerbsFromLink(originalLink) {
  * Funktion zum Parsen der Verben mit BEREINIGTER Fehlerbehandlung für Hilfsverben.
  */
 function parseVerbes(data) {
-    // Stellt sicher, dass die Datenstruktur korrekt ist
     if (!data || !data.alle_verben || typeof data.alle_verben !== 'object') {
          throw new Error("Fehlendes oder ungültiges 'alle_verben'-Objekt in der JSON-Datei.");
     }
