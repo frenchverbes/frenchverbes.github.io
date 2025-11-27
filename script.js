@@ -123,10 +123,17 @@ async function loadData() {
 async function loadVerbsFromLink(originalLink) {
     let link = originalLink;
 
-    // Führt immer zu einer .json-Endung für dpaste, um den Rohinhalt zu erzwingen
+    // KORRIGIERTE LOGIK: Stellt sicher, dass wir die .txt Endung verwenden, 
+    // um den reinen JSON-Inhalt (als Text) von dpaste zu erhalten.
     if (link.includes('dpaste.com')) {
+        // Entfernt am Ende .json oder einen Schrägstrich, wenn vorhanden
+        link = link.replace(/.json$/, '');
         if (link.endsWith('/')) link = link.slice(0, -1);
-        if (!link.endsWith('.json')) link += '.json';
+        
+        // Hängt immer .txt an, wenn es sich um eine dpaste-Seite handelt, um den Raw-Text zu erhalten.
+        if (!link.endsWith('.txt')) {
+            link += '.txt';
+        }
     }
 
     const response = await fetch(link);
@@ -134,19 +141,45 @@ async function loadVerbsFromLink(originalLink) {
         throw new Error(`HTTP-Fehler! Status: ${response.status} beim Versuch, ${link} zu laden.`);
     }
     
-    // 1. VERSUCH: JSON-PARSING
+    // Daten als reinen Text abrufen
+    const rawText = await response.text();
+
+    // 1. VERSUCH: JSON-PARSING (auf dem reinen Text)
     let json;
     try {
-        json = await response.json();
+        json = JSON.parse(rawText);
     } catch (e) {
-        // Wenn json() fehlschlägt, ist die Datei KEIN GÜLTIGES JSON.
-        throw new Error(`Die Datei von ${link} ist kein gültiges JSON. (Details: ${e.message})`);
+        // Wenn JSON.parse() fehlschlägt, ist der Inhalt KEIN GÜLTIGES JSON.
+        throw new Error(`Die Datei von ${link} ist kein gültiges JSON. (Syntax-Fehler: ${e.message})`);
     }
 
     // 2. PRÜFUNG: DATENSTRUKTUR (wird nur ausgeführt, wenn 1. erfolgreich war)
     parseVerbes(json);
     
     localStorage.setItem('verbsLink', originalLink);
+}
+
+/**
+ * Funktion zum Parsen der Verben mit BEREINIGTER Fehlerbehandlung für Hilfsverben.
+ */
+function parseVerbes(data) {
+    // Stellt sicher, dass die Datenstruktur korrekt ist
+    if (!data || !data.alle_verben || typeof data.alle_verben !== 'object') {
+         throw new Error("Fehlendes oder ungültiges 'alle_verben'-Objekt in der JSON-Datei.");
+    }
+    
+    allVerbes = data.alle_verben;
+    verbList = Object.keys(allVerbes).map(infinitiv => ({
+        infinitiv,
+        ...allVerbes[infinitiv]
+    }));
+
+    // Diese Prüfung löst das Problem mit den zusammengesetzten Zeiten aus.
+    if (!allVerbes['avoir'] || !allVerbes['être']) {
+        throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich.");
+    }
+
+    groupNames = [...new Set(verbList.map(v => v.gruppe))].sort();
 }
 
 /**
@@ -273,22 +306,6 @@ function resetAndShowSetup() {
     }
 }
 
-function parseVerbes(data) {
-    allVerbes = data.alle_verben;
-    verbList = Object.keys(allVerbes).map(infinitiv => ({
-        infinitiv,
-        ...allVerbes[infinitiv]
-    }));
-
-    // Diese Prüfung löst das sekundäre Problem aus.
-    // Sie wird nur ausgelöst, wenn das JSON-Parsing ERFOLGREICH war.
-    if (!allVerbes['avoir'] || !allVerbes['être']) {
-        // Hier wurde der Fehlertext gekürzt und präzisiert, um die Verwechslung zu vermeiden.
-        throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich.");
-    }
-
-    groupNames = [...new Set(verbList.map(v => v.gruppe))].sort();
-}
 
 // --- SETUP & UI FUNKTIONEN (unverändert) ---
 
