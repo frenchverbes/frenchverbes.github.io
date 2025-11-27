@@ -57,7 +57,6 @@ function initializeDarkMode() {
 // -----------------------
 
 // --- DATENLADE-FUNKTIONEN ---
-
 async function loadData() {
     initializeDarkMode();
     document.getElementById('resetDataButton').style.display = 'none';
@@ -120,30 +119,35 @@ async function loadData() {
 }
 
 /**
- * Ladefunktion mit Korrektur für dpaste.com Endungen (.txt / .json)
+ * Ladefunktion mit KORREKTUR für dpaste.com Endungen und JSON-Parsing.
  */
 async function loadVerbsFromLink(originalLink) {
     let link = originalLink;
 
-    // Korrektur für dpaste: Wenn die URL auf .txt endet, wird der JSON-Inhalt erwartet.
-    // Wenn die URL auf eine dpaste-Seite endet, hängen wir .json an.
-    if (!link.endsWith('.json') && link.includes('dpaste.com')) {
+    // KORRIGIERTE LOGIK: Stellt sicher, dass wir die .json Endung verwenden, 
+    // um den reinen JSON-Inhalt von dpaste zu erhalten.
+    if (link.includes('dpaste.com')) {
         if (link.endsWith('/')) {
             link = link.slice(0, -1);
         }
-        link += '.json';
+        if (!link.endsWith('.json')) {
+            link += '.json';
+        }
     }
 
     const response = await fetch(link);
     if (!response.ok) {
         throw new Error(`HTTP-Fehler! Status: ${response.status} beim Versuch, ${link} zu laden.`);
     }
+    
+    // Versucht, den Text als JSON zu parsen.
     try {
         const json = await response.json();
         parseVerbes(json);
         localStorage.setItem('verbsLink', originalLink);
     } catch (e) {
-        throw new Error(`Fehler: Die Datei von ${link} ist kein gültiges JSON. (${e.message})`);
+        // Wenn json() fehlschlägt, ist die Datei kein gültiges JSON.
+        throw new Error(`Die Datei von ${link} ist kein gültiges JSON. (Details: ${e.message})`);
     }
 }
 
@@ -278,10 +282,10 @@ function parseVerbes(data) {
         ...allVerbes[infinitiv]
     }));
 
-    // Diese Prüfung bleibt, da das Quiz auf diesen Verben basiert.
-    // Falls sie fehlen, MUSS der Nutzer sie in die JSON einfügen.
+    // Diese Prüfung löst das sekundäre Problem aus.
+    // Sie wird nur ausgelöst, wenn das JSON-Parsing ERFOLGREICH war.
     if (!allVerbes['avoir'] || !allVerbes['être']) {
-        throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich. Bitte in die JSON-Datei aufnehmen.");
+        throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich.");
     }
 
     groupNames = [...new Set(verbList.map(v => v.gruppe))].sort();
