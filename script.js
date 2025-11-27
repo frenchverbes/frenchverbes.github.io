@@ -110,7 +110,7 @@ async function loadData() {
     } else {
         document.getElementById('mainView').style.display = 'none';
         document.getElementById('initialSetupScreen').style.display = 'block';
-        if (!link && !pathName.includes('index.html')) {
+        if (!link && !pathName.includes('index.html') && !errorMessage) {
             document.getElementById('loadingStatus').innerHTML = 'Es wurde weder ein Link noch eine Kurz-ID gefunden.';
         } else if (errorMessage) {
             document.getElementById('loadingStatus').innerHTML = `<p class="initial-error-message">Fehler: ${errorMessage}</p>`;
@@ -119,22 +119,36 @@ async function loadData() {
     }
 }
 
-async function loadVerbsFromLink(link) {
+/**
+ * Ladefunktion mit Korrektur für dpaste.com Endungen (.txt / .json)
+ */
+async function loadVerbsFromLink(originalLink) {
+    let link = originalLink;
+
+    // Korrektur für dpaste: Wenn die URL auf .txt endet, wird der JSON-Inhalt erwartet.
+    // Wenn die URL auf eine dpaste-Seite endet, hängen wir .json an.
+    if (!link.endsWith('.json') && link.includes('dpaste.com')) {
+        if (link.endsWith('/')) {
+            link = link.slice(0, -1);
+        }
+        link += '.json';
+    }
+
     const response = await fetch(link);
     if (!response.ok) {
-        throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+        throw new Error(`HTTP-Fehler! Status: ${response.status} beim Versuch, ${link} zu laden.`);
     }
     try {
         const json = await response.json();
         parseVerbes(json);
-        localStorage.setItem('verbsLink', link);
+        localStorage.setItem('verbsLink', originalLink);
     } catch (e) {
-        throw new Error(`Fehler: Die Datei ist kein gültiges JSON. (${e.message})`);
+        throw new Error(`Fehler: Die Datei von ${link} ist kein gültiges JSON. (${e.message})`);
     }
 }
 
 /**
- * Korrigierte Funktion: Lädt die Datei und entscheidet, ob lokal oder hochgeladen wird.
+ * Funktion für lokalen Upload oder dpaste-Upload
  * @param {boolean} shouldUpload True, wenn die Datei zu dpaste hochgeladen werden soll.
  */
 function handleFileUpload(shouldUpload) {
@@ -160,7 +174,6 @@ function handleFileUpload(shouldUpload) {
             }
 
             if (shouldUpload) {
-                // Rufen Sie die globale, separate Upload-Funktion auf
                 await uploadToDpaste(json, file.name);
             } else {
                 // Lokaler Modus
@@ -213,7 +226,6 @@ async function uploadToDpaste(json, filename) {
         const response = await fetch('https://dpaste.com/api/v2/', {
             method: 'POST',
             headers: {
-                // Versuche 'Token' statt 'Bearer' wegen des 403-Fehlers
                 'Authorization': `Token ${API_KEY}`, 
                 'User-Agent': 'FrenchVerbes-App/1.0',
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -234,9 +246,10 @@ async function uploadToDpaste(json, filename) {
         }
 
         const pasteUrl = await response.text(); 
+        const linkWithJsonExtension = pasteUrl.trim() + '.json';
         
-        localStorage.setItem('verbsLink', pasteUrl.trim() + '.json');
-        statusDiv.innerHTML = `<strong>Erfolg!</strong> Ihr Link: <a href="${pasteUrl}.json" target="_blank">${pasteUrl}</a>. Die Seite wird neu geladen...`;
+        localStorage.setItem('verbsLink', pasteUrl.trim()); // Speichert den Basislink ohne .json
+        statusDiv.innerHTML = `<strong>Erfolg!</strong> Ihr Link: <a href="${linkWithJsonExtension}" target="_blank">${pasteUrl.trim()}</a>. Die Seite wird neu geladen...`;
         
         setTimeout(() => {
             window.location.reload(); 
@@ -265,6 +278,8 @@ function parseVerbes(data) {
         ...allVerbes[infinitiv]
     }));
 
+    // Diese Prüfung bleibt, da das Quiz auf diesen Verben basiert.
+    // Falls sie fehlen, MUSS der Nutzer sie in die JSON einfügen.
     if (!allVerbes['avoir'] || !allVerbes['être']) {
         throw new Error("Die Verben 'avoir' und 'être' sind für zusammengesetzte Zeiten erforderlich. Bitte in die JSON-Datei aufnehmen.");
     }
@@ -272,7 +287,7 @@ function parseVerbes(data) {
     groupNames = [...new Set(verbList.map(v => v.gruppe))].sort();
 }
 
-// --- SETUP & UI FUNKTIONEN ---
+// --- SETUP & UI FUNKTIONEN (unverändert) ---
 
 function setupApp(data) {
     document.getElementById('searchInput').addEventListener('input', debounce(handleSearch, 300));
@@ -291,9 +306,9 @@ function setupApp(data) {
     }
 }
 
-// 🐛 Korrektur: Akkuratere JSON-Struktur für die Template
-function downloadTemplate() {
-    const template = {
+// JSON-Vorlage Funktion (Korrigiert um die Hilfsverben hervorzuheben)
+function getTemplateJson() {
+     return {
         "anmerkungen": "Optionale Notizen für diese Verbliste",
         "alle_verben": {
             "être": {
@@ -307,39 +322,14 @@ function downloadTemplate() {
                     // Fügen Sie hier alle Zeiten ein, die Sie abfragen möchten
                 }
             },
-            "parler": {
-                "deutsch": "sprechen",
-                "gruppe": "er",
-                "hilfsverb": "avoir",
-                "participe_passe": "parlé",
-                "conjugaison": {
-                    "present": { "je": "parle", "tu": "parles", "il_elle_on": "parle", "nous": "parlons", "vous": "parlez", "ils_elles": "parlent" },
-                    "imparfait": { "je": "parlais", "tu": "parlais", "il_elle_on": "parlait", "nous": "parlions", "vous": "parliez", "ils_elles": "parlaient" }
-                }
-            }
-        }
-    };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(template, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "verbes_template.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-}
-
-function copyTemplateToClipboard() {
-    const template = {
-        "anmerkungen": "Optionale Notizen für diese Verbliste",
-        "alle_verben": {
-            "être": {
-                "deutsch": "sein",
+            "avoir": {
+                "deutsch": "haben",
                 "gruppe": "Auxiliaire",
-                "hilfsverb": "être",
-                "participe_passe": "été",
+                "hilfsverb": "avoir", 
+                "participe_passe": "eu",
                 "conjugaison": {
-                    "present": { "je": "suis", "tu": "es", "il_elle_on": "est", "nous": "sommes", "vous": "êtes", "ils_elles": "sont" },
-                    "imparfait": { "je": "étais", "tu": "étais", "il_elle_on": "était", "nous": "étions", "vous": "étiez", "ils_elles": "étaient" }
+                    "present": { "je": "ai", "tu": "as", "il_elle_on": "a", "nous": "avons", "vous": "avez", "ils_elles": "ont" },
+                    "imparfait": { "je": "avais", "tu": "avais", "il_elle_on": "avait", "nous": "avions", "vous": "aviez", "ils_elles": "avaient" }
                 }
             },
             "parler": {
@@ -354,7 +344,21 @@ function copyTemplateToClipboard() {
             }
         }
     };
+}
 
+function downloadTemplate() {
+    const template = getTemplateJson();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(template, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "verbes_template.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+function copyTemplateToClipboard() {
+    const template = getTemplateJson();
     const jsonString = JSON.stringify(template, null, 2);
 
     if (navigator.clipboard) {
@@ -368,7 +372,7 @@ function copyTemplateToClipboard() {
     }
 }
 
-// --- SUCH-FUNKTIONEN ---
+// --- SUCH-FUNKTIONEN (unverändert) ---
 
 function handleSearch(event) {
     const query = event.target.value.toLowerCase().trim();
@@ -691,6 +695,7 @@ function checkAnswer() {
     if (question.tense === 'passe_compose' || question.tense === 'plus_que_parfait') {
         const auxVerbTenseKey = (question.tense === 'passe_compose') ? 'present' : 'imparfait';
         
+        // Die Konjugation des Hilfsverbs muss aus der allVerbes-Struktur gelesen werden
         const auxConjugation = allVerbes[question.auxVerb].conjugaison[auxVerbTenseKey][question.pronounKey];
         correctAnswer = `${auxConjugation} ${question.participePasse}`.toLowerCase().trim();
         
@@ -702,9 +707,9 @@ function checkAnswer() {
             feedbackMessage = 'Korrekt! Volle Punktzahl.';
             currentQuiz.score++;
         } else if (simplifiedUserAnswer === simplifiedCorrectAnswer) {
-            feedbackMessage = `<strong>Halb richtig!</strong> Akzente/Schreibweise fehlen. Korrekt wäre: <strong>${question.correctAnswer}</strong>`;
+            feedbackMessage = `<strong>Halb richtig!</strong> Akzente/Schreibweise fehlen. Korrekt wäre: <strong>${correctAnswer}</strong>`;
         } else {
-            feedbackMessage = `Falsch! Korrekt ist: <strong>${question.correctAnswer}</strong>`;
+            feedbackMessage = `Falsch! Korrekt ist: <strong>${correctAnswer}</strong>`;
         }
     } else {
          const simplifiedUserAnswer = removeAccents(userAnswer);
@@ -715,9 +720,9 @@ function checkAnswer() {
             feedbackMessage = 'Korrekt! Volle Punktzahl.';
             currentQuiz.score++;
         } else if (simplifiedUserAnswer === simplifiedCorrectAnswer) {
-            feedbackMessage = `<strong>Halb richtig!</strong> Akzente/Schreibweise fehlen. Korrekt wäre: <strong>${question.correctAnswer}</strong>`;
+            feedbackMessage = `<strong>Halb richtig!</strong> Akzente/Schreibweise fehlen. Korrekt wäre: <strong>${correctAnswer}</strong>`;
         } else {
-            feedbackMessage = `Falsch! Korrekt ist: <strong>${question.correctAnswer}</strong>`;
+            feedbackMessage = `Falsch! Korrekt ist: <strong>${correctAnswer}</strong>`;
         }
     }
 
