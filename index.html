@@ -4,415 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FrenchVerbes</title>
-    <style>
-        /* --- Allgemeine Styles --- */
-        body { font-family: Arial, sans-serif; padding: 0; background-color: #f4f4f9; margin: 0; display: flex; justify-content: center; }
-        
-        .main-content { 
-            flex-grow: 1; 
-            padding: 20px; 
-            max-width: 1000px;
-            width: 100%;
-            position: relative; /* Für den Reset Button */
-        }
-        .container { 
-            max-width: 100%; 
-            margin: auto; 
-            background: #fff; 
-            padding: 30px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-        }
-        h1 { color: #333; border-bottom: 2px solid #5cb85c; padding-bottom: 10px; margin-top: 0; }
-        input[type="text"] { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+    /* --- NEUE CSS VARIABLEN FÜR DARK MODE --- */
+:root {
+    --bg-color: #f4f4f9;
+    --card-bg: #fff;
+    --text-color: #333;
+    --border-color: #ddd;
+    --highlight-green: #5cb85c;
+    --highlight-blue: #00bcd4;
+    --input-bg: #fff;
+    --imparfait-bg: #e0f7fa;
+    --imparfait-border: #00bcd4;
+}
 
-        /* --- Tabellen Styles --- */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; word-wrap: break-word; }
-        th { background-color: #5cb85c; color: white; }
-        
-        /* --- Mobile Responsive Table CSS --- */
-        @media screen and (max-width: 600px) {
-            .container { padding: 15px; }
-            
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            
-            tr {
-                border: 1px solid #ccc;
-                margin-bottom: 10px;
-                padding: 10px 0;
-                border-radius: 4px;
-            }
-            
-            td {
-                border: none;
-                border-bottom: 1px solid #eee;
-                position: relative;
-                padding-left: 50% !important; 
-                text-align: right !important;
-                white-space: normal;
-            }
-            
-            td:before {
-                position: absolute;
-                top: 10px; /* Vertikale Position des Labels */
-                left: 6px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                text-align: left;
-                font-weight: bold;
-                content: attr(data-label);
-                color: #5cb85c;
-            }
-        }
-        /* --- Ende Mobile Responsive Table CSS --- */
+/* Dark Mode Overrides */
+body.dark-mode {
+    --bg-color: #1e1e1e;
+    --card-bg: #2d2d30;
+    --text-color: #cccccc;
+    --border-color: #444;
+    --highlight-green: #6edb7d;
+    --highlight-blue: #4fc3f7;
+    --input-bg: #3c3c3c;
+    --imparfait-bg: #20404a;
+    --imparfait-border: #4fc3f7;
+}
 
-        .error { color: red; text-align: center; margin-top: 20px; }
-        .imparfait-info { margin-top: 30px; padding: 15px; background: #e0f7fa; border-left: 5px solid #00bcd4; }
-        
-        /* --- Verb Toggle (Deutsch/Französisch) Styles (NUR FÜRS QUIZ) --- */
-        .verb-title-container {
-            text-align: center; 
-            margin-bottom: 15px; 
-            color: #333;
-            font-size: 1.4em;
-        }
-        .verb-toggle {
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-block;
-            position: relative;
-            transition: color 0.2s; 
-        }
-        /* Style für das Quiz-Toggle */
-        #quizQuestionView .verb-toggle:hover {
-            color: #00bcd4;
-        }
-        #quizQuestionView .verb-toggle .infinitiv {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #00bcd4;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 3px;
-            white-space: nowrap;
-            z-index: 10;
-            font-size: 0.7em;
-            font-weight: normal;
-            pointer-events: none;
-        }
-        #quizQuestionView .verb-toggle:hover .infinitiv,
-        #quizQuestionView .verb-toggle.active .infinitiv {
-            display: block;
-        }
-        
-        /* --- Modal (Overlay) Styles --- */
-        #verbModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-        #verbModal.visible {
-            visibility: visible;
-            opacity: 1;
-        }
-        #modalContent {
-            background: white;
-            padding: 30px; 
-            border-radius: 10px;
-            width: 90%;
-            max-width: 1000px; 
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            position: relative;
-        }
-        .modal-title {
-            color: #333;
-            border-bottom: 2px solid #5cb85c;
-            padding-bottom: 10px;
-            margin-top: 0;
-            text-align: center;
-        }
+/* Wenden Sie Variablen auf bestehende Regeln an */
+body { background-color: var(--bg-color); }
+.container { background: var(--card-bg); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+h1 { color: var(--text-color); border-bottom-color: var(--highlight-green); }
+input[type="text"] { background-color: var(--input-bg); color: var(--text-color); border-color: var(--border-color); }
+table { border-color: var(--border-color); }
+th, td { border-color: var(--border-color); }
+th { background-color: var(--highlight-green); color: white; }
+.imparfait-info { background: var(--imparfait-bg); border-left-color: var(--imparfait-border); }
 
-        /* --- BUTTON GRUPPE FÜR HAUPTSEITE --- */
-        .button-group {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px; 
-            margin-bottom: 20px; 
-        }
-
-        .menu-trigger-button {
-            flex-grow: 1; 
-            padding: 12px; 
-            background-color: #00bcd4; 
-            border: none; 
-            border-radius: 4px; 
-            color: white; 
-            font-size: 18px; 
-            cursor: pointer; 
-            transition: background-color 0.2s;
-        }
-        .menu-trigger-button:hover {
-            background-color: #00a0b8;
-        }
-        .back-to-list-button {
-            background-color: #f4f4f4;
-            color: #333;
-            border: 1px solid #ccc;
-            padding: 8px 15px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        /* NEUER BUTTON: Reset Data */
-        #resetDataButton {
-            position: absolute;
-            top: 10px; 
-            right: 10px; 
-            background-color: #f44336; 
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 10; 
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        #resetDataButton:hover {
-            opacity: 1;
-        }
-        /* Ende NEUER BUTTON */
-
-
-        /* --- TEMPLATE STYLES --- */
-        #templateMenuContainer {
-            margin-bottom: 15px;
-        }
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: #f9f9f9;
-            min-width: 250px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        /* Wenn templateMenuContainer im setup screen ist, soll dropdown-content links aligniert sein */
-        #initialSetupScreen .dropdown-content {
-            right: auto;
-            left: 0;
-        }
-        .dropdown-content a {
-            color: #333;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            cursor: pointer;
-        }
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-        .template-button {
-            background-color: #f0ad4e;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .template-button:hover {
-            background-color: #ec971f;
-        }
-        
-        /* --- QUIZ STYLES --- */
-        .quiz-option {
-            display: block; 
-            margin: 8px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.1s;
-        }
-        .quiz-option:hover {
-            background-color: #f0f0f0;
-        }
-        .quiz-option input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        
-        .quiz-start-button {
-            background-color: #5cb85c; 
-            color: white; 
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2em;
-            margin-top: 20px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .quiz-start-button:hover {
-            background-color: #4cae4c;
-        }
-        .quiz-question-container {
-            text-align: center;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
-        }
-        .question-text {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .question-text button {
-            background: none;
-            border: none;
-            margin-left: 10px;
-            padding: 0;
-            line-height: 1;
-        }
-        .quiz-result {
-            margin-top: 15px;
-            font-size: 1.1em;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .quiz-result.correct {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .quiz-result.incorrect {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        /* --- Gruppierte Liste Styles --- */
-        #modalListContainer {
-            overflow-y: auto;
-            margin-top: 10px;
-            padding-right: 15px;
-        }
-        #modalVerbList h4 {
-            color: #5cb85c;
-            border-bottom: 1px dotted #ccc;
-            padding-top: 15px;
-            margin-bottom: 5px;
-            text-transform: capitalize;
-        }
-        #modalVerbList ul.verb-group-list {
-            list-style-type: none; 
-            padding-left: 0;
-            margin-top: 5px;
-            columns: 2; 
-        }
-        #modalVerbList li {
-            padding: 5px 0;
-            break-inside: avoid; 
-            display: flex; 
-            margin-bottom: 5px;
-        }
-        #modalVerbList .verb-number {
-            font-weight: bold;
-            color: #5cb85c;
-            margin-right: 8px;
-            min-width: 30px; 
-            text-align: right;
-        }
-        #modalVerbList a {
-            color: #333;
-            text-decoration: none;
-            display: inline-block;
-        }
-        #modalVerbList a:hover {
-            color: #00bcd4;
-            text-decoration: underline;
-        }
-        .close-button {
-            position: absolute;
-            top: 5px;
-            right: 15px;
-            color: #333;
-            font-size: 30px;
-            cursor: pointer;
-            line-height: 1;
-        }
-        
-        /* --- Initial Setup Screen Styles --- */
-        #initialSetupScreen {
-            padding: 20px;
-            border: 2px dashed #00bcd4;
-            border-radius: 8px;
-            background-color: #e0f7fa;
-            margin-top: 50px;
-        }
-        #initialSetupScreen h2, #initialSetupScreen h3 {
-            color: #00bcd4;
-            border-bottom: none;
-        }
-        #initialSetupScreen pre {
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
-            font-size: 0.9em;
-        }
-        #fileUploadInput {
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        #templateMenuContainer.setup-view {
-            justify-content: flex-start;
-        }
-    </style>
+/* Dark Mode Spezifika */
+body.dark-mode h1 { border-bottom-color: var(--highlight-green); }
+body.dark-mode .container { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); }
+body.dark-mode #initialSetupScreen { background-color: #2b3336; border-color: var(--highlight-blue); }
+body.dark-mode #initialSetupScreen h2, body.dark-mode #initialSetupScreen h3 { color: var(--highlight-blue); }
+body.dark-mode #initialSetupScreen pre { background-color: var(--input-bg); }
+body.dark-mode .quiz-result.correct { background-color: #388e3c; color: #d4edda; }
+body.dark-mode .quiz-result.incorrect { background-color: #c62828; color: #f8d7da; }
+/* --- ENDE DARK MODE CSS --- */
 </head>
 <body>
 
@@ -1172,9 +808,8 @@
         
 
         async function uploadToDpaste(content) {
-            // Entschlüsselung des API-Schlüssels (Base64-Dekodierung)
-            // HINWEIS: Dies ist KEINE sichere Methode zum Schutz des Schlüssels.
-            const API_KEY = atob(OBFUSCATED_API_KEY);
+            //HIEREURUEconst API_KEY = atob(OBFUSCATED_API_KEY);
+            const API_KEY = "99817c306d7e554e";
             
             const formData = new URLSearchParams();
             formData.append('content', content);
@@ -1291,6 +926,27 @@
             }
         }
 
+        // --- DARK MODE LOGIK ---
+        const DARK_MODE_KEY = 'frenchverbes_dark_mode';
+
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem(DARK_MODE_KEY, isDarkMode ? 'enabled' : 'disabled');
+            document.getElementById('darkModeToggle').textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        function initializeDarkMode() {
+            const savedMode = localStorage.getItem(DARK_MODE_KEY);
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedMode === 'enabled' || (savedMode === null && prefersDark)) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeToggle').textContent = '☀️';
+            } else {
+                document.getElementById('darkModeToggle').textContent = '🌙';
+            }
+        }
+        // -----------------------
 
         async function loadData() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1556,7 +1212,11 @@
             targetDiv.innerHTML = tableHTML;
         }
 
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', () => {
+        // Initialisiere Dark Mode, BEVOR die Daten geladen werden, um Flackern zu vermeiden.
+        initializeDarkMode(); 
+        loadData();
+    });
     </script>
 
 </body>
