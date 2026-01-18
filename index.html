@@ -1,162 +1,58 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FrenchVerbes</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Directory Explorer</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        h1 { border-bottom: 2px solid #eaecef; padding-bottom: 10px; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 8px; border-bottom: 1px solid #f6f8fa; display: flex; align-items: center; }
+        li:hover { background-color: #f6f8fa; }
+        .icon { margin-right: 10px; font-size: 1.2em; }
+        a { color: #0366d6; text-decoration: none; font-weight: 500; }
+        a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
 
-    <div class="main-content">
-        <div class="container" id="appContent">
-            <h1>FrenchVerbes</h1>
+    <h1>File Explorer</h1>
+    <ul id="explorer">Loading repository contents...</ul>
 
-            <button id="darkModeToggle" onclick="toggleDarkMode()" title="Hell-/Dunkelmodus umschalten">🌙</button>
+    <script>
+        // --- CONFIGURATION ---
+        const USER = 'frenchverbes'; // Change this
+        const REPO = 'frenchverbes.github.io';       // Change this
+        // ---------------------
 
-            <button id="resetDataButton" onclick="resetAndShowSetup()" title="Daten zurücksetzen und Setup-Ansicht öffnen" style="display: none;">Daten-Setup</button>
-
-            <div id="initialSetupScreen">
-                <h2>Daten nicht geladen!</h2>
-                <p>Um die App mit Ihren eigenen Verben nutzen zu können, müssen Sie eine JSON-Datei bereitstellen.</p>
-                <div id="loadingStatus" class="error" style="display: none;"></div>
-
-                <hr>
-
-                <h3>Option 1: JSON per Kurz-ID laden</h3>
-                <p>Wenn Ihre Verben-Liste in der globalen `link_map.json` registriert wurde, können Sie sie direkt über eine einfache Nummer aufrufen:</p>
-                <pre>IhreApp-URL/5</pre>
-
-                <h3>Option 2: JSON per Link laden</h3>
-                <p>Laden Sie Ihre Verben-Datei von einem externen Link (z.B. GitHub Gist oder einem Server). Hängen Sie den Link einfach als URL-Parameter an die Adresse dieser Seite an:</p>
-                <pre>IhreApp-URL/?link=https://ihre-domain.com/pfad/zu/ihrer/verben.json</pre>
-                <p>Der Link wird im Browser gespeichert und automatisch beim nächsten Besuch versucht.</p>
-
-                <h3>Option 3: JSON-Datei verwenden</h3>
-                <p>Laden Sie eine lokale JSON-Datei von Ihrem Gerät hoch.</p>
-                <input type="file" id="fileUploadInput" accept=".json">
-                <div class="button-group" style="margin-top: 10px;">
-                    <button class="menu-trigger-button" onclick="handleFileUpload(false)" title="Lädt die Datei nur einmalig in diesen Browser.">Lokal verwenden (nicht speichern)</button>
-                    <button class="menu-trigger-button" onclick="handleFileUpload(true)" id="uploadToDpasteButton" title="Lädt die Datei permanent auf dpaste.com hoch und speichert den Link.">Auf dpaste hochladen & Link nutzen</button>
-                </div>
-
-                <h3>Option 4: Vorlage erstellen</h3>
-                <p>Nutzen Sie diese Vorlage, um Ihre eigene Datei zu erstellen (stellen Sie sicher, dass sie dem vorgegebenen Format entspricht):</p>
-                <div id="templateMenuContainer" class="dropdown">
-                    <button class="template-button">JSON-Vorlage</button>
-                    <div class="dropdown-content">
-                        <a onclick="downloadTemplate()">Herunterladen (verbes_template.json)</a>
-                        <a onclick="copyTemplateToClipboard()">In Zwischenablage kopieren</a>
-                    </div>
-                </div>
-            </div>
-
-            <div id="mainView" style="display: none;">
-                <div class="button-group">
-                    <button class="menu-trigger-button" onclick="showModal('verbList')">Verbliste</button>
-                    <button class="menu-trigger-button" onclick="showModal('quizSettings')">Quiz mich!</button>
-                </div>
-
-                <input type="text" id="searchInput" placeholder="Direktsuche (Infinitiv oder Deutsch)...">
-                <div id="resultView">
-                    <p id="initialHint">Bitte geben Sie einen Suchbegriff ein oder wählen Sie ein Verb über den Knopf aus.</p>
-                    <div id="verbDetails" style="display: none;">
-                        </div>
-                    <div id="generalInfo" style="display: none;">
-                        <h2>Imparfait Regeln</h2>
-                        <div class="imparfait-info">
-                            <p>Der Imparfait Stamm wird in der Regel von der 1. Person Plural (Nous) des Présent abgeleitet. Die Endungen sind:</p>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Pronomen</th>
-                                        <th>Endung</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>je</td><td>-ais</td></tr>
-                                    <tr><td>tu</td><td>-ais</td></tr>
-                                    <tr><td>il/elle/on</td><td>-ait</td></tr>
-                                    <tr><td>nous</td><td>-ions</td></tr>
-                                    <tr><td>vous</td><td>-iez</td></tr>
-                                    <tr><td>ils/elles</td><td>-aient</td></tr>
-                                </tbody>
-                            </table>
-                            <h3>Spezialfälle (Imparfait)</h3>
-                            <p>Nur "être" hat einen unregelmäßigen Stamm: *ét-* (statt *somm-* von nous sommes).</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div id="verbModal" onclick="closeModal(event)">
-        <div id="modalContent">
-            <span class="close-button" onclick="closeModal()">&times;</span>
-            <h2 id="modalTitle" class="modal-title"></h2>
-            
-            <div id="verbListView" style="display: none; flex-direction: column; max-height: 100%;">
-                <input type="text" id="listSearchInput" placeholder="Liste filtern...">
-                <div id="modalListContainer">
-                    <div id="modalVerbList">
-                        </div>
-                </div>
-            </div>
-            
-            <div id="conjugationView" style="display: none;">
-                <button class="back-to-list-button" onclick="showModal('verbList')">← Zurück zur Liste</button>
-                <div id="modalVerbDetails"></div>
-            </div>
-
-            <div id="quizSettingsView" style="display: none; max-height: 100%;">
-                <button class="back-to-list-button" onclick="closeModal()">← Zurück zu den Quiz-Einstellungen</button>
-                <h3>Quiz Einstellungen</h3>
+        async function fetchContents() {
+            const listElement = document.getElementById('explorer');
+            try {
+                const response = await fetch(`https://api.github.com{USER}/${REPO}/contents/`);
                 
-                <div id="quizFormContainer" style="overflow-y: auto; padding-right: 15px;">
-                    <h4>1. Verben Gruppen</h4>
-                    <div id="verbGroupCheckboxes"></div> 
-
-                    <h4>2. Zeitformen</h4>
-                    <div id="tenseCheckboxes"></div>
-
-                    <h4>3. Personalpronomen</h4>
-                    <div id="pronounCheckboxes"></div>
-
-                    <h4>4. Anzahl der Fragen</h4>
-                    <input type="number" id="questionCountInput" min="1" value="20">
-                </div>
+                if (!response.ok) throw new Error('Failed to fetch data. Check your USER and REPO names.');
                 
-                <button class="quiz-start-button" onclick="startQuiz()">Quiz mich!</button>
-            </div>
+                const files = await response.json();
+                listElement.innerHTML = ''; // Clear loading text
 
-            <div id="quizQuestionView" style="display: none;">
-                <p>Frage <span id="currentQuestionNumber"></span> von <span id="totalQuestions"></span></p>
-                <div class="quiz-question-container">
-                    <p>Konjugieren Sie:</p>
-                    <div class="question-text">
-                        <span id="quizPronoun"></span>
-                        <span id="quizInfinitiv" class="verb-toggle" title="Klicken/Hovern Sie für den französischen Infinitiv"></span>
-                        <span>in</span>
-                        <span id="quizTense"></span>
-                    </div>
-                    <input type="text" id="quizInput" placeholder="Ihre Konjugation">
-                    <button class="menu-trigger-button" onclick="checkAnswer()" id="checkButton">Prüfen</button>
-                    <button class="menu-trigger-button" onclick="nextQuestion()" id="nextButton" style="display: none;">Nächste Frage</button>
-                    <div id="quizFeedback" class="quiz-result" style="display: none;"></div>
-                </div>
-            </div>
+                files.forEach(file => {
+                    const li = document.createElement('li');
+                    const icon = file.type === 'dir' ? '📁' : '📄';
+                    
+                    // Link to the GitHub Pages version of the file
+                    // Use file.html_url if you want to link to the GitHub code view instead
+                    const fileUrl = file.type === 'dir' ? '#' : file.path;
 
-            <div id="quizResultView" style="display: none; text-align: center;">
-                <h2>Quiz beendet.</h2>
-                <div id="finalScore" class="quiz-result correct" style="font-size: 1.5em; margin: 30px auto;"></div>
-                <button class="quiz-start-button" onclick="showModal('quizSettings')">Neues Quiz starten</button>
-            </div>
+                    li.innerHTML = `<span class="icon">${icon}</span><a href="${fileUrl}">${file.name}</a>`;
+                    listElement.appendChild(li);
+                });
+            } catch (error) {
+                listElement.innerHTML = `<li style="color: red;">Error: ${error.message}</li>`;
+            }
+        }
 
-        </div>
-    </div>
-    
-    <script src="script.js"></script>
+        fetchContents();
+    </script>
 </body>
 </html>
