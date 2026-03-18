@@ -44,6 +44,7 @@
             position: absolute; top: 0.4rem; right: 0.4rem; 
             z-index: 10; background: rgba(220, 38, 38, 0.9); color: white; padding: 0.5rem;
             border-radius: 0.5rem; backdrop-filter: blur(4px); cursor: pointer;
+            font-size: 1.1rem; line-height: 1; border: none;
         }
 
         #lightbox { background-color: #000; }
@@ -119,6 +120,23 @@
         }
         #textPopupOverlay.visible { opacity: 1; }
         #textPopupOverlay.visible #popupMsg { transform: scale(1); }
+
+        /* Lightbox delete button */
+        #lightboxDeleteBtn {
+            background: rgba(220, 38, 38, 0.85);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(4px);
+            border-radius: 0.75rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: background 0.15s;
+        }
+        #lightboxDeleteBtn:active { background: rgba(185, 28, 28, 0.95); }
     </style>
 </head>
 <body class="min-h-screen font-sans">
@@ -173,6 +191,8 @@
                     <span id="countdownDisplay" class="text-white font-black text-xl md:text-2xl italic leading-none">10</span>
                 </div>
                 <button id="favBtn" onclick="event.stopPropagation(); toggleFavorite()" class="p-2"></button>
+                <!-- FIX: Lightbox delete button -->
+                <button id="lightboxDeleteBtn" onclick="event.stopPropagation(); removeCurrentFromLightbox()">🗑 Remove</button>
                 <button onclick="event.stopPropagation(); closeLightbox()" class="p-2"><svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
         </div>
@@ -245,6 +265,7 @@
             if (e.key === 'Escape') closeLightbox();
             if (e.key === 'ArrowRight') handleTapNav('next');
             if (e.key === 'ArrowLeft') handleTapNav('prev');
+            if (e.key === 'Delete' || e.key === 'Backspace') removeCurrentFromLightbox();
         });
 
         function toggleDarkMode() {
@@ -254,10 +275,6 @@
 
         function toggleUrlInput() { document.getElementById('inputWrapper').classList.toggle('hidden'); }
 
-        /**
-         * The state is now managed strictly via allMedia array.
-         * Parsing only happens when pasting raw text into the urlInput box.
-         */
         function handleUrlPaste() {
             const rawText = urlInput.innerText;
             const textLinks = (rawText.match(/(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g) || []);
@@ -268,13 +285,12 @@
                 isText: false 
             }));
             
-            // Append only new ones
             const existingSrcs = new Set(allMedia.map(m => m.src));
             newLinks.forEach(link => {
                 if(!existingSrcs.has(link.src)) allMedia.push(link);
             });
 
-            urlInput.innerHTML = ''; // Clear after processing
+            urlInput.innerHTML = '';
             renderGallery();
         }
 
@@ -339,6 +355,36 @@
             isFinishing = false; 
             document.getElementById('countdownBox').classList.add('hidden'); 
             document.getElementById('textPopupOverlay').classList.remove('visible');
+        }
+
+        // FIX 1: removeMedia now always re-renders the gallery
+        function removeMedia(id) { 
+            allMedia = allMedia.filter(m => m.id !== id); 
+            if (favorites.has(id)) favorites.delete(id);
+            if (finaleMediaId === id) finaleMediaId = null;
+            renderGallery(); // <-- was missing, causing buttons to appear broken
+        }
+
+        // FIX 2: new function to delete the currently viewed item from inside the lightbox
+        function removeCurrentFromLightbox() {
+            const m = allMedia[currentIndex];
+            if (!m) return;
+            const id = m.id;
+
+            allMedia = allMedia.filter(item => item.id !== id);
+            if (favorites.has(id)) favorites.delete(id);
+            if (finaleMediaId === id) finaleMediaId = null;
+
+            renderGallery();
+
+            if (allMedia.length === 0) {
+                closeLightbox();
+                return;
+            }
+
+            // Stay at same index (now points to next item), or step back if at end
+            if (currentIndex >= allMedia.length) currentIndex = allMedia.length - 1;
+            openLightbox(currentIndex);
         }
         
         function toggleFavorite() { 
@@ -534,16 +580,11 @@
             allMedia.push({ id: 't-'+Date.now(), isText: true, text: val }); 
             input.value = '';
             renderSortGrid();
-            // Scroll to bottom
             sortGrid.scrollTo({ top: sortGrid.scrollHeight, behavior: 'smooth' });
         }
 
         function startSlideshow() { if(allMedia.length) openLightbox(0); }
-        function removeMedia(id) { 
-            allMedia = allMedia.filter(m => m.id !== id); 
-            if(favorites.has(id)) favorites.delete(id);
-            if(finaleMediaId === id) finaleMediaId = null;
-        }
+
         function appearAgain() { 
             const c = allMedia[currentIndex]; 
             if(!c) return; 
@@ -551,7 +592,6 @@
         }
 
         if(localStorage.getItem('darkMode') === 'true') toggleDarkMode();
-        // Start empty or with placeholder
         renderGallery();
     </script>
 </body>
