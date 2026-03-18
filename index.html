@@ -123,20 +123,38 @@
 
         /* Lightbox delete button */
         #lightboxDeleteBtn {
-            background: rgba(220, 38, 38, 0.85);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            backdrop-filter: blur(4px);
-            border-radius: 0.75rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.7rem;
-            font-weight: 900;
-            text-transform: uppercase;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 0.5rem;
             cursor: pointer;
-            letter-spacing: 0.05em;
-            transition: background 0.15s;
+            transition: color 0.15s;
+            display: flex; align-items: center; justify-content: center;
         }
-        #lightboxDeleteBtn:active { background: rgba(185, 28, 28, 0.95); }
+        #lightboxDeleteBtn:hover, #lightboxDeleteBtn:active { color: rgba(248, 113, 113, 1); }
+
+        /* Burger menu */
+        #burgerMenu {
+            position: absolute; top: 100%; right: 0; margin-top: 8px;
+            background: var(--bg-card);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            padding: 0.5rem;
+            display: none; flex-direction: column; gap: 2px;
+            min-width: 160px; z-index: 100;
+        }
+        #burgerMenu.open { display: flex; }
+        .burger-item {
+            background: none; border: none; cursor: pointer;
+            text-align: left; padding: 0.6rem 1rem;
+            border-radius: 0.6rem; font-size: 0.75rem; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--text-main); width: 100%;
+            transition: background 0.1s;
+        }
+        .burger-item:hover { background: rgba(0,0,0,0.05); }
+        .dark .burger-item:hover { background: rgba(255,255,255,0.07); }
     </style>
 </head>
 <body class="min-h-screen font-sans">
@@ -155,11 +173,28 @@
                 </div>
                 
                 <div class="flex items-center gap-1 md:gap-2">
-                    <button onclick="toggleSortMode()" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-xs font-black uppercase">Sort</button>
-                    <button onclick="triggerUpload()" class="hidden md:block bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-black uppercase">Upload</button>
+                    <!-- Always-visible: Play + Load -->
                     <button onclick="startSlideshow()" class="bg-indigo-600 text-white px-5 py-2 rounded-xl text-xs font-black uppercase shadow-lg shadow-indigo-500/20">Play</button>
                     <button onclick="triggerUniversalFileImport()" class="bg-slate-800 text-white px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-xs font-black uppercase">Load</button>
-                    <button onclick="exportSaveFile()" class="hidden md:block bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-black uppercase">Export</button>
+
+                    <!-- Collapsible extras: shown inline on wide screens, burger on narrow -->
+                    <div class="hidden sm:flex items-center gap-1 md:gap-2" id="extraBtnsInline">
+                        <button onclick="toggleSortMode()" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-xs font-black uppercase">Sort</button>
+                        <button onclick="triggerUpload()" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-black uppercase">Upload</button>
+                        <button onclick="exportSaveFile()" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-black uppercase">Export</button>
+                    </div>
+
+                    <!-- Burger (shown only on small screens) -->
+                    <div class="relative sm:hidden">
+                        <button onclick="toggleBurger()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        </button>
+                        <div id="burgerMenu">
+                            <button class="burger-item" onclick="toggleBurger(); toggleSortMode()">Sort</button>
+                            <button class="burger-item" onclick="toggleBurger(); triggerUpload()">Upload</button>
+                            <button class="burger-item" onclick="toggleBurger(); exportSaveFile()">Export</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="inputWrapper" class="transition-all duration-300 hidden">
@@ -191,8 +226,9 @@
                     <span id="countdownDisplay" class="text-white font-black text-xl md:text-2xl italic leading-none">10</span>
                 </div>
                 <button id="favBtn" onclick="event.stopPropagation(); toggleFavorite()" class="p-2"></button>
-                <!-- FIX: Lightbox delete button -->
-                <button id="lightboxDeleteBtn" onclick="event.stopPropagation(); removeCurrentFromLightbox()">🗑 Remove</button>
+                <button id="lightboxDeleteBtn" onclick="event.stopPropagation(); removeCurrentFromLightbox()" title="Remove">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
                 <button onclick="event.stopPropagation(); closeLightbox()" class="p-2"><svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
         </div>
@@ -593,6 +629,16 @@
 
         if(localStorage.getItem('darkMode') === 'true') toggleDarkMode();
         renderGallery();
+
+        function toggleBurger() {
+            document.getElementById('burgerMenu').classList.toggle('open');
+        }
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('burgerMenu');
+            if (menu.classList.contains('open') && !menu.parentElement.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
     </script>
 </body>
 </html>
