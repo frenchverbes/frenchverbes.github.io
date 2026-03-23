@@ -3,363 +3,1436 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Französisch Verb-Trainer Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Verb-Meister Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        .no-select { -webkit-tap-highlight-color: transparent; user-select: none; }
-        .card-inner { transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
-        .card-flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { backface-visibility: hidden; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .card-back { transform: rotateY(180deg); }
-        
-        @media (min-width: 768px) {
-            .mobile-only { display: none; }
-            .desktop-only { display: flex; }
+        :root {
+            --bg: #0f0f13;
+            --surface: #18181f;
+            --surface2: #22222c;
+            --border: #2e2e3a;
+            --accent: #7c6cf8;
+            --accent2: #a78bfa;
+            --green: #34d399;
+            --red: #f87171;
+            --amber: #fbbf24;
+            --text: #e8e8f0;
+            --muted: #6b6b80;
+            --muted2: #3f3f50;
         }
-        @media (max-width: 767px) {
-            .mobile-only { display: flex; }
-            .desktop-only { display: none; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
+
+        /* Subtle grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(124,108,248,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,108,248,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #app { position: relative; z-index: 1; }
+
+        /* ── NAV ── */
+        nav.top-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(15,15,19,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        .brand span { color: var(--accent2); }
+
+        .nav-modes {
+            display: flex;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 2px;
+        }
+
+        .nav-mode-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 7px 16px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-mode-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tense-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tense-btn.active {
+            border-color: var(--accent);
+            color: var(--accent2);
+            background: rgba(124,108,248,0.1);
+        }
+
+        .fav-filter-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'Syne', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fav-filter-btn.active {
+            border-color: var(--amber);
+            color: var(--amber);
+            background: rgba(251,191,36,0.1);
+        }
+
+        /* ── MAIN ── */
+        main {
+            padding-top: 80px;
+            padding-bottom: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        /* ── STUDY ── */
+        .study-section-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .study-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .study-section-label.special { color: var(--accent2); }
+
+        .verb-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 0.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .verb-card:hover { border-color: var(--muted2); }
+
+        .verb-card.special { border-color: rgba(124,108,248,0.2); }
+
+        .verb-inf-block { min-width: 180px; }
+
+        .verb-de {
+            font-size: 0.65rem;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+
+        .verb-inf {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .verb-forms {
+            display: flex;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .form-chip {
+            flex: 1;
+            background: var(--surface2);
+            border-radius: 10px;
+            padding: 0.6rem 0.8rem;
+        }
+
+        .form-chip-label {
+            font-size: 0.55rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .form-chip-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .form-chip.cond .form-chip-label { color: var(--accent2); }
+        .form-chip.cond .form-chip-value { color: rgba(167,139,250,0.9); }
+        .form-chip.imp .form-chip-label { color: var(--green); }
+        .form-chip.imp .form-chip-value { color: rgba(52,211,153,0.9); }
+        .form-chip.pc .form-chip-label { color: var(--amber); }
+        .form-chip.pc .form-chip-value { color: rgba(251,191,36,0.9); }
+
+        .star-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted2);
+            transition: color 0.2s, transform 0.2s;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+
+        .star-btn:hover { color: var(--amber); transform: scale(1.1); }
+        .star-btn.active { color: var(--amber); }
+
+        /* ── FLASHCARD ── */
+        .flashcard-wrap {
+            max-width: 480px;
+            margin: 2rem auto 0;
+        }
+
+        .flashcard-counter {
+            text-align: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-scene {
+            perspective: 2000px;
+            height: 380px;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-inner.flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem;
+        }
+
+        .card-front {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #4c3fb0 0%, #7c6cf8 50%, #9c8cf8 100%);
+            transform: rotateY(180deg);
+        }
+
+        .card-hint {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-back .card-hint { color: rgba(255,255,255,0.5); }
+
+        .card-word {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .card-back .card-word {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-flip-hint {
+            position: absolute;
+            bottom: 1.5rem;
+            font-size: 0.6rem;
+            color: var(--muted2);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+        }
+
+        .card-back-forms {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .back-form-row {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-form-row label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .back-form-row span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .card-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .card-nav-btn {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 1rem;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .card-nav-btn:hover { border-color: var(--muted2); }
+
+        .card-nav-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .card-nav-btn.primary:hover { background: var(--accent2); }
+
+        /* ── QUIZ ── */
+        .quiz-wrap {
+            max-width: 560px;
+            margin: 2rem auto 0;
+        }
+
+        .quiz-progress-bar-outer {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            height: 8px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .quiz-progress-bar-inner {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .quiz-progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 2rem;
+            letter-spacing: 0.05em;
+        }
+
+        .quiz-progress-stats .score { color: var(--accent2); }
+        .quiz-progress-stats .errors { color: var(--red); }
+
+        .quiz-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+        }
+
+        .quiz-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .quiz-badge.retry {
+            border-color: rgba(248,113,113,0.3);
+            background: rgba(248,113,113,0.08);
+            color: var(--red);
+        }
+
+        .quiz-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .quiz-word {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .quiz-prompt {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .quiz-prompt strong {
+            color: var(--accent2);
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .quiz-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .quiz-input:focus { border-color: var(--accent); }
+        .quiz-input:disabled { opacity: 0.6; }
+
+        .quiz-input.correct { border-color: var(--green); background: rgba(52,211,153,0.05); }
+        .quiz-input.wrong { border-color: var(--red); background: rgba(248,113,113,0.05); }
+
+        .quiz-submit {
+            width: 100%;
+            background: var(--accent);
+            border: none;
+            border-radius: 14px;
+            padding: 1.1rem;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .quiz-submit:hover { background: var(--accent2); transform: translateY(-1px); }
+        .quiz-submit:active { transform: translateY(0); }
+
+        .quiz-feedback {
+            margin-top: 1.25rem;
+            padding: 1rem 1.25rem;
+            border-radius: 14px;
+            display: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .quiz-feedback.show { display: block; }
+
+        .quiz-feedback.correct {
+            background: rgba(52,211,153,0.08);
+            border: 1px solid rgba(52,211,153,0.2);
+            color: var(--green);
+        }
+
+        .quiz-feedback.wrong {
+            background: rgba(248,113,113,0.08);
+            border: 1px solid rgba(248,113,113,0.2);
+            color: var(--red);
+        }
+
+        .feedback-solution {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            color: var(--text);
+        }
+
+        .quiz-next-btn {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem;
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.75rem;
+            display: none;
+        }
+
+        .quiz-next-btn:hover { border-color: var(--muted2); }
+        .quiz-next-btn.show { display: block; }
+
+        /* Quiz complete screen */
+        .quiz-complete {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .quiz-complete h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-complete p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .quiz-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: var(--surface2);
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+
+        .stat-val {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .restart-btn {
+            background: var(--accent);
+            border: none;
+            border-radius: 14px;
+            padding: 1rem 2rem;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .restart-btn:hover { background: var(--accent2); }
+
+        /* Mobile nav */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(15,15,19,0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .mobile-nav-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.55rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .mobile-nav-btn.active { color: var(--accent2); }
+
+        .mobile-nav-btn svg { width: 22px; height: 22px; }
+
+        /* Tense modal */
+        .tense-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .tense-modal-overlay.show { display: flex; }
+
+        .tense-modal-sheet {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .tense-modal-title {
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .tense-modal-btn {
+            display: block;
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tense-modal-btn:hover { border-color: var(--accent); color: var(--accent2); }
 
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4f46e5;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
+            width: 32px;
+            height: 32px;
+            animation: spin 0.8s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .star-active { fill: #f59e0b; stroke: #f59e0b; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        #loading-overlay p {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        #main-content {
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        #main-content.visible { opacity: 1; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav.top-nav { display: none; }
+            .mobile-nav { display: flex; }
+            main { padding-top: 1rem; padding-bottom: 90px; }
+
+            .verb-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .verb-inf-block { min-width: unset; }
+            .verb-forms { flex-direction: column; gap: 0.5rem; }
+        }
+
+        .section-mb { margin-bottom: 2.5rem; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen font-sans text-slate-900 pb-20 md:pb-0 md:pt-20">
-
-    <!-- Desktop Navigation -->
-    <nav class="desktop-only fixed top-0 left-0 right-0 bg-white border-b border-slate-200 px-8 py-4 justify-between items-center z-50 shadow-sm">
-        <div class="flex items-center gap-3">
-            <span class="text-2xl">🇫🇷</span>
-            <h1 class="text-xl font-black text-indigo-700 uppercase tracking-tighter">Verb-Meister</h1>
-        </div>
-        <div class="flex gap-8">
-            <button onclick="setMode('study')" class="nav-link font-bold text-xs uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">Lernen</button>
-            <button onclick="setMode('flashcard')" class="nav-link font-bold text-xs uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">Karten</button>
-            <button onclick="setMode('quiz')" class="nav-link font-bold text-xs uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">Quiz</button>
-        </div>
-        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-            <button onclick="setTense('cond')" id="d-btn-cond" class="px-4 py-1.5 rounded-lg text-[10px] font-black transition-all">COND</button>
-            <button onclick="setTense('imp')" id="d-btn-imp" class="px-4 py-1.5 rounded-lg text-[10px] font-black transition-all">IMP</button>
-            <button onclick="setTense('pc')" id="d-btn-pc" class="px-4 py-1.5 rounded-lg text-[10px] font-black transition-all">PC</button>
-        </div>
-    </nav>
-
-    <div id="app" class="max-w-6xl mx-auto p-4 md:p-8">
-        <!-- Loading State -->
-        <div id="loading-overlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center gap-4">
-            <div class="loader"></div>
-            <p class="text-sm font-bold text-slate-400 animate-pulse">Lade Verben...</p>
-        </div>
-
-        <!-- Mobile Header -->
-        <header class="mobile-only text-center mb-6 pt-4">
-            <h1 class="text-2xl font-black text-indigo-700">Verb-Meister 🇫🇷</h1>
-            <p id="mobile-tense-label" class="text-indigo-400 font-bold text-[10px] uppercase tracking-[0.3em] mt-1">Conditionnel</p>
-        </header>
-
-        <main id="main-content" class="opacity-0 transition-opacity duration-500">
-            <!-- Dynamic Content -->
-        </main>
+<body>
+    <div id="loading-overlay">
+        <div class="loader"></div>
+        <p>Verben werden geladen…</p>
     </div>
 
-    <!-- Mobile Navigation -->
-    <nav class="mobile-only fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-8 py-3 justify-between items-center z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-        <button onclick="setMode('study')" id="m-nav-study" class="flex flex-col items-center gap-1 text-slate-300">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            <span class="text-[9px] font-black">LISTE</span>
+    <!-- Desktop Nav -->
+    <nav class="top-nav">
+        <div class="brand">🇫🇷 <span>Verb</span>-Meister</div>
+        <div class="nav-modes">
+            <button class="nav-mode-btn" onclick="setMode('study')">Liste</button>
+            <button class="nav-mode-btn" onclick="setMode('flashcard')">Karten</button>
+            <button class="nav-mode-btn" onclick="setMode('quiz')">Quiz</button>
+        </div>
+        <div class="nav-right">
+            <button class="fav-filter-btn" id="fav-filter-toggle" onclick="toggleFavFilter()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                Nur Favoriten
+            </button>
+            <button class="tense-btn" id="d-btn-cond" onclick="setTense('cond')">COND</button>
+            <button class="tense-btn" id="d-btn-imp" onclick="setTense('imp')">IMP</button>
+            <button class="tense-btn" id="d-btn-pc" onclick="setTense('pc')">PC</button>
+        </div>
+    </nav>
+
+    <div id="app">
+        <main id="main-content"><!-- dynamic --></main>
+    </div>
+
+    <!-- Mobile Nav -->
+    <nav class="mobile-nav" id="mobile-nav">
+        <button class="mobile-nav-btn" id="m-btn-study" onclick="setMode('study')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            Liste
         </button>
-        <button onclick="setMode('flashcard')" id="m-nav-flashcard" class="flex flex-col items-center gap-1 text-slate-300">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-            <span class="text-[9px] font-black">KARTEN</span>
+        <button class="mobile-nav-btn" id="m-btn-flashcard" onclick="setMode('flashcard')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="7" width="16" height="13" rx="2"/><path d="M6 7V5a2 2 0 012-2h8a2 2 0 012 2v2"/></svg>
+            Karten
         </button>
-        <button onclick="setMode('quiz')" id="m-nav-quiz" class="flex flex-col items-center gap-1 text-slate-300">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span class="text-[9px] font-black">QUIZ</span>
+        <button class="mobile-nav-btn" id="m-btn-quiz" onclick="setMode('quiz')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+            Quiz
         </button>
-        <button onclick="toggleTenseMenu()" class="flex flex-col items-center gap-1 text-indigo-600">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span class="text-[9px] font-black">ZEIT</span>
+        <button class="mobile-nav-btn" id="m-btn-fav" onclick="toggleFavFilter()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            Favs
+        </button>
+        <button class="mobile-nav-btn" onclick="openTenseModal()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Zeit
         </button>
     </nav>
 
-    <!-- Mobile Tense Picker -->
-    <div id="tense-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[110] flex items-end justify-center backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-t-[2.5rem] p-8 pb-12 shadow-2xl">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
-            <h3 class="text-lg font-black mb-6 text-center text-slate-800">Zeitform wählen</h3>
-            <div class="grid gap-4">
-                <button onclick="setTense('cond')" class="w-full py-5 bg-indigo-50 text-indigo-700 rounded-2xl font-black text-sm">Conditionnel</button>
-                <button onclick="setTense('imp')" class="w-full py-5 bg-emerald-50 text-emerald-700 rounded-2xl font-black text-sm">Imparfait</button>
-                <button onclick="setTense('pc')" class="w-full py-5 bg-amber-50 text-amber-700 rounded-2xl font-black text-sm">Passé Composé</button>
-                <button onclick="toggleTenseMenu()" class="w-full py-4 text-slate-400 font-bold text-xs uppercase tracking-widest mt-2">Schließen</button>
-            </div>
+    <!-- Mobile Tense Modal -->
+    <div class="tense-modal-overlay" id="tense-modal">
+        <div class="tense-modal-sheet">
+            <div class="tense-modal-title">Zeitform wählen</div>
+            <button class="tense-modal-btn" onclick="setTense('cond');closeTenseModal()">Conditionnel</button>
+            <button class="tense-modal-btn" onclick="setTense('imp');closeTenseModal()">Imparfait</button>
+            <button class="tense-modal-btn" onclick="setTense('pc');closeTenseModal()">Passé Composé</button>
         </div>
     </div>
 
     <script>
-        let verbs = [];
-        let randomizedVerbs = [];
-        let currentTense = 'cond';
-        let currentMode = 'study';
-        let score = 0;
-        let flashcardIndex = 0;
-        let quizActiveVerb = null;
-        let favorites = JSON.parse(localStorage.getItem('verbFavorites') || '[]');
+    // ── STATE ──
+    let verbs = [];
+    let currentTense = 'cond';
+    let currentMode = 'study';
+    let favoritesOnly = false;
+    let favorites = JSON.parse(localStorage.getItem('vmFavorites') || '[]');
 
-        const csvUrl = "https://raw.githubusercontent.com/frenchverbes/frenchverbes.github.io/main/verbes.csv";
+    // Flashcard
+    let fcDeck = [];
+    let fcIndex = 0;
 
-        async function loadVerbs() {
-            try {
-                let response = await fetch(csvUrl);
-                let text = await response.text();
-                parseCSV(text);
-                shuffleVerbs();
-            } catch (e) {
-                console.error("Load failed", e);
-            } finally {
-                document.getElementById('loading-overlay').style.display = 'none';
-                document.getElementById('main-content').classList.replace('opacity-0', 'opacity-100');
-                render();
+    // Quiz
+    let quizDeck = [];         // ordered list of verbs to quiz
+    let quizErrors = [];       // verbs answered wrong
+    let quizIndex = 0;         // current position in quizDeck
+    let quizScore = 0;
+    let quizTotal = 0;         // total questions (deck + error repeats)
+    let quizIsRetry = false;   // current card is a retry
+    let quizAnswered = false;
+    let quizCurrentVerb = null;
+    let quizCurrentPerson = null;
+    let quizCurrentTense = null;
+    let quizCompleted = false;
+
+    // Persons
+    const PERSONS = [
+        { pronoun: 'je', key: 'je', label: '1. Pers. Sing.' },
+        { pronoun: 'tu', key: 'tu', label: '2. Pers. Sing.' },
+        { pronoun: 'il/elle', key: 'il', label: '3. Pers. Sing.' },
+        { pronoun: 'nous', key: 'nous', label: '1. Pers. Plur.' },
+        { pronoun: 'vous', key: 'vous', label: '2. Pers. Plur.' },
+        { pronoun: 'ils/elles', key: 'ils', label: '3. Pers. Plur.' }
+    ];
+
+    const csvUrl = "https://raw.githubusercontent.com/frenchverbes/frenchverbes.github.io/main/verbes.csv";
+
+    // ── LOAD ──
+    async function loadVerbs() {
+        try {
+            const resp = await fetch(csvUrl);
+            const text = await resp.text();
+            parseCSV(text);
+        } catch(e) {
+            // fallback empty
+            console.warn("Could not load verbs:", e);
+        } finally {
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('main-content').classList.add('visible');
+            setTense(currentTense);
+            setMode(currentMode);
+        }
+    }
+
+    function parseCSV(text) {
+        const lines = text.trim().split('\n');
+        const data = [];
+        for (let i = 1; i < lines.length; i++) {
+            const parts = lines[i].split(';');
+            if (parts.length >= 6) {
+                const v = {
+                    id: i,
+                    de: parts[0].trim(),
+                    inf: parts[1].trim(),
+                    cat: parts[5].trim()
+                };
+                // Parse conjugations — each tense is one string like "ferais;ferais;ferait;ferions;feriez;feraient"
+                // But the CSV may just store "je" form. Handle both cases.
+                // Try splitting by comma first, then use single value for all persons
+                ['cond', 'imp', 'pc'].forEach((t, ti) => {
+                    const raw = (parts[2 + ti] || '').trim();
+                    const forms = raw.split(',').map(s => s.trim());
+                    if (forms.length === 6) {
+                        v[t] = {
+                            je: forms[0], tu: forms[1], il: forms[2],
+                            nous: forms[3], vous: forms[4], ils: forms[5]
+                        };
+                    } else {
+                        // Only "je" form available
+                        v[t] = { je: raw, tu: raw, il: raw, nous: raw, vous: raw, ils: raw };
+                        v[t + '_je_only'] = true;
+                    }
+                });
+                data.push(v);
             }
         }
+        verbs = data;
+    }
 
-        function parseCSV(text) {
-            const lines = text.trim().split('\n');
-            const data = [];
-            for (let i = 1; i < lines.length; i++) {
-                const parts = lines[i].split(';');
-                if (parts.length >= 6) {
-                    data.push({
-                        id: i,
-                        de: parts[0],
-                        inf: parts[1],
-                        cond: parts[2],
-                        imp: parts[3],
-                        pc: parts[4],
-                        cat: parts[5].trim()
-                    });
-                }
-            }
-            verbs = data;
+    // ── HELPERS ──
+    function getActiveVerbs() {
+        if (favoritesOnly) return verbs.filter(v => favorites.includes(v.id));
+        return verbs;
+    }
+
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function toggleFavorite(id, e) {
+        if (e) e.stopPropagation();
+        if (favorites.includes(id)) {
+            favorites = favorites.filter(f => f !== id);
+        } else {
+            favorites.push(id);
+        }
+        localStorage.setItem('vmFavorites', JSON.stringify(favorites));
+        render();
+    }
+
+    function toggleFavFilter() {
+        favoritesOnly = !favoritesOnly;
+        document.getElementById('fav-filter-toggle')?.classList.toggle('active', favoritesOnly);
+        document.getElementById('m-btn-fav')?.classList.toggle('active', favoritesOnly);
+        render();
+    }
+
+    // ── TENSE ──
+    function setTense(t) {
+        currentTense = t;
+        ['cond', 'imp', 'pc'].forEach(id => {
+            document.getElementById(`d-btn-${id}`)?.classList.toggle('active', id === t);
+        });
+        render();
+    }
+
+    // ── MODE ──
+    function setMode(m) {
+        currentMode = m;
+        ['study', 'flashcard', 'quiz'].forEach(id => {
+            document.getElementById(`m-btn-${id}`)?.classList.toggle('active', id === m);
+            document.querySelector(`.nav-mode-btn[onclick="setMode('${id}')"]`)?.classList.toggle('active', id === m);
+        });
+
+        if (m === 'flashcard') {
+            fcDeck = shuffle(getActiveVerbs());
+            fcIndex = 0;
+        }
+        if (m === 'quiz') {
+            initQuiz();
+        }
+        render();
+    }
+
+    // ── RENDER ──
+    function render() {
+        const main = document.getElementById('main-content');
+        main.innerHTML = '';
+        if (currentMode === 'study') renderStudy(main);
+        else if (currentMode === 'flashcard') renderFlashcard(main);
+        else if (currentMode === 'quiz') renderQuizView(main);
+    }
+
+    // ── STUDY ──
+    function renderStudy(container) {
+        const list = getActiveVerbs();
+        if (!list.length) {
+            container.innerHTML = `<div style="text-align:center;padding:5rem 2rem;color:var(--muted);font-weight:700;">
+                ${favoritesOnly ? 'Keine Favoriten vorhanden. Markiere Verben mit ★.' : 'Keine Verben geladen.'}
+            </div>`;
+            return;
         }
 
-        function shuffleVerbs() {
-            randomizedVerbs = [...verbs].sort(() => Math.random() - 0.5);
-        }
+        const cats = [...new Set(list.map(v => v.cat))];
+        cats.forEach(cat => {
+            const vList = list.filter(v => v.cat === cat);
+            const isSpecial = cat.includes('PARTICULIERS') || cat.toUpperCase().includes('IRR');
+            const section = document.createElement('div');
+            section.className = 'section-mb';
 
-        function toggleFavorite(id, event) {
-            if(event) event.stopPropagation();
-            if (favorites.includes(id)) {
-                favorites = favorites.filter(fid => fid !== id);
-            } else {
-                favorites.push(id);
-            }
-            localStorage.setItem('verbFavorites', JSON.stringify(favorites));
-            render();
-        }
+            const label = document.createElement('div');
+            label.className = `study-section-label${isSpecial ? ' special' : ''}`;
+            label.textContent = cat;
+            section.appendChild(label);
 
-        function setTense(t) {
-            currentTense = t;
-            ['cond', 'imp', 'pc'].forEach(id => {
-                const btn = document.getElementById(`d-btn-${id}`);
-                if(btn) btn.className = id === t ? "px-4 py-1.5 rounded-lg text-[10px] font-black bg-white shadow-sm text-indigo-600" : "px-4 py-1.5 rounded-lg text-[10px] font-black text-slate-400 hover:text-slate-600";
-            });
-            document.getElementById('mobile-tense-label').innerText = t === 'cond' ? 'Conditionnel' : t === 'imp' ? 'Imparfait' : 'Passé Composé';
-            if (!document.getElementById('tense-modal').classList.contains('hidden')) toggleTenseMenu();
-            render();
-        }
+            vList.forEach(v => {
+                const card = document.createElement('div');
+                card.className = `verb-card${isSpecial ? ' special' : ''}`;
 
-        function toggleTenseMenu() {
-            document.getElementById('tense-modal').classList.toggle('hidden');
-        }
+                const isFav = favorites.includes(v.id);
 
-        function setMode(m) {
-            currentMode = m;
-            if (m === 'flashcard' || m === 'quiz') shuffleVerbs();
-            flashcardIndex = 0;
-            quizActiveVerb = null;
-            render();
-        }
-
-        function render() {
-            const main = document.getElementById('main-content');
-            main.innerHTML = '';
-            if (currentMode === 'study') renderStudy(main);
-            if (currentMode === 'flashcard') renderFlashcard(main);
-            if (currentMode === 'quiz') renderQuiz(main);
-        }
-
-        function renderStudy(container) {
-            const cats = [...new Set(verbs.map(v => v.cat))].sort((a,b) => {
-                if(a.includes('PARTICULIERS') || a.includes('IRR')) return -1;
-                return 1;
-            });
-
-            cats.forEach(cat => {
-                const vList = verbs.filter(v => v.cat === cat);
-                const section = document.createElement('div');
-                section.className = "mb-12";
-                const isSpecial = cat.includes('PARTICULIERS') || cat.includes('IRR');
-                
-                section.innerHTML = `
-                    <h2 class="text-[10px] font-black ${isSpecial ? 'text-indigo-500' : 'text-slate-300'} uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
-                        ${cat}
-                    </h2>
-                    <div class="grid gap-3">
-                        ${vList.map(v => `
-                            <div class="bg-white p-5 rounded-[1.5rem] border ${isSpecial ? 'border-indigo-100 bg-indigo-50/20' : 'border-slate-200'} shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative group">
-                                <button onclick="toggleFavorite(${v.id})" class="absolute top-4 right-4 text-slate-300 hover:text-amber-500 transition-colors">
-                                    <svg class="w-5 h-5 ${favorites.includes(v.id) ? 'star-active' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-                                </button>
-                                <div class="md:w-1/4">
-                                    <div class="text-[9px] font-black text-slate-300 uppercase leading-none mb-1">${v.de}</div>
-                                    <div class="text-lg font-bold text-slate-800">${v.inf}</div>
-                                </div>
-                                <div class="grid grid-cols-3 gap-2 flex-grow">
-                                    <div class="bg-indigo-50/50 p-3 rounded-2xl border border-indigo-100/50">
-                                        <div class="text-[8px] font-black text-indigo-300 uppercase mb-0.5">Cond.</div>
-                                        <div class="text-xs font-mono font-bold text-indigo-700">je ${v.cond}</div>
-                                    </div>
-                                    <div class="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100/50">
-                                        <div class="text-[8px] font-black text-emerald-300 uppercase mb-0.5">Imp.</div>
-                                        <div class="text-xs font-mono font-bold text-emerald-700">je ${v.imp}</div>
-                                    </div>
-                                    <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-100/50">
-                                        <div class="text-[8px] font-black text-amber-300 uppercase mb-0.5">P.C.</div>
-                                        <div class="text-xs font-mono font-bold text-amber-700">${v.pc}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
+                card.innerHTML = `
+                    <div class="verb-inf-block">
+                        <div class="verb-de">${v.de}</div>
+                        <div class="verb-inf">${v.inf}</div>
                     </div>
-                `;
-                container.appendChild(section);
-            });
-        }
-
-        function renderFlashcard(container) {
-            const v = randomizedVerbs[flashcardIndex % randomizedVerbs.length];
-            container.innerHTML = `
-                <div class="max-w-md mx-auto space-y-8 py-6">
-                    <div class="h-96 no-select" style="perspective: 2000px;" onclick="this.querySelector('.card-inner').classList.toggle('card-flipped')">
-                        <div class="card-inner relative w-full h-full shadow-2xl rounded-[2.5rem]">
-                            <div class="card-front bg-white rounded-[2.5rem] p-10 flex flex-col items-center justify-center border-b-8 border-indigo-500">
-                                <button onclick="toggleFavorite(${v.id}, event)" class="absolute top-6 right-6 text-slate-300 hover:text-amber-500">
-                                    <svg class="w-6 h-6 ${favorites.includes(v.id) ? 'star-active' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-                                </button>
-                                <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-6">Deutsch</span>
-                                <h2 class="text-4xl font-black text-slate-800 text-center leading-tight">${v.de}</h2>
-                                <p class="mt-12 text-indigo-300 text-[10px] font-bold uppercase tracking-widest italic">Antippen</p>
-                            </div>
-                            <div class="card-back bg-indigo-600 rounded-[2.5rem] p-10 flex flex-col items-center justify-center text-white border-8 border-indigo-500 shadow-inner">
-                                <div class="text-[10px] font-bold opacity-50 uppercase tracking-widest mb-2">Lösung</div>
-                                <div class="text-2xl font-light italic mb-8">${v.inf}</div>
-                                <div class="w-full space-y-4">
-                                    <div class="bg-white/10 p-4 rounded-2xl">
-                                        <div class="text-[8px] uppercase opacity-60 font-black mb-1">Conditionnel</div>
-                                        <div class="text-xl font-bold">je ${v.cond}</div>
-                                    </div>
-                                    <div class="bg-white/10 p-4 rounded-2xl">
-                                        <div class="text-[8px] uppercase opacity-60 font-black mb-1">Imparfait</div>
-                                        <div class="text-xl font-bold">je ${v.imp}</div>
-                                    </div>
-                                    <div class="bg-white/10 p-4 rounded-2xl">
-                                        <div class="text-[8px] uppercase opacity-60 font-black mb-1">Passé Composé</div>
-                                        <div class="text-xl font-bold">${v.pc}</div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="verb-forms">
+                        <div class="form-chip cond">
+                            <div class="form-chip-label">Cond.</div>
+                            <div class="form-chip-value">je ${getJeForm(v, 'cond')}</div>
+                        </div>
+                        <div class="form-chip imp">
+                            <div class="form-chip-label">Imp.</div>
+                            <div class="form-chip-value">je ${getJeForm(v, 'imp')}</div>
+                        </div>
+                        <div class="form-chip pc">
+                            <div class="form-chip-label">P.C.</div>
+                            <div class="form-chip-value">${getJeForm(v, 'pc')}</div>
                         </div>
                     </div>
-                    <div class="flex gap-4">
-                        <button onclick="flashcardIndex = (flashcardIndex - 1 + randomizedVerbs.length) % randomizedVerbs.length; render();" class="flex-1 bg-white p-5 rounded-2xl font-black text-xs text-slate-400 border border-slate-200">ZURÜCK</button>
-                        <button onclick="flashcardIndex = (flashcardIndex + 1) % randomizedVerbs.length; render();" class="flex-1 bg-indigo-600 text-white p-5 rounded-2xl font-black text-xs shadow-xl shadow-indigo-100">ZUFÄLLIG NÄCHSTE</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderQuiz(container) {
-            if (!quizActiveVerb) {
-                quizActiveVerb = randomizedVerbs[Math.floor(Math.random() * randomizedVerbs.length)];
-            }
-            const v = quizActiveVerb;
-            const tenseTitle = currentTense === 'cond' ? 'Conditionnel' : currentTense === 'imp' ? 'Imparfait' : 'Passé Composé';
-            
-            container.innerHTML = `
-                <div class="max-w-md mx-auto bg-white rounded-[2.5rem] p-10 shadow-2xl border border-slate-100 relative">
-                    <button onclick="toggleFavorite(${v.id}, event)" class="absolute top-10 right-10 text-slate-300 hover:text-amber-500">
-                        <svg class="w-6 h-6 ${favorites.includes(v.id) ? 'star-active' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                    <button class="star-btn${isFav ? ' active' : ''}" onclick="toggleFavorite(${v.id}, event)" title="Favorit">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
                     </button>
-                    <div class="flex justify-between items-center mb-10">
-                        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${tenseTitle}</span>
-                        <span class="bg-indigo-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black">${score} PKT</span>
-                    </div>
-                    <div class="text-center mb-10">
-                        <h2 class="text-4xl font-black text-slate-800 mb-2">${v.de}</h2>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest italic">Form: 1. Pers. Sing.</p>
-                    </div>
-                    <div id="quiz-inputs" class="space-y-4">
-                        <div class="group">
-                            <label class="text-[9px] font-black text-slate-300 uppercase ml-4">Infinitiv</label>
-                            <input type="text" id="q-inf" autocomplete="off" class="w-full p-5 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-bold text-lg transition-all" placeholder="...">
-                        </div>
-                        <div class="group">
-                            <label class="text-[9px] font-black text-slate-300 uppercase ml-4">Konjugation</label>
-                            <input type="text" id="q-conj" autocomplete="off" class="w-full p-5 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-bold text-lg transition-all" placeholder="je ...">
-                        </div>
-                        <button id="check-btn" onclick="checkQuiz('${v.inf}', '${v[currentTense]}')" class="w-full bg-indigo-600 text-white font-black py-6 rounded-2xl shadow-xl shadow-indigo-100 active:scale-95 transition-transform mt-4 text-sm tracking-widest">PRÜFEN</button>
-                    </div>
-                    <div id="fb" class="mt-8 hidden p-5 rounded-2xl text-center font-bold text-sm"></div>
-                    <button id="next-btn" onclick="nextQuiz()" class="hidden w-full bg-slate-800 text-white font-black py-6 rounded-2xl shadow-xl active:scale-95 transition-transform mt-4 text-sm tracking-widest uppercase">Nächste Frage</button>
-                </div>
-            `;
+                `;
+                section.appendChild(card);
+            });
+
+            container.appendChild(section);
+        });
+    }
+
+    function getJeForm(v, tense) {
+        if (!v[tense]) return '–';
+        if (typeof v[tense] === 'string') return v[tense];
+        return v[tense].je || '–';
+    }
+
+    // ── FLASHCARD ──
+    function renderFlashcard(container) {
+        const list = getActiveVerbs();
+        if (!list.length) {
+            container.innerHTML = `<div style="text-align:center;padding:5rem 2rem;color:var(--muted);font-weight:700;">Keine Verben verfügbar.</div>`;
+            return;
         }
 
-        function checkQuiz(inf, conj) {
-            const userInf = document.getElementById('q-inf').value.trim().toLowerCase();
-            const userConj = document.getElementById('q-conj').value.trim().toLowerCase();
-            
-            const cleanedConj = userConj.replace(/^je\s+/, '').replace(/^j'/, '');
-            const targetConj = conj.toLowerCase().replace(/^je\s+/, '').replace(/^j'/, '');
+        if (!fcDeck.length || fcDeck.some(v => !list.find(lv => lv.id === v.id))) {
+            fcDeck = shuffle(list);
+            fcIndex = 0;
+        }
 
-            const isCorrect = userInf === inf.toLowerCase() && cleanedConj === targetConj;
-            
-            const fb = document.getElementById('fb');
-            fb.classList.remove('hidden');
-            
-            // Disable inputs
-            document.getElementById('q-inf').disabled = true;
-            document.getElementById('q-conj').disabled = true;
-            document.getElementById('check-btn').classList.add('hidden');
-            document.getElementById('next-btn').classList.remove('hidden');
+        const v = fcDeck[fcIndex % fcDeck.length];
+        const isFav = favorites.includes(v.id);
+        const total = fcDeck.length;
 
-            if (isCorrect) {
-                score += 10;
-                fb.className = "mt-8 p-5 rounded-2xl text-center font-bold text-sm bg-emerald-50 text-emerald-700 border border-emerald-100";
-                fb.innerHTML = "✨ Sehr gut! +10 Punkte";
-            } else {
-                fb.className = "mt-8 p-5 rounded-2xl text-center font-bold text-sm bg-rose-50 text-rose-700 border border-rose-100";
-                fb.innerHTML = `Lösung: <span class="block text-lg mt-1">${inf} & je ${conj}</span>`;
+        const wrap = document.createElement('div');
+        wrap.className = 'flashcard-wrap';
+
+        wrap.innerHTML = `
+            <div class="flashcard-counter">${fcIndex + 1} / ${total}</div>
+            <div class="card-scene" id="fc-scene" onclick="document.getElementById('fc-inner').classList.toggle('flipped')">
+                <div class="card-inner" id="fc-inner">
+                    <div class="card-face card-front">
+                        <div class="card-hint">Deutsch</div>
+                        <div class="card-word">${v.de}</div>
+                        <div class="card-flip-hint">antippen zum umdrehen</div>
+                        <button class="star-btn${isFav ? ' active' : ''}" style="position:absolute;top:1.5rem;right:1.5rem;" onclick="toggleFavorite(${v.id}, event)">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-hint">Lösung</div>
+                        <div class="card-word">${v.inf}</div>
+                        <div class="card-back-forms">
+                            <div class="back-form-row">
+                                <label>Conditionnel</label>
+                                <span>je ${getJeForm(v, 'cond')}</span>
+                            </div>
+                            <div class="back-form-row">
+                                <label>Imparfait</label>
+                                <span>je ${getJeForm(v, 'imp')}</span>
+                            </div>
+                            <div class="back-form-row">
+                                <label>Passé Composé</label>
+                                <span>${getJeForm(v, 'pc')}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-nav">
+                <button class="card-nav-btn" onclick="fcNav(-1)">← Zurück</button>
+                <button class="card-nav-btn primary" onclick="fcNav(1)">Weiter →</button>
+            </div>
+        `;
+
+        container.appendChild(wrap);
+    }
+
+    function fcNav(dir) {
+        const list = getActiveVerbs();
+        if (!fcDeck.length) return;
+        fcIndex = (fcIndex + dir + fcDeck.length) % fcDeck.length;
+        render();
+    }
+
+    // ── QUIZ ──
+    function initQuiz() {
+        const list = getActiveVerbs();
+        quizDeck = shuffle(list);
+        quizErrors = [];
+        quizIndex = 0;
+        quizScore = 0;
+        quizTotal = quizDeck.length;
+        quizIsRetry = false;
+        quizAnswered = false;
+        quizCompleted = false;
+        quizCurrentVerb = null;
+        nextQuizVerb();
+    }
+
+    function nextQuizVerb() {
+        quizAnswered = false;
+
+        // Every ~4 cards, insert a retry if there are errors
+        if (quizErrors.length > 0 && quizIndex > 0 && quizIndex % 4 === 0) {
+            const retryVerb = quizErrors.splice(Math.floor(Math.random() * quizErrors.length), 1)[0];
+            quizCurrentVerb = retryVerb;
+            quizIsRetry = true;
+        } else if (quizIndex < quizDeck.length) {
+            quizCurrentVerb = quizDeck[quizIndex];
+            quizIsRetry = false;
+            quizIndex++;
+        } else if (quizErrors.length > 0) {
+            // Done with deck, go through remaining errors
+            const retryVerb = quizErrors.splice(0, 1)[0];
+            quizCurrentVerb = retryVerb;
+            quizIsRetry = true;
+            quizTotal++;
+        } else {
+            quizCompleted = true;
+            quizCurrentVerb = null;
+        }
+
+        // Pick random person
+        const personObj = PERSONS[Math.floor(Math.random() * PERSONS.length)];
+        quizCurrentPerson = personObj;
+        quizCurrentTense = currentTense;
+    }
+
+    function renderQuizView(container) {
+        const list = getActiveVerbs();
+        if (!list.length) {
+            container.innerHTML = `<div style="text-align:center;padding:5rem 2rem;color:var(--muted);font-weight:700;">
+                Keine Verben verfügbar.
+            </div>`;
+            return;
+        }
+
+        if (quizCompleted) {
+            renderQuizComplete(container);
+            return;
+        }
+
+        if (!quizCurrentVerb) { initQuiz(); }
+
+        const v = quizCurrentVerb;
+        const person = quizCurrentPerson;
+        const tenseTitle = currentTense === 'cond' ? 'Conditionnel' : currentTense === 'imp' ? 'Imparfait' : 'Passé Composé';
+
+        // Progress: include errors re-injected
+        const answered = quizIndex + (quizIsRetry ? 1 : 0);
+        const progressPct = Math.min(100, Math.round((answered / Math.max(quizTotal, 1)) * 100));
+
+        const wrap = document.createElement('div');
+        wrap.className = 'quiz-wrap';
+
+        // Progress bar
+        const progOuter = document.createElement('div');
+        progOuter.className = 'quiz-progress-bar-outer';
+        progOuter.innerHTML = `<div class="quiz-progress-bar-inner" style="width:${progressPct}%"></div>`;
+        wrap.appendChild(progOuter);
+
+        const stats = document.createElement('div');
+        stats.className = 'quiz-progress-stats';
+        const done = quizIndex - 1 + (quizIsRetry ? 1 : 0);
+        stats.innerHTML = `
+            <span>${done} / ${quizTotal} beantwortet</span>
+            <span class="score">${quizScore} Punkte</span>
+            <span class="errors">${quizErrors.length} Fehler</span>
+        `;
+        wrap.appendChild(stats);
+
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+
+        const isFav = favorites.includes(v.id);
+
+        // Retry badge or normal badge
+        const badgeHtml = quizIsRetry
+            ? `<div class="quiz-badge retry"><span class="dot"></span> Wiederholung — vorheriger Fehler</div>`
+            : `<div class="quiz-badge"><span class="dot" style="background:var(--accent2)"></span> ${tenseTitle}</div>`;
+
+        // Get the correct form for the chosen person
+        const formData = v[currentTense];
+        let correctForm = '';
+        if (formData && typeof formData === 'object') {
+            correctForm = formData[person.key] || formData.je || '';
+        } else if (typeof formData === 'string') {
+            correctForm = formData;
+        }
+
+        // For PC, only je form makes sense
+        const actualPronoun = currentTense === 'pc' ? '' : person.pronoun;
+        const displayPronoun = currentTense === 'pc' ? '' : `${person.pronoun} `;
+
+        card.innerHTML = `
+            ${badgeHtml}
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+                <div>
+                    <div class="quiz-word">${v.de}</div>
+                    <div class="quiz-prompt">
+                        ${currentTense === 'pc' 
+                            ? `Passé Composé von <strong>${v.inf}</strong>` 
+                            : `<strong>${person.label}</strong> im ${tenseTitle} von <strong>${v.inf}</strong>`}
+                    </div>
+                </div>
+                <button class="star-btn${isFav ? ' active' : ''}" style="margin-top:0.5rem;" onclick="toggleFavorite(${v.id}, event)">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Infinitiv</label>
+                <input class="quiz-input" id="q-inf" type="text" autocomplete="off" placeholder="infinitif…" />
+            </div>
+            <div class="input-group">
+                <label class="input-label">${currentTense === 'pc' ? 'Passé Composé' : `Konjugation (${person.pronoun})`}</label>
+                <input class="quiz-input" id="q-conj" type="text" autocomplete="off" placeholder="${displayPronoun}…" />
+            </div>
+
+            <button class="quiz-submit" id="q-submit" onclick="checkQuiz()">Prüfen</button>
+
+            <div class="quiz-feedback" id="q-feedback"></div>
+            <button class="quiz-next-btn" id="q-next" onclick="advanceQuiz()">Nächste Frage →</button>
+        `;
+
+        wrap.appendChild(card);
+        container.appendChild(wrap);
+
+        // Store for check
+        window._quizCorrectInf = v.inf.toLowerCase();
+        window._quizCorrectConj = correctForm.toLowerCase();
+        window._quizDisplayPronoun = displayPronoun;
+
+        // Enter key support
+        const infInput = document.getElementById('q-inf');
+        const conjInput = document.getElementById('q-conj');
+        [infInput, conjInput].forEach(el => {
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    if (!window._quizAnswered) checkQuiz();
+                    else advanceQuiz();
+                }
+            });
+        });
+        window._quizAnswered = false;
+    }
+
+    function checkQuiz() {
+        if (window._quizAnswered) return;
+        window._quizAnswered = true;
+
+        const userInf = document.getElementById('q-inf').value.trim().toLowerCase();
+        const userConj = document.getElementById('q-conj').value.trim().toLowerCase();
+
+        const cleanUser = userConj.replace(/^(je|tu|il|elle|ils|elles|nous|vous|j'|i')\s*/i, '').trim();
+        const cleanTarget = window._quizCorrectConj.replace(/^(je|tu|il|elle|ils|elles|nous|vous|j'|i')\s*/i, '').trim();
+
+        const infOk = userInf === window._quizCorrectInf;
+        const conjOk = cleanUser === cleanTarget;
+        const isCorrect = infOk && conjOk;
+
+        const infInput = document.getElementById('q-inf');
+        const conjInput = document.getElementById('q-conj');
+        const fb = document.getElementById('q-feedback');
+        const submitBtn = document.getElementById('q-submit');
+        const nextBtn = document.getElementById('q-next');
+
+        infInput.disabled = true;
+        conjInput.disabled = true;
+        infInput.classList.add(infOk ? 'correct' : 'wrong');
+        conjInput.classList.add(conjOk ? 'correct' : 'wrong');
+        submitBtn.style.display = 'none';
+        nextBtn.classList.add('show');
+
+        fb.classList.add('show');
+        if (isCorrect) {
+            quizScore += 10;
+            fb.classList.add('correct');
+            fb.innerHTML = `✨ Richtig! +10 Punkte`;
+        } else {
+            fb.classList.add('wrong');
+            fb.innerHTML = `✗ Nicht ganz.
+                <div class="feedback-solution">
+                    ${window._quizCorrectInf} &nbsp;·&nbsp; ${window._quizDisplayPronoun}${window._quizCorrectConj}
+                </div>`;
+            // Add to errors queue (if not already a retry)
+            if (!quizIsRetry) {
+                quizErrors.push(quizCurrentVerb);
             }
         }
+    }
 
-        function nextQuiz() {
-            quizActiveVerb = null;
-            render();
-        }
+    function advanceQuiz() {
+        nextQuizVerb();
+        render();
+    }
 
-        loadVerbs();
+    function renderQuizComplete(container) {
+        const total = quizTotal;
+        const pct = total > 0 ? Math.round((quizScore / (total * 10)) * 100) : 0;
+        const wrap = document.createElement('div');
+        wrap.className = 'quiz-wrap';
+
+        const card = document.createElement('div');
+        card.className = 'quiz-card quiz-complete';
+        card.innerHTML = `
+            <div style="font-size:3rem;margin-bottom:1rem;">${pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚'}</div>
+            <h2>${pct >= 80 ? 'Excellent!' : pct >= 50 ? 'Gut gemacht!' : 'Weiter üben!'}</h2>
+            <p>${total} Fragen beantwortet</p>
+            <div class="quiz-stats-grid">
+                <div class="stat-box">
+                    <div class="stat-val" style="color:var(--accent2)">${quizScore}</div>
+                    <div class="stat-label">Punkte</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val" style="color:var(--green)">${pct}%</div>
+                    <div class="stat-label">Richtig</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val" style="color:var(--amber)">${total}</div>
+                    <div class="stat-label">Fragen</div>
+                </div>
+            </div>
+            <button class="restart-btn" onclick="initQuiz();render()">Nochmal starten</button>
+        `;
+        wrap.appendChild(card);
+        container.appendChild(wrap);
+    }
+
+    // ── TENSE MODAL ──
+    function openTenseModal() {
+        document.getElementById('tense-modal').classList.add('show');
+    }
+
+    function closeTenseModal() {
+        document.getElementById('tense-modal').classList.remove('show');
+    }
+
+    document.getElementById('tense-modal').addEventListener('click', e => {
+        if (e.target === document.getElementById('tense-modal')) closeTenseModal();
+    });
+
+    // ── BOOT ──
+    loadVerbs();
     </script>
 </body>
 </html>
