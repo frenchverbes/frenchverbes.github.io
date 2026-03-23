@@ -14,6 +14,21 @@
   --amber:#d97706;--amber-l:#fffbeb;--purple:#7c3aed;--purple-l:#f5f3ff;
   --r:14px;--r-sm:9px;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.10);
 }
+body.dark{
+  --bg:#111113;--bg2:#1a1a1f;--white:#1f1f26;--border:#2e2e3a;--border2:#44445a;
+  --text:#e8e8f0;--text2:#8888a0;--text3:#55556a;
+  --accent:#6a8fff;--accent-l:#1a2040;--accent-d:#8aabff;
+  --green:#34d399;--green-l:#0d2a1e;--red:#f87171;--red-l:#2a1010;
+  --amber:#fbbf24;--amber-l:#2a1f00;--purple:#a78bfa;--purple-l:#1e1030;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.4);
+}
+body.dark #topbar{background:rgba(17,17,19,.93);}
+body.dark #mobnav{background:rgba(17,17,19,.95);}
+body.dark #loader{background:var(--bg);}
+body.dark .fc-back{box-shadow:0 8px 28px rgba(100,130,255,.15);}
+body.dark .q-input:focus{background:var(--bg2);}
+body.dark .q-input.good{background:var(--green-l);}
+body.dark .q-input.bad{background:var(--red-l);}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 /* TOPBAR */
@@ -31,6 +46,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .icon-btn:hover{border-color:var(--border2);color:var(--text);}
 .icon-btn.fav.on{background:var(--amber-l);border-color:var(--amber);color:var(--amber);}
 .icon-btn.save.on{background:var(--green-l);border-color:var(--green);color:var(--green);}
+.icon-btn.dark-tog.on{background:var(--accent-l);border-color:var(--accent);color:var(--accent);}
 /* CONTENT */
 #content{max-width:940px;margin:0 auto;padding:1.5rem 1.25rem 6rem;}
 /* STUDY */
@@ -197,6 +213,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="icon-btn fav" id="fav-toggle" onclick="toggleFavFilter()" title="Nur Favoriten">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     </button>
+    <button class="icon-btn dark-tog" id="dark-toggle" onclick="toggleDark()" title="Dark Mode">
+      <svg id="dark-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="dark-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
     <button class="icon-btn save" id="save-btn" onclick="saveProgress()" title="Speichern">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
     </button>
@@ -259,7 +279,10 @@ async function loadVerbs(){
   finally{
     document.getElementById('loader').style.display='none';
     document.getElementById('content').classList.add('vis');
-    setTense('cond'); setMode('study');
+    loadDark();
+    loadProgress();
+    setTense(tense);
+    setMode('study');
   }
 }
 
@@ -399,10 +422,59 @@ function toggleFav(id,e){
   localStorage.setItem('vm_favs',JSON.stringify(favs));
   render();
 }
+function toggleDark(){
+  const isDark=document.body.classList.toggle('dark');
+  localStorage.setItem('vm_dark',isDark?'1':'0');
+  document.getElementById('dark-icon-moon').style.display=isDark?'none':'';
+  document.getElementById('dark-icon-sun').style.display=isDark?'':'none';
+  document.getElementById('dark-toggle')?.classList.toggle('on',isDark);
+}
+function loadDark(){
+  if(localStorage.getItem('vm_dark')==='1'){
+    document.body.classList.add('dark');
+    document.getElementById('dark-icon-moon').style.display='none';
+    document.getElementById('dark-icon-sun').style.display='';
+    document.getElementById('dark-toggle')?.classList.add('on');
+  }
+}
 function saveProgress(){
-  localStorage.setItem('vm_score',qScore);
+  // Save full quiz state
+  const save={
+    qScore,qIdx,qTotal,qDone,qRetry,
+    qDeckIds:qDeck.map(v=>v.id),
+    qErrorIds:qErrors.map(v=>v.id),
+    qCurVerbId:qCurVerb?.id??null,
+    qCurPersonKey:qCurPerson?.key??null,
+    tense,favs,favsOnly,
+    savedAt:new Date().toISOString()
+  };
+  localStorage.setItem('vm_save',JSON.stringify(save));
   const btn=document.getElementById('save-btn');
   if(btn){btn.classList.add('on');setTimeout(()=>btn.classList.remove('on'),1500);}
+}
+function loadProgress(){
+  try{
+    const raw=localStorage.getItem('vm_save');
+    if(!raw)return;
+    const s=JSON.parse(raw);
+    // Restore favs
+    if(s.favs) favs=s.favs;
+    if(s.favsOnly!==undefined) favsOnly=s.favsOnly;
+    if(s.tense) tense=s.tense;
+    // Restore quiz state — only if verbs are loaded
+    if(!verbs.length)return;
+    const byId=Object.fromEntries(verbs.map(v=>[v.id,v]));
+    if(s.qDeckIds)  qDeck   =s.qDeckIds.map(id=>byId[id]).filter(Boolean);
+    if(s.qErrorIds) qErrors =s.qErrorIds.map(id=>byId[id]).filter(Boolean);
+    if(s.qCurVerbId)   qCurVerb   =byId[s.qCurVerbId]??null;
+    if(s.qCurPersonKey) qCurPerson=PERSONS.find(p=>p.key===s.qCurPersonKey)??PERSONS[0];
+    qScore=s.qScore??0; qIdx=s.qIdx??0; qTotal=s.qTotal??0;
+    qDone=s.qDone??false; qRetry=s.qRetry??false;
+    // Update UI state
+    document.getElementById('fav-toggle')?.classList.toggle('on',favsOnly);
+    document.getElementById('m-fav')?.classList.toggle('on',favsOnly);
+    ['cond','imp','pc'].forEach(id=>document.getElementById('d-'+id)?.classList.toggle('on',id===tense));
+  } catch(e){console.warn('load failed',e);}
 }
 function openTS(){document.getElementById('tensesheet').classList.add('show');}
 function closeTS(){document.getElementById('tensesheet').classList.remove('show');}
@@ -536,8 +608,8 @@ function renderQuiz(c){
           <div class="q-word">${esc(v.de)}</div>
           <div class="q-prompt">
             ${isPc
-              ?`Passé Composé von <strong>${esc(v.inf)}</strong> · <strong>${p.label} (${p.key})</strong>`
-              :`${TL[tense]} von <strong>${esc(v.inf)}</strong>`
+              ?`Passé Composé · <strong>${p.label} (${p.key})</strong>`
+              :`${TL[tense]} · <strong>${p.label} (${p.key})</strong>`
             }
           </div>
         </div>
