@@ -71,7 +71,7 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
 .pos-name { font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pos-sub { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-top: 0.08rem; }
 .pnl-badge { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; text-align: right; white-space: nowrap; }
-.pnl-badge.up { color: var(--green); } .pnl-badge.down { color: var(--red); }
+.pnl-badge.up { color: var(--green); } .pnl-badge.down { color: var(--red); } .pnl-badge { color: var(--muted); }
 
 /* Eye toggle button */
 .eye-btn {
@@ -111,7 +111,7 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
 .lot-date { font-family: var(--mono); font-size: 0.58rem; color: var(--muted); margin-top: 0.06rem; }
 .lot-chf { font-family: var(--mono); font-size: 0.67rem; text-align: right; }
 .lot-pnl { font-family: var(--mono); font-size: 0.63rem; text-align: right; }
-.lot-pnl.up { color: var(--green); } .lot-pnl.down { color: var(--red); }
+.lot-pnl.up { color: var(--green); } .lot-pnl.down { color: var(--red); } .lot-pnl { color: var(--muted); }
 .lot-sell-btn {
   font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.04em; text-transform: uppercase;
   background: none; border: 1px solid var(--border); color: var(--muted);
@@ -585,6 +585,7 @@ function fmtNum(v) {
 }
 function fmtChf(v) { return 'CHF\u00a0' + fmtNum(v); }
 function fmtPct(v) { return (v >= 0 ? '+' : '') + v.toFixed(2) + '%'; }
+function pnlClass(v, pos, neg) { return Math.abs(v) < 0.005 ? '' : v > 0 ? pos : neg; }
 function fmtDate(iso) {
   const d = new Date(iso);
   return d.toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit', year:'2-digit' })
@@ -634,24 +635,25 @@ function renderAll() { updateSummary(); renderPositions(); renderSellPanel(); re
 
 function updateSummary() {
   let depotChf = 0;
-  let totalCostChf = 0;
+  let hiddenManualCost = 0;
   const hidden = state.hidden || {};
   for (const lot of state.lots) {
-    if (hidden[lot.symbol]) continue;
+    if (hidden[lot.symbol]) {
+      if (lot.manual) hiddenManualCost += lot.shares * (lot.buyPriceChf || lot.buyPriceNative);
+      continue;
+    }
     const p = lot.currentPriceNative || lot.buyPriceNative;
-    const cost = lot.shares * (lot.buyPriceChf || toChf(lot.buyPriceNative, lot.currency));
     depotChf += lot.shares * toChf(p, lot.currency);
-    totalCostChf += cost;
   }
-  const total = state.cash + depotChf;
-  const invested = START_CASH - state.cash;
+  const virtualCash = state.cash + hiddenManualCost;
+  const total = virtualCash + depotChf;
   const pnl = ((total - START_CASH) / START_CASH) * 100;
-  document.getElementById('sumCash').textContent  = fmtNum(state.cash);
+  document.getElementById('sumCash').textContent  = fmtNum(virtualCash);
   document.getElementById('sumDepot').textContent = fmtNum(depotChf);
   document.getElementById('sumTotal').textContent = fmtNum(total);
   const el = document.getElementById('sumPnl');
   el.textContent = fmtPct(pnl);
-  el.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  el.style.color = Math.abs(pnl) < 0.005 ? 'var(--muted)' : pnl > 0 ? 'var(--green)' : 'var(--red)';
 }
 
 function toggleHidden(sym, event) {
@@ -705,12 +707,12 @@ function renderPositions() {
       existing.querySelector('.pos-sub').textContent = fmtChf(curPriceChf) + ' · ' + totalShares.toFixed(4);
       const pb = existing.querySelector('.pnl-badge');
       pb.textContent = fmtPct(pnlPct);
-      pb.className = 'pnl-badge ' + (pnlPct >= 0 ? 'up' : 'down');
+      pb.className = 'pnl-badge ' + (pnlClass(pnlPct, 'up', 'down'));
       existing.querySelector('.mv-cost').textContent = fmtChf(costChf);
       existing.querySelector('.mv-val').textContent  = fmtChf(curValChf);
       const pe = existing.querySelector('.mv-pnl');
       pe.textContent = (pnlAbs >= 0 ? '+' : '') + fmtChf(pnlAbs);
-      pe.className = 'meta-val mv-pnl ' + (pnlAbs >= 0 ? 'pos' : 'neg');
+      pe.className = 'meta-val mv-pnl ' + (pnlClass(pnlAbs, 'pos', 'neg'));
       existing.querySelector('.lots-list').innerHTML = buildLotsHtml(g);
       const eyeBtn = existing.querySelector('.eye-btn');
       if (eyeBtn) { eyeBtn.innerHTML = eyeIcon; eyeBtn.className = 'eye-btn' + (isHidden ? ' hidden' : ''); }
@@ -748,13 +750,13 @@ function renderPositions() {
           <div class="pos-name">${g.name}${manualBadge}</div>
           <div class="pos-sub">${fmtChf(curPriceChf)} · ${totalShares.toFixed(4)}</div>
         </div>
-        <div class="pnl-badge ${pnlPct >= 0 ? 'up' : 'down'}">${fmtPct(pnlPct)}</div>
+        <div class="pnl-badge ${pnlClass(pnlPct, 'up', 'down')}">${fmtPct(pnlPct)}</div>
         ${isManual ? `<button class="eye-btn${isHidden ? ' hidden' : ''}" onclick="toggleHidden('${g.symbol}', event)" title="${isHidden ? 'Einblenden' : 'Ausblenden'}">${eyeIcon}</button>` : ''}
       </div>
       <div class="pos-meta">
         <div><div class="meta-label">Einstand</div><div class="meta-val mv-cost">${fmtChf(costChf)}</div></div>
         <div><div class="meta-label">Aktuell</div><div class="meta-val mv-val">${fmtChf(curValChf)}</div></div>
-        <div><div class="meta-label">G/V</div><div class="meta-val mv-pnl ${pnlAbs >= 0 ? 'pos' : 'neg'}">${(pnlAbs >= 0 ? '+' : '') + fmtChf(pnlAbs)}</div></div>
+        <div><div class="meta-label">G/V</div><div class="meta-val mv-pnl ${pnlClass(pnlAbs, 'pos', 'neg')}">${(pnlAbs >= 0 ? '+' : '') + fmtChf(pnlAbs)}</div></div>
       </div>
       <div class="lots-list" id="lots-${g.symbol}">${buildLotsHtml(g)}</div>
       ${chartSection}`;
@@ -801,7 +803,7 @@ function buildLotsHtml(g) {
           <div class="lot-date">${fmtDate(lot.boughtAt)}</div>
         </div>
         <div class="lot-chf">${fmtChf(curChf)}</div>
-        <div class="lot-pnl ${pnlAbs >= 0 ? 'up' : 'down'}">${fmtPct(pnlPct)}</div>
+        <div class="lot-pnl ${pnlClass(pnlAbs, 'up', 'down')}">${fmtPct(pnlPct)}</div>
         <button class="lot-sell-btn" onclick="quickSellLot('${lot.id}')">Verk.</button>
       </div>`;
   }).join('');
@@ -1027,7 +1029,7 @@ function renderSellPanel() {
       <div class="sell-row">
         <span class="sell-ticker">${g.symbol}</span>
         <span class="sell-info">${totalShares.toFixed(3)} · ${fmtChf(curValChf)}</span>
-        <span class="sell-pnl ${pnl >= 0 ? 'up' : 'down'}">${fmtPct(pnl)}</span>
+        <span class="sell-pnl ${pnlClass(pnl, 'up', 'down')}">${fmtPct(pnl)}</span>
         <button class="sell-pick-btn ${isSel ? 'selected' : ''}" onclick="selectSellSym('${g.symbol}','${totalShares}')">
           ${isSel ? '✓' : 'Wählen'}
         </button>
