@@ -1,5 +1,5 @@
 // API Key für dpaste.com (Wird für den Upload verwendet)
-const API_KEY = '99817c306d7e554e'; // BITTE ERSETZEN DURCH IHREN EIGENEN TOKEN
+const API_KEY = 'dpaste'; // BITTE ERSETZEN DURCH IHREN EIGENEN TOKEN
 
 // Standard-Verben (Zurück zur Liste Button)
 const AUX_VERBS = ['être', 'avoir']; 
