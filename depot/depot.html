@@ -55,7 +55,7 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
 @keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
 .pos-header {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 0 0.6rem;
+  display: grid; grid-template-columns: auto 1fr auto auto; gap: 0 0.6rem;
   align-items: center; padding: 0.8rem 1rem 0.45rem;
   cursor: pointer; user-select: none; transition: background 0.12s;
 }
@@ -67,10 +67,32 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
   background: var(--surface2); border: 1px solid var(--border); color: var(--accent);
   padding: 0.2rem 0.45rem; border-radius: 4px; min-width: 48px; text-align: center;
 }
+.ticker-badge.manual { border-color: rgba(200,240,96,0.3); }
 .pos-name { font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pos-sub { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-top: 0.08rem; }
 .pnl-badge { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; text-align: right; white-space: nowrap; }
 .pnl-badge.up { color: var(--green); } .pnl-badge.down { color: var(--red); }
+
+/* Eye toggle button */
+.eye-btn {
+  background: none; border: none; cursor: pointer; padding: 0.15rem 0.25rem;
+  color: var(--muted); transition: color 0.15s; font-size: 0.85rem; line-height: 1;
+  flex-shrink: 0;
+}
+.eye-btn:hover { color: var(--text); }
+.eye-btn.hidden { color: rgba(255,255,255,0.2); }
+
+/* Hidden position overlay */
+.pos-group.pos-hidden .pos-meta,
+.pos-group.pos-hidden .lots-list,
+.pos-group.pos-hidden .chart-container { display: none; }
+.pos-group.pos-hidden .pos-header { opacity: 0.4; }
+.pos-group.pos-hidden .pos-header:hover { opacity: 0.65; background: none; }
+.hidden-badge {
+  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--border); border-radius: 3px;
+  padding: 0.1rem 0.3rem; margin-left: 0.3rem;
+}
 
 .pos-meta { display: grid; grid-template-columns: repeat(3, 1fr); padding: 0 1rem 0.65rem; gap: 0.35rem; }
 .meta-label { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.08rem; }
@@ -96,6 +118,25 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
   padding: 0.18rem 0.4rem; border-radius: 3px; cursor: pointer; transition: all 0.12s; white-space: nowrap;
 }
 .lot-sell-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* Manual price update row */
+.manual-update-row {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem 0.65rem 1.25rem; border-top: 1px solid var(--border);
+}
+.manual-price-input {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); font-family: var(--mono); font-size: 0.72rem;
+  padding: 0.28rem 0.5rem; outline: none; width: 110px; transition: border-color 0.15s;
+}
+.manual-price-input:focus { border-color: var(--border-hover); }
+.manual-update-btn {
+  font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.04em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  padding: 0.18rem 0.4rem; border-radius: 3px; cursor: pointer; transition: all 0.12s; white-space: nowrap;
+}
+.manual-update-btn:hover { border-color: var(--accent); color: var(--accent); }
+.manual-update-label { font-family: var(--mono); font-size: 0.55rem; color: var(--muted); }
 
 .chart-container { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
 .chart-container.open { max-height: 380px; }
@@ -245,6 +286,31 @@ canvas { display: block; width: 100% !important; }
 .buy-btn:hover { opacity: 0.88; } .buy-btn:active { transform: scale(0.97); }
 .buy-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+/* Manual entry form */
+.manual-toggle {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  padding: 0.2rem 0; margin-bottom: 0.4rem; transition: color 0.15s; display: block;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.manual-toggle:hover { color: var(--text); }
+.manual-form { display: none; border-top: 1px solid var(--border); padding-top: 0.6rem; margin-top: 0.2rem; }
+.manual-form.visible { display: block; }
+.manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 0.4rem; }
+.manual-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text); font-family: var(--mono); font-size: 0.75rem;
+  padding: 0.42rem 0.6rem; outline: none; transition: border-color 0.15s;
+}
+.manual-input::placeholder { color: var(--muted); font-size: 0.68rem; }
+.manual-input:focus { border-color: var(--border-hover); }
+.manual-buy-btn {
+  width: 100%; background: var(--surface2); border: 1px solid var(--accent); border-radius: 6px; color: var(--accent);
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 0.45rem; cursor: pointer; transition: all 0.15s;
+}
+.manual-buy-btn:hover { background: var(--accent-dim); }
+
 .sell-list { max-height: 145px; overflow-y: auto; margin-bottom: 0.5rem; }
 .sell-row { display: flex; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid var(--border); gap: 0.45rem; }
 .sell-row:last-child { border-bottom: none; }
@@ -338,17 +404,17 @@ canvas { display: block; width: 100% !important; }
     transform: none; left: auto;
     width: auto; max-width: none;
     height: calc(100vh - 57px);
-    overflow-y: auto;
+    overflow: visible;
     border-top: none;
     border-left: 1px solid var(--border);
     display: flex; flex-direction: column;
   }
+  .panel-tabs { flex-shrink: 0; }
   .panel-body { flex: 1; padding: 1rem 1.25rem 1.25rem; overflow-y: auto; }
-  .panel-body { flex: 1; padding: 1rem 1.25rem 1.25rem; }
   .search-input, .amount-input { font-size: 0.88rem; padding: 0.58rem 0.8rem; }
   .buy-btn, .sell-confirm-btn { font-size: 0.72rem; padding: 0.58rem 1rem; }
   .sell-list { max-height: 300px; }
-    .dropdown {
+  .dropdown {
     bottom: auto;
     top: calc(100% + 4px);
     max-height: 280px;
@@ -438,6 +504,20 @@ canvas { display: block; width: 100% !important; }
       <input class="amount-input" id="amountInput" type="number" placeholder="Betrag in CHF" min="1" step="any" />
       <button class="buy-btn" id="buyBtn" onclick="buyPosition()" disabled>Kaufen</button>
     </div>
+
+    <!-- Manual entry -->
+    <button class="manual-toggle" onclick="toggleManualForm()">+ Manuell erfassen</button>
+    <div class="manual-form" id="manualForm">
+      <div class="manual-grid">
+        <input class="manual-input" id="manualTicker" placeholder="Ticker (z.B. NESN)" maxlength="12" />
+        <input class="manual-input" id="manualName" placeholder="Name (z.B. Nestlé)" />
+      </div>
+      <div class="manual-grid">
+        <input class="manual-input" id="manualBuyPrice" type="number" placeholder="Kaufkurs CHF" min="0.01" step="any" />
+        <input class="manual-input" id="manualAmount" type="number" placeholder="Betrag CHF" min="1" step="any" />
+      </div>
+      <button class="manual-buy-btn" onclick="buyManual()">Manuell kaufen</button>
+    </div>
   </div>
   <div class="panel-body" id="panel-sell" style="display:none">
     <div class="sell-list" id="sellList"></div>
@@ -451,7 +531,7 @@ canvas { display: block; width: 100% !important; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
 <script>
-const API = 'https://stock-worker.stock-worker.workers.dev';
+const API = 'https://stock-api-proxy.felix-43f.workers.dev';
 const START_CASH = 10000;
 const SK = 'depot_v3';
 const SYNC_CODE_KEY = 'depot_sync_code';
@@ -480,9 +560,9 @@ function resetConfirm() {
   Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
   charts = {}; priceCache = {};
   document.getElementById('positionsList').innerHTML = '';
-  document.getElementById('historySection').style.display = 'none'; // ← neu
-  document.getElementById('historyList').innerHTML = '';             // ← neu
-  silentPush();                                                       // ← neu: Cloud ebenfalls zurücksetzen
+  document.getElementById('historySection').style.display = 'none';
+  document.getElementById('historyList').innerHTML = '';
+  silentPush();
   renderAll();
 }
 
@@ -521,12 +601,13 @@ async function fetchPrice(symbol) {
 }
 
 async function refreshPrices() {
-  const symbols = [...new Set(state.lots.map(l => l.symbol))];
+  // Only refresh non-manual positions
+  const symbols = [...new Set(state.lots.filter(l => !l.manual).map(l => l.symbol))];
   for (const sym of symbols) {
     const q = await fetchPrice(sym);
     if (q && q.price) {
       state.lots.forEach(l => {
-        if (l.symbol === sym) { l.currentPriceNative = q.price; l.currency = q.currency; }
+        if (l.symbol === sym && !l.manual) { l.currentPriceNative = q.price; l.currency = q.currency; }
       });
     }
   }
@@ -537,17 +618,24 @@ async function refreshPrices() {
 function groupLots() {
   const map = {};
   for (const lot of state.lots) {
-    if (!map[lot.symbol]) map[lot.symbol] = { symbol: lot.symbol, name: lot.name, currency: lot.currency, lots: [] };
+    if (!map[lot.symbol]) map[lot.symbol] = { symbol: lot.symbol, name: lot.name, currency: lot.currency, manual: lot.manual || false, lots: [] };
     map[lot.symbol].lots.push(lot);
   }
   return Object.values(map);
+}
+
+// Returns only visible groups for summary calculations
+function visibleGroups() {
+  return groupLots().filter(g => !state.hidden || !state.hidden[g.symbol]);
 }
 
 function renderAll() { updateSummary(); renderPositions(); renderSellPanel(); renderHistory(); }
 
 function updateSummary() {
   let depotChf = 0;
+  const hidden = state.hidden || {};
   for (const lot of state.lots) {
+    if (hidden[lot.symbol]) continue; // skip hidden
     const p = lot.currentPriceNative || lot.buyPriceNative;
     depotChf += lot.shares * toChf(p, lot.currency);
   }
@@ -561,9 +649,18 @@ function updateSummary() {
   el.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
 }
 
+function toggleHidden(sym, event) {
+  event.stopPropagation();
+  if (!state.hidden) state.hidden = {};
+  state.hidden[sym] = !state.hidden[sym];
+  save();
+  renderAll();
+}
+
 function renderPositions() {
   const list = document.getElementById('positionsList');
   const groups = groupLots();
+  const hidden = state.hidden || {};
 
   if (!groups.length) {
     list.innerHTML = '<div class="empty-state"><strong>Keine Positionen</strong>Kaufe deine erste Aktie im Panel.</div>';
@@ -588,9 +685,18 @@ function renderPositions() {
     const pnlAbs = curValChf - costChf;
     const pnlPct = costChf > 0 ? (pnlAbs / costChf) * 100 : 0;
     const curPriceChf = toChf(g.lots[0].currentPriceNative || g.lots[0].buyPriceNative, g.currency);
+    const isHidden = !!hidden[g.symbol];
+    const isManual = !!g.manual;
+
+    const eyeIcon = isHidden
+      ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+      : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+
+    const manualBadge = isManual ? `<span style="font-family:var(--mono);font-size:0.45rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);border-radius:3px;padding:0.1rem 0.28rem;margin-left:0.3rem;">manuell</span>` : '';
 
     const existing = document.getElementById('grp-' + g.symbol);
     if (existing) {
+      existing.className = 'pos-group' + (isHidden ? ' pos-hidden' : '');
       existing.querySelector('.pos-sub').textContent = fmtChf(curPriceChf) + ' · ' + totalShares.toFixed(4);
       const pb = existing.querySelector('.pnl-badge');
       pb.textContent = fmtPct(pnlPct);
@@ -601,27 +707,17 @@ function renderPositions() {
       pe.textContent = (pnlAbs >= 0 ? '+' : '') + fmtChf(pnlAbs);
       pe.className = 'meta-val mv-pnl ' + (pnlAbs >= 0 ? 'pos' : 'neg');
       existing.querySelector('.lots-list').innerHTML = buildLotsHtml(g);
+      const eyeBtn = existing.querySelector('.eye-btn');
+      if (eyeBtn) { eyeBtn.innerHTML = eyeIcon; eyeBtn.className = 'eye-btn' + (isHidden ? ' hidden' : ''); }
       return;
     }
 
     const div = document.createElement('div');
-    div.className = 'pos-group'; div.id = 'grp-' + g.symbol; div.dataset.sym = g.symbol;
+    div.className = 'pos-group' + (isHidden ? ' pos-hidden' : '');
+    div.id = 'grp-' + g.symbol; div.dataset.sym = g.symbol;
     div.style.animationDelay = (gi * 0.04) + 's';
-    div.innerHTML = `
-      <div class="pos-header" onclick="toggleGroup('${g.symbol}')">
-        <div class="ticker-badge">${g.symbol}</div>
-        <div>
-          <div class="pos-name">${g.name}</div>
-          <div class="pos-sub">${fmtChf(curPriceChf)} · ${totalShares.toFixed(4)}</div>
-        </div>
-        <div class="pnl-badge ${pnlPct >= 0 ? 'up' : 'down'}">${fmtPct(pnlPct)}</div>
-      </div>
-      <div class="pos-meta">
-        <div><div class="meta-label">Einstand</div><div class="meta-val mv-cost">${fmtChf(costChf)}</div></div>
-        <div><div class="meta-label">Aktuell</div><div class="meta-val mv-val">${fmtChf(curValChf)}</div></div>
-        <div><div class="meta-label">G/V</div><div class="meta-val mv-pnl ${pnlAbs >= 0 ? 'pos' : 'neg'}">${(pnlAbs >= 0 ? '+' : '') + fmtChf(pnlAbs)}</div></div>
-      </div>
-      <div class="lots-list" id="lots-${g.symbol}">${buildLotsHtml(g)}</div>
+
+    const chartSection = isManual ? buildManualUpdateHtml(g) : `
       <div class="chart-container" id="chart-${g.symbol}">
         <div class="chart-inner">
           <div class="chart-tabs" id="tabs-${g.symbol}">
@@ -639,8 +735,50 @@ function renderPositions() {
           </div>
         </div>
       </div>`;
+
+    div.innerHTML = `
+      <div class="pos-header" onclick="toggleGroup('${g.symbol}')">
+        <div class="ticker-badge ${isManual ? 'manual' : ''}">${g.symbol}</div>
+        <div>
+          <div class="pos-name">${g.name}${manualBadge}</div>
+          <div class="pos-sub">${fmtChf(curPriceChf)} · ${totalShares.toFixed(4)}</div>
+        </div>
+        <div class="pnl-badge ${pnlPct >= 0 ? 'up' : 'down'}">${fmtPct(pnlPct)}</div>
+        ${isManual ? `<button class="eye-btn${isHidden ? ' hidden' : ''}" onclick="toggleHidden('${g.symbol}', event)" title="${isHidden ? 'Einblenden' : 'Ausblenden'}">${eyeIcon}</button>` : ''}
+      </div>
+      <div class="pos-meta">
+        <div><div class="meta-label">Einstand</div><div class="meta-val mv-cost">${fmtChf(costChf)}</div></div>
+        <div><div class="meta-label">Aktuell</div><div class="meta-val mv-val">${fmtChf(curValChf)}</div></div>
+        <div><div class="meta-label">G/V</div><div class="meta-val mv-pnl ${pnlAbs >= 0 ? 'pos' : 'neg'}">${(pnlAbs >= 0 ? '+' : '') + fmtChf(pnlAbs)}</div></div>
+      </div>
+      <div class="lots-list" id="lots-${g.symbol}">${buildLotsHtml(g)}</div>
+      ${chartSection}`;
     list.appendChild(div);
   });
+}
+
+function buildManualUpdateHtml(g) {
+  return `
+    <div class="chart-container" id="chart-${g.symbol}">
+      <div class="manual-update-row">
+        <span class="manual-update-label">Kurs aktualisieren:</span>
+        <input class="manual-price-input" id="manualCurPrice-${g.symbol}" type="number" placeholder="${fmtNum(g.lots[0].currentPriceNative || g.lots[0].buyPriceNative)}" min="0.01" step="any" />
+        <button class="manual-update-btn" onclick="updateManualPrice('${g.symbol}')">Setzen</button>
+      </div>
+    </div>`;
+}
+
+function updateManualPrice(sym) {
+  const input = document.getElementById('manualCurPrice-' + sym);
+  const newPrice = parseFloat(input.value);
+  if (!newPrice || newPrice <= 0) return;
+  state.lots.forEach(l => {
+    if (l.symbol === sym && l.manual) l.currentPriceNative = newPrice;
+  });
+  input.value = '';
+  save();
+  silentPush();
+  renderAll();
 }
 
 function buildLotsHtml(g) {
@@ -667,10 +805,11 @@ function buildLotsHtml(g) {
 function toggleGroup(sym) {
   const chartEl = document.getElementById('chart-' + sym);
   const lotsEl  = document.getElementById('lots-'  + sym);
-  const wasOpen = chartEl.classList.contains('open');
-  chartEl.classList.toggle('open');
+  const wasOpen = chartEl && chartEl.classList.contains('open');
+  if (chartEl) chartEl.classList.toggle('open');
   if (lotsEl) lotsEl.classList.toggle('open');
-  if (!wasOpen) loadChart(sym, '1d', document.querySelector('#tabs-' + sym + ' .chart-tab'));
+  const g = groupLots().find(x => x.symbol === sym);
+  if (!wasOpen && g && !g.manual) loadChart(sym, '1d', document.querySelector('#tabs-' + sym + ' .chart-tab'));
 }
 
 function toggleAll() {
@@ -682,7 +821,7 @@ function toggleAll() {
     if (!chartEl) return;
     if (allExpanded) {
       chartEl.classList.add('open'); if (lotsEl) lotsEl.classList.add('open');
-      loadChart(g.symbol, '1d', document.querySelector('#tabs-' + g.symbol + ' .chart-tab'));
+      if (!g.manual) loadChart(g.symbol, '1d', document.querySelector('#tabs-' + g.symbol + ' .chart-tab'));
     } else {
       chartEl.classList.remove('open'); if (lotsEl) lotsEl.classList.remove('open');
     }
@@ -705,8 +844,7 @@ async function loadChart(sym, range, tabEl) {
   if (charts[sym]) { try { charts[sym].destroy(); } catch(e){} delete charts[sym]; }
   const interval = intervalForRange(range);
   try {
-    const r = await fetch(API + '/api/chart?symbol=' + encodeURIComponent(sym)
-      + '&range=' + range + '&interval=' + interval);
+    const r = await fetch(API + '/api/chart?symbol=' + encodeURIComponent(sym) + '&range=' + range + '&interval=' + interval);
     const d = await r.json();
     if (!d.points || !d.points.length) throw new Error('no data');
     const lot = state.lots.find(l => l.symbol === sym);
@@ -714,49 +852,36 @@ async function loadChart(sym, range, tabEl) {
     const labels = d.points.map(p => {
       const dt = new Date(p.time * 1000);
       if (range === '1d') return dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
-      if (range === '5d') return dt.toLocaleDateString('de-CH', { weekday:'short' })
-        + ' ' + dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
-      if (range === '5y' || range === 'max')
-        return dt.toLocaleDateString('de-CH', { year:'2-digit', month:'short' });
+      if (range === '5d') return dt.toLocaleDateString('de-CH', { weekday:'short' }) + ' ' + dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
+      if (range === '5y' || range === 'max') return dt.toLocaleDateString('de-CH', { year:'2-digit', month:'short' });
       return dt.toLocaleDateString('de-CH', { month:'short', day:'numeric' });
     });
     const values = d.points.map(p => toChf(p.value, currency));
     const isUp = values[values.length-1] >= values[0];
     const color = isUp ? '#5dca8c' : '#ff5f5f';
 
-    // ── Kaufmarkierungen berechnen ────────────────────────────
+    // Buy markers
     const symLots = state.lots.filter(l => l.symbol === sym);
     const annotations = {};
     symLots.forEach((lot, idx) => {
       const buyTime = new Date(lot.boughtAt).getTime();
-      // Nächsten Datenpunkt zum Kaufzeitpunkt finden
-      let closestIdx = 0;
-      let minDiff = Infinity;
+      let closestIdx = 0, minDiff = Infinity;
       d.points.forEach((p, i) => {
         const diff = Math.abs(p.time * 1000 - buyTime);
         if (diff < minDiff) { minDiff = diff; closestIdx = i; }
       });
       const buyPriceChf = lot.buyPriceChf || toChf(lot.buyPriceNative, lot.currency);
       annotations['buy_' + idx] = {
-        type: 'line',
-        xMin: closestIdx, xMax: closestIdx,
-        borderColor: 'rgba(200,240,96,0.7)',
-        borderWidth: 1.5,
-        borderDash: [3, 3],
+        type: 'line', xMin: closestIdx, xMax: closestIdx,
+        borderColor: 'rgba(200,240,96,0.7)', borderWidth: 1.5, borderDash: [3,3],
         label: {
-          display: true,
-          content: 'Kauf ' + fmtChf(buyPriceChf),
-          position: 'start',
-          backgroundColor: 'rgba(12,12,15,0.85)',
-          color: '#c8f060',
-          font: { family: "'Syne Mono', monospace", size: 9 },
-          padding: { top: 2, bottom: 2, left: 4, right: 4 },
-          borderRadius: 3,
-          yAdjust: 6
+          display: true, content: 'Kauf ' + fmtChf(buyPriceChf), position: 'start',
+          backgroundColor: 'rgba(12,12,15,0.85)', color: '#c8f060',
+          font: { family:"'Syne Mono',monospace", size:9 },
+          padding: { top:2, bottom:2, left:4, right:4 }, borderRadius: 3, yAdjust: 6
         }
       };
     });
-    // ─────────────────────────────────────────────────────────
 
     loading.style.display = 'none'; canvas.style.display = 'block';
     charts[sym] = new Chart(canvas, {
@@ -775,7 +900,7 @@ async function loadChart(sym, range, tabEl) {
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
-          annotation: { annotations },   // ← neu
+          annotation: { annotations },
           tooltip: {
             backgroundColor: '#1c1c22', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
             titleColor: '#888880', bodyColor: '#f0ede8',
@@ -786,11 +911,9 @@ async function loadChart(sym, range, tabEl) {
         },
         scales: {
           x: { grid:{display:false}, border:{display:false},
-            ticks:{color:'#888880', font:{family:"'Syne Mono',monospace",size:8},
-              maxTicksLimit:5, maxRotation:0} },
+            ticks:{color:'#888880', font:{family:"'Syne Mono',monospace",size:8}, maxTicksLimit:5, maxRotation:0} },
           y: { position:'right', border:{display:false}, grid:{color:'rgba(255,255,255,0.04)'},
-            ticks:{color:'#888880', font:{family:"'Syne Mono',monospace",size:8},
-              maxTicksLimit:4, callback:v=>v.toFixed(0)} }
+            ticks:{color:'#888880', font:{family:"'Syne Mono',monospace",size:8}, maxTicksLimit:4, callback:v=>v.toFixed(0)} }
         }
       }
     });
@@ -798,6 +921,48 @@ async function loadChart(sym, range, tabEl) {
     loading.textContent = 'Keine Daten'; loading.style.display = 'flex'; canvas.style.display = 'none';
   }
 }
+
+// ── Manual Buy ────────────────────────────────────────────────
+function toggleManualForm() {
+  const form = document.getElementById('manualForm');
+  form.classList.toggle('visible');
+}
+
+function buyManual() {
+  const ticker    = document.getElementById('manualTicker').value.trim().toUpperCase();
+  const name      = document.getElementById('manualName').value.trim();
+  const buyPrice  = parseFloat(document.getElementById('manualBuyPrice').value);
+  const amount    = parseFloat(document.getElementById('manualAmount').value);
+
+  if (!ticker || !name || !buyPrice || !amount) { alert('Alle Felder ausfüllen.'); return; }
+  if (amount > state.cash + 0.001) { alert('Nicht genug Bargeld.\nVerfügbar: ' + fmtChf(state.cash)); return; }
+
+  const shares = amount / buyPrice;
+  const lot = {
+    id: Date.now().toString(),
+    symbol: ticker, name,
+    shares,
+    buyPriceNative: buyPrice,
+    buyPriceChf: buyPrice,
+    currentPriceNative: buyPrice,
+    currency: 'CHF',
+    manual: true,
+    boughtAt: new Date().toISOString()
+  };
+  state.lots.push(lot);
+  state.cash -= amount;
+  state.history.unshift({ type:'buy', symbol:ticker, name, shares, priceChf:buyPrice, totalChf:amount, at:lot.boughtAt, manual:true });
+  save();
+  silentPush();
+
+  // Clear form
+  ['manualTicker','manualName','manualBuyPrice','manualAmount'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('manualForm').classList.remove('visible');
+  document.getElementById('positionsList').innerHTML = '';
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} }); charts = {};
+  renderAll();
+}
+
 // ── Buy ───────────────────────────────────────────────────────
 async function buyPosition() {
   if (!selectedTicker) return;
@@ -817,7 +982,7 @@ async function buyPosition() {
     symbol: selectedTicker.symbol, name: selectedTicker.name,
     shares,
     buyPriceNative: quote.price,
-    buyPriceChf: priceChf,        // stored at purchase time — never drifts
+    buyPriceChf: priceChf,
     currentPriceNative: quote.price,
     currency: quote.currency,
     boughtAt: new Date().toISOString()
@@ -826,7 +991,7 @@ async function buyPosition() {
   state.cash -= amount;
   state.history.unshift({ type:'buy', symbol:lot.symbol, name:lot.name, shares, priceChf, totalChf:amount, at:lot.boughtAt });
   save();
-  silentPush(); // auto-push after transaction (fire-and-forget)
+  silentPush();
   clearSelection();
   document.getElementById('amountInput').value = '';
   btn.textContent = 'Kaufen'; btn.disabled = true;
@@ -894,9 +1059,16 @@ async function confirmSell() {
   const raw = parseFloat(document.getElementById('sellAmountInput').value);
   const sharesToSell = (isNaN(raw) || raw <= 0) ? maxShares : raw;
   if (sharesToSell > maxShares + 0.00001) { alert('Nicht genug Aktien.\nVerfügbar: ' + maxShares.toFixed(4)); return; }
-  const quote = await fetchPrice(sym);
-  const priceNative = (quote && quote.price) ? quote.price : (g.lots[0].currentPriceNative || g.lots[0].buyPriceNative);
-  const priceChf = toChf(priceNative, g.lots[0].currency);
+  const isManual = g.manual;
+  let priceNative, priceChf;
+  if (isManual) {
+    priceNative = g.lots[0].currentPriceNative || g.lots[0].buyPriceNative;
+    priceChf = priceNative;
+  } else {
+    const quote = await fetchPrice(sym);
+    priceNative = (quote && quote.price) ? quote.price : (g.lots[0].currentPriceNative || g.lots[0].buyPriceNative);
+    priceChf = toChf(priceNative, g.lots[0].currency);
+  }
   const proceeds = sharesToSell * priceChf;
   let remaining = sharesToSell;
   const toRemove = [];
@@ -906,10 +1078,12 @@ async function confirmSell() {
     else { lot.shares -= remaining; remaining = 0; }
   }
   state.lots = state.lots.filter(l => !toRemove.includes(l.id));
+  // Clean up hidden state if fully sold
+  if (!state.lots.find(l => l.symbol === sym) && state.hidden) delete state.hidden[sym];
   state.cash += proceeds;
   state.history.unshift({ type:'sell', symbol:sym, name:g.name, shares:sharesToSell, priceChf, totalChf:proceeds, at:new Date().toISOString() });
   save();
-  silentPush(); // auto-push after transaction
+  silentPush();
   selectedSellSym = null;
   document.getElementById('sellAmountInput').value = '';
   document.getElementById('sellAmountRow').style.display = 'none';
@@ -1109,7 +1283,7 @@ async function loadFromCode() {
 async function init() {
   await getFxRate();
   renderAll();
-  await autoPullOnLoad();   // pull from KV on startup if newer data exists
+  await autoPullOnLoad();
   await refreshPrices();
   setInterval(refreshPrices, 60000);
   setInterval(getFxRate, 300000);
