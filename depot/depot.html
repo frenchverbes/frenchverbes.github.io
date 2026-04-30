@@ -449,6 +449,7 @@ canvas { display: block; width: 100% !important; }
   <div class="header-btns">
     <button class="hbtn" id="syncBtn" onclick="openSyncModal()">Sync</button>
     <button class="hbtn" id="expandAllBtn" onclick="toggleAll()">Aufklappen</button>
+    <button class="hbtn" id="fixBtn" onclick="fixBuyPrices()" title="Kaufkurse anhand historischer Daten neu berechnen">Korrigieren</button>
     <button class="hbtn" onclick="resetConfirm()" style="color:var(--red);border-color:rgba(255,95,95,0.3)">Reset</button>
   </div>
 </div>
@@ -633,13 +634,17 @@ function renderAll() { updateSummary(); renderPositions(); renderSellPanel(); re
 
 function updateSummary() {
   let depotChf = 0;
+  let totalCostChf = 0;
   const hidden = state.hidden || {};
   for (const lot of state.lots) {
-    if (hidden[lot.symbol]) continue; // skip hidden
+    if (hidden[lot.symbol]) continue;
     const p = lot.currentPriceNative || lot.buyPriceNative;
+    const cost = lot.shares * (lot.buyPriceChf || toChf(lot.buyPriceNative, lot.currency));
     depotChf += lot.shares * toChf(p, lot.currency);
+    totalCostChf += cost;
   }
   const total = state.cash + depotChf;
+  const invested = START_CASH - state.cash;
   const pnl = ((total - START_CASH) / START_CASH) * 100;
   document.getElementById('sumCash').textContent  = fmtNum(state.cash);
   document.getElementById('sumDepot').textContent = fmtNum(depotChf);
@@ -1277,6 +1282,59 @@ async function loadFromCode() {
   } catch(e) {
     setSyncStatus('Verbindungsfehler.', 'err');
   } finally { loadBtn.disabled = false; loadBtn.textContent = 'Laden'; }
+}
+
+// ── Fix buy prices ────────────────────────────────────────────
+async function fixBuyPrices() {
+  if (!confirm('Kaufkurse anhand historischer Daten korrigieren?\nManuelle Einträge werden übersprungen.')) return;
+  const btn = document.getElementById('fixBtn');
+  btn.textContent = 'Lädt…'; btn.disabled = true;
+
+  const symbols = [...new Set(state.lots.filter(l => !l.manual).map(l => l.symbol))];
+  let fixed = 0, failed = 0;
+
+  for (const sym of symbols) {
+    const symLots = state.lots.filter(l => l.symbol === sym && !l.manual);
+    // Fetch a wide range to cover all buy dates
+    try {
+      const r = await fetch(API + '/api/chart?symbol=' + encodeURIComponent(sym) + '&range=5y&interval=1d');
+      const d = await r.json();
+      if (!d.points || !d.points.length) { failed++; continue; }
+
+      // Also get current quote for currency info
+      const quote = await fetchPrice(sym);
+      const currency = quote ? quote.currency : 'USD';
+
+      for (const lot of symLots) {
+        const buyTime = new Date(lot.boughtAt).getTime();
+        // Find closest data point to buy date
+        let closestPoint = d.points[0];
+        let minDiff = Infinity;
+        for (const p of d.points) {
+          const diff = Math.abs(p.time * 1000 - buyTime);
+          if (diff < minDiff) { minDiff = diff; closestPoint = p; }
+        }
+        const historicPriceNative = closestPoint.value;
+        const historicPriceChf = toChf(historicPriceNative, currency);
+        // Recalculate shares based on original CHF amount invested
+        const originalAmountChf = lot.shares * (lot.buyPriceChf || toChf(lot.buyPriceNative, lot.currency));
+        lot.buyPriceNative = historicPriceNative;
+        lot.buyPriceChf    = historicPriceChf;
+        lot.currency       = currency;
+        lot.shares         = originalAmountChf / historicPriceChf;
+        fixed++;
+      }
+    } catch(e) { failed++; }
+  }
+
+  save();
+  silentPush();
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} }); charts = {};
+  document.getElementById('positionsList').innerHTML = '';
+  renderAll();
+  btn.textContent = 'Korrigieren'; btn.disabled = false;
+  const msg = fixed + ' Lot(s) korrigiert' + (failed ? ', ' + failed + ' fehlgeschlagen' : '') + '.';
+  alert(msg);
 }
 
 // ── Init ──────────────────────────────────────────────────────
