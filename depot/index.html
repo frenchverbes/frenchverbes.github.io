@@ -483,6 +483,7 @@ canvas { display: block; width: 100% !important; }
 .srd-chart-wrap { height: 100px; position: relative; margin: 0.5rem 0 0.5rem; }
 .srd-chart-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.62rem; color: var(--muted); }
 
+/* FIX: Watchlist button always visible and enabled when ticker selected */
 .add-watch-btn {
   width: 100%; background: var(--accent); border: none; border-radius: 6px; color: #0c0c0f;
   font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
@@ -490,7 +491,7 @@ canvas { display: block; width: 100% !important; }
   margin-bottom: 0.4rem;
 }
 .add-watch-btn:hover { opacity: 0.88; }
-.add-watch-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.add-watch-btn:active { transform: scale(0.98); }
 
 /* ── NEWS PANEL ── */
 .news-panel-body { padding: 0.5rem 0.75rem 0.8rem; }
@@ -554,39 +555,6 @@ canvas { display: block; width: 100% !important; }
 }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-/* fullscreen start modal */
-.fs-start-modal {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 400;
-  display: flex; align-items: center; justify-content: center; padding: 1.25rem;
-}
-.fs-start-inner {
-  background: var(--surface); border: 1px solid var(--border-hover); border-radius: 10px;
-  width: 100%; max-width: 340px; padding: 1.4rem;
-}
-.fs-start-title { font-size: 0.88rem; font-weight: 800; margin-bottom: 0.5rem; }
-.fs-start-sub { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.55; }
-.fs-option-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-.fs-option {
-  flex: 1; min-width: 80px;
-  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.05em; text-transform: uppercase;
-  background: none; border: 1px solid var(--border); color: var(--muted);
-  padding: 0.4rem 0.5rem; border-radius: 5px; cursor: pointer; transition: all 0.15s; text-align: center;
-}
-.fs-option:hover { border-color: var(--accent); color: var(--accent); }
-.fs-option.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-.fs-start-btn {
-  width: 100%; background: var(--accent); border: none; border-radius: 6px; color: #0c0c0f;
-  font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  padding: 0.52rem; cursor: pointer; transition: opacity 0.15s;
-}
-.fs-start-btn:hover { opacity: 0.88; }
-.fs-skip-btn {
-  width: 100%; background: none; border: none; color: var(--muted);
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.04em;
-  padding: 0.4rem; cursor: pointer; margin-top: 0.4rem; transition: color 0.15s;
-}
-.fs-skip-btn:hover { color: var(--text); }
-
 /* Desktop layout */
 @media (min-width: 860px) {
   body {
@@ -632,21 +600,6 @@ canvas { display: block; width: 100% !important; }
 </head>
 <body>
 
-<!-- Fullscreen start modal -->
-<div class="fs-start-modal" id="fsStartModal" style="display:none">
-  <div class="fs-start-inner">
-    <div class="fs-start-title">Vollbild starten?</div>
-    <div class="fs-start-sub">Wähle einen Tab und öffne die Leiste im Vollbild.</div>
-    <div class="fs-option-row" id="fsTabOptions">
-      <button class="fs-option selected" data-tab="search" onclick="selectFsTab(this)">Suche</button>
-      <button class="fs-option" data-tab="portfolio-news" onclick="selectFsTab(this)">Portfolio-News</button>
-      <button class="fs-option" data-tab="news" onclick="selectFsTab(this)">News</button>
-    </div>
-    <button class="fs-start-btn" onclick="startFullscreen()">Vollbild starten</button>
-    <button class="fs-skip-btn" onclick="skipFullscreen()">Ohne Vollbild fortfahren</button>
-  </div>
-</div>
-
 <div class="header">
   <div class="header-top">
     <div class="logo">Watch<span>.</span><span class="refresh-dot"></span></div>
@@ -670,7 +623,8 @@ canvas { display: block; width: 100% !important; }
     <button class="hbtn" id="expandAllBtn" onclick="toggleAll()">Aufklappen</button>
     <button class="hbtn" id="expertModeBtn" onclick="toggleExpertMode()">Experte</button>
     <button class="hbtn" onclick="openSettingsModal()">RSS</button>
-    <button class="hbtn" onclick="openFsStartModal()">Vollbild</button>
+    <!-- FIX 3: Vollbild-Button speichert nur den Tab, kein sofortiges Vollbild -->
+    <button class="hbtn" onclick="openFsSettingsModal()">Vollbild</button>
     <button class="hbtn" onclick="resetConfirm()" style="color:var(--red);border-color:rgba(255,95,95,0.3)">Reset</button>
   </div>
 </div>
@@ -750,13 +704,33 @@ canvas { display: block; width: 100% !important; }
   </div>
 </div>
 
+<!-- FIX 3: Vollbild-Einstellungs-Modal (kein Start-Modal mehr beim Laden) -->
+<div class="modal-backdrop" id="fsSettingsModal" onclick="if(event.target===this)closeFsSettingsModal()">
+  <div class="modal">
+    <div class="modal-title">Vollbild-Einstellungen</div>
+    <div class="modal-sub">Wähle welcher Tab beim nächsten Seitenaufruf automatisch im Vollbild geöffnet wird. Oder deaktiviere das Auto-Vollbild.</div>
+    <div class="modal-section-label">Standard-Tab beim Start</div>
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem">
+      <button class="sync-action-btn" id="fss-none" onclick="setFsDefault('none')">Kein Vollbild</button>
+      <button class="sync-action-btn" id="fss-search" onclick="setFsDefault('search')">Suche</button>
+      <button class="sync-action-btn" id="fss-portfolio-news" onclick="setFsDefault('portfolio-news')">Portfolio News</button>
+      <button class="sync-action-btn" id="fss-news" onclick="setFsDefault('news')">News</button>
+    </div>
+    <div class="sync-status info" id="fsSettingsStatus"></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeFsSettingsModal()">Schließen</button>
+      <button class="modal-push-btn" onclick="applyFsNow()">Jetzt öffnen</button>
+    </div>
+  </div>
+</div>
+
 <!-- Bottom Panel -->
 <div class="bottom-panel" id="bottomPanel">
   <div class="panel-tabs">
     <button class="panel-tab active" id="tab-search" onclick="switchTab('search')">Suche</button>
     <button class="panel-tab" id="tab-portfolio-news" onclick="switchTab('portfolio-news')">Portfolio News</button>
     <button class="panel-tab" id="tab-news" onclick="switchTab('news')">News</button>
-    <button class="fullscreen-toggle" onclick="togglePanelFullscreen()">⛶</button>
+    <button class="fullscreen-toggle" id="fsToggleBtn" onclick="togglePanelFullscreen()">⛶</button>
   </div>
   <!-- Search Tab -->
   <div class="panel-body" id="panel-search">
@@ -777,6 +751,7 @@ canvas { display: block; width: 100% !important; }
         <div class="srd-chart-loading" id="srdChartLoading">laden…</div>
         <canvas id="srdCanvas" height="100"></canvas>
       </div>
+      <!-- FIX 2: Button ohne disabled-Attribut, wird per JS gesteuert -->
       <button class="add-watch-btn" id="addWatchBtn" onclick="addToWatchlist()">+ Zur Watchlist</button>
     </div>
   </div>
@@ -810,11 +785,9 @@ const SK = 'watchlist_v1';
 const SYNC_CODE_KEY = 'watchlist_sync_code';
 const RSS_SETTINGS_KEY = 'watchlist_rss_v2';
 const EXPERT_MODE_KEY = 'watchlist_expert';
-const FS_DEFAULT_KEY = 'watchlist_fs_default';
+const FS_DEFAULT_KEY = 'watchlist_fs_default'; // 'none' | 'search' | 'portfolio-news' | 'news'
 
 // ── RSS FEED CATEGORIES ──────────────────────────────────────
-// Structure: { categoryKey: { label, countries: { countryKey: { label, feeds: [] } } } }
-// Portfolio is special
 const DEFAULT_RSS_CONFIG = {
   portfolio: {
     label: 'Portfolio',
@@ -840,7 +813,6 @@ const DEFAULT_RSS_CONFIG = {
       ]},
       usa: { label: 'USA', feeds: [
         'https://feeds.apnews.com/rss/apf-usnews',
-        'https://news.google.com/rss/search?q=Reuters+US+news&hl=en-US&gl=US&ceid=US%3Aen',
         'https://feeds.npr.org/1001/rss.xml'
       ]}
     }
@@ -851,28 +823,21 @@ const DEFAULT_RSS_CONFIG = {
       welt: { label: 'Welt', feeds: [
         'https://feeds.apnews.com/rss/business',
         'https://feeds.content.dowjones.io/public/rss/mw_topstories',
-        'https://www.ecb.europa.eu/rss/press.html',
         'https://techcrunch.com/feed/',
         'https://www.wired.com/feed/rss'
       ]},
       schweiz: { label: 'Schweiz', feeds: [
         'https://www.cash.ch/feeds/latest/news',
-        'https://www.cash.ch/rss/450.xml',
-        'https://www.swissinfo.ch/eng/business/feed',
-        'https://www.snb.ch/public/de/rss/news',
         'https://www.nzz.ch/wirtschaft.rss',
         'https://www.srf.ch/news/bnf/rss/1648'
       ]},
       deutschland: { label: 'Deutschland', feeds: [
         'https://www.handelsblatt.com/contentexport/feed/finanzen',
-        'https://www.handelsblatt.com/contentexport/feed/unternehmen',
-        'https://www.handelsblatt.com/contentexport/feed/marktberichte/',
         'https://www.faz.net/rss/aktuell/wirtschaft/'
       ]},
       usa: { label: 'USA', feeds: [
         'https://www.cnbc.com/id/20409666/device/rss/rss.html',
-        'https://www.cnbc.com/id/19854910/device/rss/rss.html',
-        'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&ceid=US:en&hl=en-US&gl=US'
+        'https://www.cnbc.com/id/19854910/device/rss/rss.html'
       ]}
     }
   },
@@ -1004,7 +969,13 @@ async function refreshPrices() {
     const q = await fetchPrice(sym);
     if (q && q.price) {
       const item = state.watchlist.find(w => w.symbol === sym);
-      if (item) { item.currentPrice = q.price; item.currency = q.currency; item.prevClose = q.previousClose || item.prevClose; item.change = q.change; item.changePercent = q.changePercent; }
+      if (item) {
+        item.currentPrice = q.price;
+        item.currency = q.currency;
+        item.prevClose = q.previousClose || item.prevClose;
+        item.change = q.change;
+        item.changePercent = q.changePercent;
+      }
     }
   }
   save(); renderAll();
@@ -1021,24 +992,42 @@ function getOrderedWatchlist() {
   return ordered;
 }
 
+// ── FIX 2: addToWatchlist — robuste Version ──────────────────
 function addToWatchlist() {
-  if (!selectedTicker) return;
+  if (!selectedTicker) {
+    console.warn('Kein Ticker ausgewählt');
+    return;
+  }
   const sym = selectedTicker.symbol;
-  if (state.watchlist.find(w => w.symbol === sym)) { alert('Bereits in der Watchlist.'); return; }
+  if (state.watchlist.find(w => w.symbol === sym)) {
+    alert('Bereits in der Watchlist.');
+    return;
+  }
   const item = {
-    symbol: sym, name: selectedTicker.name,
+    symbol: sym,
+    name: selectedTicker.name,
     currency: selectedTicker.currency || 'USD',
     addedAt: new Date().toISOString(),
-    currentPrice: null, prevClose: null
+    currentPrice: null,
+    prevClose: null
   };
   state.watchlist.push(item);
   if (!state.order) state.order = [];
   state.order.push(sym);
   save();
   silentPush();
-  clearSearchSelection();
+
+  // Reset Suche
+  const btn = document.getElementById('addWatchBtn');
+  if (btn) btn.textContent = '✓ Hinzugefügt';
+  setTimeout(() => {
+    clearSearchSelection();
+  }, 600);
+
+  // Render
   document.getElementById('positionsList').innerHTML = '';
-  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} }); charts = {};
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  charts = {};
   renderAll();
   refreshPrices();
 }
@@ -1103,16 +1092,10 @@ function renderPositions() {
     const dayChgAbs = (cp && prev) ? (cp - prev) : null;
     const priceChf = cp ? toChf(cp, item.currency) : null;
 
-    // Buy markers
     const markers = (state.buyMarkers || {})[item.symbol] || [];
-    let markerSection = '';
-    if (markers.length > 0 || true) {
-      markerSection = buildMarkersHtml(item, markers, cp);
-    }
 
     const existing = document.getElementById('grp-' + item.symbol);
     if (existing) {
-      // Update dynamic parts
       existing.querySelector('.pos-sub').textContent = priceChf ? fmtChf(priceChf) : '–';
       const pb = existing.querySelector('.pnl-badge');
       if (dayChgPct !== null) {
@@ -1121,7 +1104,6 @@ function renderPositions() {
       } else {
         pb.textContent = '–'; pb.className = 'pnl-badge';
       }
-      // Update meta
       existing.querySelector('.mv-price').textContent = priceChf ? fmtChf(priceChf) : '–';
       const chgEl = existing.querySelector('.mv-chg');
       if (dayChgPct !== null) {
@@ -1133,7 +1115,6 @@ function renderPositions() {
         chfEl.textContent = (dayChgAbs >= 0 ? '+' : '') + fmtNum(toChf(dayChgAbs, item.currency));
         chfEl.className = 'meta-val mv-chf ' + pnlClass(dayChgAbs, 'pos', 'neg');
       }
-      // Update markers
       const markEl = existing.querySelector('.buy-markers-list');
       if (markEl) markEl.innerHTML = buildMarkersListHtml(item, markers, cp);
       return;
@@ -1190,7 +1171,6 @@ function renderPositions() {
         </div>
       </div>`;
 
-    // Drag events
     div.addEventListener('dragstart', onDragStart);
     div.addEventListener('dragover', onDragOver);
     div.addEventListener('drop', onDrop);
@@ -1262,7 +1242,6 @@ function addBuyMarker(sym) {
   const markers = state.buyMarkers[sym];
   const markEl = document.getElementById('markers-' + sym);
   if (markEl && item) markEl.innerHTML = buildMarkersListHtml(item, markers, item.currentPrice);
-  // Reload chart to show new marker
   const activeTab = document.querySelector('#tabs-' + sym + ' .chart-tab.active');
   if (activeTab) {
     const range = activeTab.textContent === '1T' ? '1d' : activeTab.textContent === '5T' ? '5d' :
@@ -1282,7 +1261,6 @@ function removeBuyMarker(sym, idx) {
   if (markEl && item) markEl.innerHTML = buildMarkersListHtml(item, markers, item.currentPrice);
 }
 
-// Marker tooltip
 function showMarkerTooltip(event, sym, idx) {
   const item = state.watchlist.find(w => w.symbol === sym);
   const markers = (state.buyMarkers || {})[sym] || [];
@@ -1388,7 +1366,7 @@ async function loadChart(sym, range, tabEl) {
   const loading = document.getElementById('loading-' + sym);
   const canvas  = document.getElementById('canvas-'  + sym);
   if (!canvas) return;
-  loading.style.display = 'flex'; loading.textContent = 'laden…';
+  if (loading) { loading.style.display = 'flex'; loading.textContent = 'laden…'; }
   canvas.style.display = 'none';
   if (charts[sym]) { try { charts[sym].destroy(); } catch(e){} delete charts[sym]; }
   const interval = intervalForRange(range);
@@ -1407,8 +1385,6 @@ async function loadChart(sym, range, tabEl) {
     const values = d.points.map(p => toChf(p.value, currency));
     const isUp = values[values.length-1] >= values[0];
     const color = isUp ? '#5dca8c' : '#ff5f5f';
-
-    // Buy markers on chart
     const markers = (state.buyMarkers || {})[sym] || [];
     const annotations = {};
     markers.forEach((m, idx) => {
@@ -1428,13 +1404,12 @@ async function loadChart(sym, range, tabEl) {
           content: fmtNum(priceChfVal), position: 'start',
           backgroundColor: 'rgba(12,12,15,0.85)', color: '#c8f060',
           font: { family:"'Syne Mono',monospace", size:9 },
-          padding: { top:2, bottom:2, left:4, right:4 }, borderRadius: 3, yAdjust: 6,
-          click: (ctx) => { showMarkerTooltipById(sym, idx); }
+          padding: { top:2, bottom:2, left:4, right:4 }, borderRadius: 3, yAdjust: 6
         }
       };
     });
-
-    loading.style.display = 'none'; canvas.style.display = 'block';
+    if (loading) loading.style.display = 'none';
+    canvas.style.display = 'block';
     charts[sym] = new Chart(canvas, {
       type: 'line',
       data: { labels, datasets: [{
@@ -1469,7 +1444,8 @@ async function loadChart(sym, range, tabEl) {
       }
     });
   } catch(e) {
-    loading.textContent = 'Keine Daten'; loading.style.display = 'flex'; canvas.style.display = 'none';
+    if (loading) { loading.textContent = 'Keine Daten'; loading.style.display = 'flex'; }
+    canvas.style.display = 'none';
   }
 }
 
@@ -1640,7 +1616,6 @@ async function fetchRssFeed(url, timeout = 8000) {
     }
   } catch(e) {}
 
-  // Fallback: allorigins proxy to parse XML
   try {
     const proxyUrl = RSS_PROXY2 + encodeURIComponent(url);
     const ctrl = new AbortController();
@@ -1697,14 +1672,12 @@ async function fetchMultipleFeeds(urls, maxItems = 30) {
   const results = await Promise.allSettled(urls.map(u => fetchRssFeed(u)));
   let all = [];
   results.forEach(r => { if (r.status === 'fulfilled') all = all.concat(r.value); });
-  // Deduplicate by normalized title
   const seen = new Set();
   const deduped = [];
   for (const item of all) {
     const key = normalizeTitle(item.title);
     if (!seen.has(key)) { seen.add(key); deduped.push(item); }
   }
-  // Sort by date descending
   deduped.sort((a, b) => {
     const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
     const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
@@ -1776,19 +1749,17 @@ function buildSettingsTabContent(catKey) {
   if (!cat) return '';
 
   if (cat.isPortfolio) {
-    // Portfolio: flat list of feeds with {TICKER} support
     return `
       <div class="country-section">
         <div class="country-title">Portfolio-News Feeds (Platzhalter: {TICKER})</div>
         <div id="pfeed-list">${(cat.feeds||[]).map((f, i) => buildFeedItem(f, 'portfolio', null, i)).join('')}</div>
         <div class="add-feed-row">
-          <input class="add-feed-input" id="pfeed-input" placeholder="https://…/{TICKER}… oder mehrere mit Enter/Komma" onkeydown="if(event.key==='Enter')addFeed('portfolio',null,this.id)" />
+          <input class="add-feed-input" id="pfeed-input" placeholder="https://…/{TICKER}…" onkeydown="if(event.key==='Enter')addFeed('portfolio',null,this.id)" />
           <button class="add-feed-btn" onclick="addFeed('portfolio',null,'pfeed-input')">+ Hinzufügen</button>
         </div>
       </div>`;
   }
 
-  // Category with countries
   const countries = cat.countries || {};
   return Object.entries(countries).map(([cKey, country]) => {
     const feedsId = `feeds-${catKey}-${cKey}`;
@@ -1819,10 +1790,7 @@ function addFeed(catKey, countryKey, inputId) {
   if (!input) return;
   const raw = input.value.trim();
   if (!raw) return;
-
-  // Support multiple URLs separated by comma, semicolon, or newline
   const urls = raw.split(/[,;\n]+/).map(u => u.trim()).filter(u => u.startsWith('http'));
-
   if (catKey === 'portfolio') {
     if (!rssConfig.portfolio) rssConfig.portfolio = { label: 'Portfolio', isPortfolio: true, feeds: [] };
     urls.forEach(u => { if (!rssConfig.portfolio.feeds.includes(u)) rssConfig.portfolio.feeds.push(u); });
@@ -1831,7 +1799,6 @@ function addFeed(catKey, countryKey, inputId) {
     if (!rssConfig[catKey].countries[countryKey]) rssConfig[catKey].countries[countryKey] = { label: countryKey, feeds: [] };
     urls.forEach(u => { if (!rssConfig[catKey].countries[countryKey].feeds.includes(u)) rssConfig[catKey].countries[countryKey].feeds.push(u); });
   }
-
   saveRss();
   input.value = '';
   renderSettingsModal();
@@ -1874,8 +1841,6 @@ function collectAllFeedUrls(excludePortfolio = true) {
 }
 
 // ── NEWS PANEL ───────────────────────────────────────────────
-let newsLoadController = null;
-
 function switchNewsMainTab(tab) {
   activeNewsMainTab = tab;
   ['alles','allgemein','wirtschaft','politik'].forEach(t => {
@@ -1890,20 +1855,14 @@ function switchNewsMainTab(tab) {
 function renderNewsCatRow() {
   const catRow = document.getElementById('newsCatRow');
   const subRow = document.getElementById('newsSubCatRow');
-
-  if (activeNewsMainTab === 'alles') {
-    catRow.innerHTML = ''; subRow.innerHTML = '';
-    return;
-  }
-
+  if (activeNewsMainTab === 'alles') { catRow.innerHTML = ''; subRow.innerHTML = ''; return; }
   const cat = rssConfig[activeNewsMainTab];
   if (!cat || !cat.countries) { catRow.innerHTML = ''; subRow.innerHTML = ''; return; }
-
   const countries = Object.entries(cat.countries);
   catRow.innerHTML = countries.map(([cKey, c]) =>
     `<button class="news-cat-btn ${activeNewsCat === cKey ? 'active' : ''}" onclick="selectNewsCat('${cKey}')">${c.label}</button>`
   ).join('');
-  subRow.innerHTML = ''; // No sub-categories for now (clean structure)
+  subRow.innerHTML = '';
 }
 
 function selectNewsCat(cKey) {
@@ -1916,10 +1875,8 @@ async function loadNewsFeed() {
   const container = document.getElementById('newsFeedContainer');
   if (!container) return;
   container.innerHTML = '<div class="news-loading">Lade News…</div>';
-
   let urls = [];
   if (activeNewsMainTab === 'alles') {
-    // Collect all feeds from all categories
     Object.entries(rssConfig).forEach(([catKey, cat]) => {
       if (cat.isPortfolio) return;
       Object.values(cat.countries || {}).forEach(c => urls.push(...(c.feeds||[])));
@@ -1933,25 +1890,20 @@ async function loadNewsFeed() {
     }
     urls = country.feeds;
   }
-
   urls = [...new Set(urls)];
   if (!urls.length) { container.innerHTML = '<div class="news-empty">Keine Feeds konfiguriert.</div>'; return; }
-
   const items = await fetchMultipleFeeds(urls, 40);
   if (!items.length) { container.innerHTML = '<div class="news-empty">Keine Artikel geladen. Überprüfe die RSS Feeds.</div>'; return; }
   container.innerHTML = items.map(n => renderNewsItem(n)).join('');
 }
 
-// Portfolio news
 async function loadPortfolioNews() {
   const container = document.getElementById('portfolioNewsContainer');
   if (!container) return;
   const items = getOrderedWatchlist();
   if (!items.length) { container.innerHTML = '<div class="news-loading">Keine Aktien in der Watchlist.</div>'; return; }
-
   const feeds = (rssConfig.portfolio && rssConfig.portfolio.feeds) || [];
   if (!feeds.length) { container.innerHTML = '<div class="news-empty">Konfiguriere Portfolio-Feeds unter RSS.</div>'; return; }
-
   container.innerHTML = '<div class="news-loading">Lade Portfolio-News…</div>';
   const allUrls = [];
   items.forEach(item => {
@@ -1979,42 +1931,73 @@ function togglePanelFullscreen() {
   const panel = document.getElementById('bottomPanel');
   panelFullscreen = !panelFullscreen;
   panel.classList.toggle('fullscreen', panelFullscreen);
-  document.querySelector('.fullscreen-toggle').textContent = panelFullscreen ? '✕' : '⛶';
+  document.getElementById('fsToggleBtn').textContent = panelFullscreen ? '✕' : '⛶';
   document.body.style.overflow = panelFullscreen ? 'hidden' : '';
 }
 
-function openFsStartModal() {
-  document.getElementById('fsStartModal').style.display = 'flex';
+// FIX 3: Vollbild-Button öffnet Einstellungs-Modal statt sofort Vollbild
+function openFsSettingsModal() {
+  // Highlight current default
+  const cur = localStorage.getItem(FS_DEFAULT_KEY) || 'none';
+  ['none','search','portfolio-news','news'].forEach(k => {
+    const btn = document.getElementById('fss-' + k);
+    if (btn) {
+      btn.style.borderColor = (cur === k) ? 'var(--accent)' : '';
+      btn.style.color = (cur === k) ? 'var(--accent)' : '';
+    }
+  });
+  const statusEl = document.getElementById('fsSettingsStatus');
+  if (statusEl) statusEl.textContent = cur === 'none' ? 'Auto-Vollbild deaktiviert.' : 'Auto-Vollbild: ' + cur;
+  document.getElementById('fsSettingsModal').classList.add('open');
 }
 
-let fsSelectedTab = 'search';
-function selectFsTab(btn) {
-  fsSelectedTab = btn.dataset.tab;
-  document.querySelectorAll('.fs-option').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
+function closeFsSettingsModal() {
+  document.getElementById('fsSettingsModal').classList.remove('open');
 }
 
-function startFullscreen() {
-  document.getElementById('fsStartModal').style.display = 'none';
-  switchTab(fsSelectedTab);
+function setFsDefault(tab) {
+  localStorage.setItem(FS_DEFAULT_KEY, tab);
+  ['none','search','portfolio-news','news'].forEach(k => {
+    const btn = document.getElementById('fss-' + k);
+    if (btn) {
+      btn.style.borderColor = (k === tab) ? 'var(--accent)' : '';
+      btn.style.color = (k === tab) ? 'var(--accent)' : '';
+    }
+  });
+  const statusEl = document.getElementById('fsSettingsStatus');
+  if (statusEl) statusEl.textContent = tab === 'none' ? '✓ Auto-Vollbild deaktiviert.' : '✓ Wird beim nächsten Start automatisch geöffnet: ' + tab;
+}
+
+function applyFsNow() {
+  const tab = localStorage.getItem(FS_DEFAULT_KEY) || 'search';
+  closeFsSettingsModal();
+  if (tab === 'none') { if (panelFullscreen) togglePanelFullscreen(); return; }
+  switchTab(tab);
   if (!panelFullscreen) togglePanelFullscreen();
-  localStorage.setItem(FS_DEFAULT_KEY, fsSelectedTab);
 }
 
-function skipFullscreen() {
-  document.getElementById('fsStartModal').style.display = 'none';
-  localStorage.removeItem(FS_DEFAULT_KEY);
+// FIX 3: Beim Laden automatisch Vollbild starten wenn konfiguriert
+function checkAutoFullscreen() {
+  const saved = localStorage.getItem(FS_DEFAULT_KEY);
+  if (saved && saved !== 'none') {
+    switchTab(saved);
+    // Kurze Verzögerung damit das DOM bereit ist
+    setTimeout(() => {
+      if (!panelFullscreen) togglePanelFullscreen();
+    }, 150);
+  }
 }
 
 // ── SEARCH ───────────────────────────────────────────────────
 async function onSearch(q) {
   clearTimeout(searchTimeout);
-  clearSearchSelection();
+  // FIX 2: clearSearchSelection nur wenn wirklich nichts eingegeben
   if (q.length < 2) { closeDropdown(); return; }
   searchTimeout = setTimeout(async () => {
     try {
       const r = await fetch(API + '/api/search?q=' + encodeURIComponent(q));
-      searchResults = await r.json(); renderDropdown(searchResults);
+      searchResults = await r.json();
+      renderDropdown(searchResults);
     } catch(e) {}
   }, 300);
 }
@@ -2034,49 +2017,78 @@ function renderDropdown(results) {
 function closeDropdown() { document.getElementById('searchDropdown').classList.remove('visible'); }
 function onSearchFocus() { if (searchResults.length) renderDropdown(searchResults); }
 
+// FIX 1+2: selectTicker — lädt Preis und Chart, hält selectedTicker gesetzt
 async function selectTicker(i) {
   selectedTicker = searchResults[i];
   closeDropdown();
-  document.getElementById('searchInput').value = '';
 
-  // Show detail panel
+  // Input leeren ohne oninput auszulösen
+  const input = document.getElementById('searchInput');
+  input.value = '';
+
+  // Detail-Panel zeigen
   const detail = document.getElementById('searchResultDetail');
   detail.classList.add('visible');
   document.getElementById('srdSym').textContent = selectedTicker.symbol;
   document.getElementById('srdName').textContent = selectedTicker.name;
-  document.getElementById('srdPrice').textContent = '–';
-  document.getElementById('srdChange').textContent = '–';
-  document.getElementById('srdChartLoading').style.display = 'flex';
-  document.getElementById('addWatchBtn').disabled = false;
+  document.getElementById('srdPrice').textContent = 'Lade…';
+  document.getElementById('srdChange').textContent = '';
+  document.getElementById('srdChange').className = 'srd-change';
 
-  // Load price
-  const q = await fetchPrice(selectedTicker.symbol);
-  if (q && q.price) {
-    document.getElementById('srdPrice').textContent = fmtNum(q.price) + ' ' + (q.currency||'');
-    const prev = q.previousClose || 0;
-    const chg = prev > 0 ? ((q.price - prev)/prev)*100 : 0;
-    const chgEl = document.getElementById('srdChange');
-    chgEl.textContent = fmtPct(chg) + ' heute';
-    chgEl.className = 'srd-change ' + (chg >= 0 ? 'up' : 'down');
-    selectedTicker.currency = q.currency;
+  const btn = document.getElementById('addWatchBtn');
+  btn.textContent = '+ Zur Watchlist';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+
+  // Chart-Bereich zurücksetzen
+  const srdLoading = document.getElementById('srdChartLoading');
+  const srdCanvas = document.getElementById('srdCanvas');
+  if (srdLoading) { srdLoading.style.display = 'flex'; srdLoading.textContent = 'laden…'; }
+  if (srdCanvas) srdCanvas.style.display = 'none';
+
+  // Kurs laden
+  try {
+    const q = await fetchPrice(selectedTicker.symbol);
+    if (q && q.price) {
+      document.getElementById('srdPrice').textContent = fmtNum(q.price) + ' ' + (q.currency || '');
+      const prev = q.previousClose || 0;
+      const chg = prev > 0 ? ((q.price - prev) / prev) * 100 : 0;
+      const chgEl = document.getElementById('srdChange');
+      chgEl.textContent = fmtPct(chg) + ' heute';
+      chgEl.className = 'srd-change ' + (chg >= 0 ? 'up' : 'down');
+      selectedTicker.currency = q.currency;
+    } else {
+      document.getElementById('srdPrice').textContent = 'Kurs nicht verfügbar';
+    }
+  } catch(e) {
+    document.getElementById('srdPrice').textContent = 'Fehler beim Laden';
   }
 
-  // Load chart
+  // Chart laden (unabhängig vom Kursergebnis)
   loadSrdChart(selectedTicker.symbol);
 }
 
+// FIX 1: loadSrdChart mit robuster Fehlerbehandlung
 async function loadSrdChart(sym) {
   const loading = document.getElementById('srdChartLoading');
   const canvas = document.getElementById('srdCanvas');
-  loading.style.display = 'flex'; canvas.style.display = 'none';
+  if (!loading || !canvas) return;
+
+  loading.style.display = 'flex';
+  loading.textContent = 'Chart laden…';
+  canvas.style.display = 'none';
+
   if (srdChart) { try { srdChart.destroy(); } catch(e){} srdChart = null; }
 
   try {
     const r = await fetch(API + '/api/chart?symbol=' + encodeURIComponent(sym) + '&range=1d&interval=5m');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-    if (!d.points || !d.points.length) throw new Error();
+    if (!d.points || !d.points.length) throw new Error('Keine Datenpunkte');
+
     const item = state.watchlist.find(w => w.symbol === sym);
     const currency = (item && item.currency) || (selectedTicker && selectedTicker.currency) || 'USD';
+
     const labels = d.points.map(p => {
       const dt = new Date(p.time * 1000);
       return dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
@@ -2085,21 +2097,26 @@ async function loadSrdChart(sym) {
     const isUp = values[values.length-1] >= values[0];
     const color = isUp ? '#5dca8c' : '#ff5f5f';
 
-    loading.style.display = 'none'; canvas.style.display = 'block';
+    loading.style.display = 'none';
+    canvas.style.display = 'block';
+
     srdChart = new Chart(canvas, {
       type: 'line',
       data: { labels, datasets: [{
         data: values, borderColor: color, borderWidth: 1.5, pointRadius: 0, fill: true,
         backgroundColor: ctx => {
-          const g2 = ctx.chart.ctx.createLinearGradient(0,0,0,100);
+          const g2 = ctx.chart.ctx.createLinearGradient(0, 0, 0, 100);
           g2.addColorStop(0, isUp ? 'rgba(93,202,140,0.18)' : 'rgba(255,95,95,0.18)');
-          g2.addColorStop(1, 'rgba(0,0,0,0)'); return g2;
+          g2.addColorStop(1, 'rgba(0,0,0,0)');
+          return g2;
         }, tension: 0.3
       }]},
       options: {
-        responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 300 },
         interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { display: false },
+        plugins: {
+          legend: { display: false },
           tooltip: {
             backgroundColor: '#1c1c22', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
             titleColor: '#888880', bodyColor: '#f0ede8',
@@ -2110,25 +2127,35 @@ async function loadSrdChart(sym) {
         },
         scales: {
           x: { display: false },
-          y: { position:'right', border:{display:false}, grid:{color:'rgba(255,255,255,0.04)'},
-            ticks:{color:'#888880', font:{family:"'Syne Mono',monospace",size:8}, maxTicksLimit:3, callback:v=>v.toFixed(0)} }
+          y: {
+            position: 'right', border: { display: false },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color:'#888880', font:{ family:"'Syne Mono',monospace", size:8 }, maxTicksLimit:3, callback: v => v.toFixed(0) }
+          }
         }
       }
     });
   } catch(e) {
-    loading.textContent = 'Keine Daten';
+    // Chart nicht verfügbar — aber das ist ok, Ticker ist trotzdem ausgewählt
+    loading.textContent = 'Kein Chart verfügbar';
+    loading.style.display = 'flex';
+    canvas.style.display = 'none';
+    // selectedTicker bleibt gesetzt, Button bleibt aktiv
   }
 }
 
 function clearSearchSelection() {
   selectedTicker = null;
   document.getElementById('searchResultDetail').classList.remove('visible');
-  document.getElementById('addWatchBtn').disabled = true;
+  const btn = document.getElementById('addWatchBtn');
+  if (btn) { btn.textContent = '+ Zur Watchlist'; btn.disabled = false; }
   if (srdChart) { try { srdChart.destroy(); } catch(e){} srdChart = null; }
 }
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.search-wrap')) closeDropdown();
+  if (!e.target.closest('.search-wrap') && !e.target.closest('.search-result-detail')) {
+    closeDropdown();
+  }
 });
 
 // ── SYNC ──────────────────────────────────────────────────────
@@ -2240,6 +2267,8 @@ async function init() {
   renderAll();
   await autoPullOnLoad();
   await refreshPrices();
+  // FIX 3: Auto-Vollbild nach dem Laden prüfen
+  checkAutoFullscreen();
   setInterval(refreshPrices, 60000);
   setInterval(getFxRate, 300000);
   setInterval(silentPush, 5 * 60 * 1000);
