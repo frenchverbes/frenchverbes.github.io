@@ -38,7 +38,6 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
 }
 .hbtn:hover { border-color: var(--border-hover); color: var(--text); }
 .hbtn.sync-active { border-color: rgba(200,240,96,0.4); color: var(--accent); }
-.hbtn.expert-active { border-color: rgba(200,240,96,0.4); color: var(--accent); background: var(--accent-dim); }
 
 .summary { display: grid; grid-template-columns: repeat(3, 1fr); }
 .summary-item { padding: 0.4rem 0; text-align: center; }
@@ -64,8 +63,7 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
 .pos-header:hover { background: var(--surface); }
 .drag-handle {
   cursor: grab; color: var(--muted); opacity: 0.4; font-size: 0.85rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity 0.15s;
+  display: flex; align-items: center; justify-content: center; transition: opacity 0.15s;
 }
 .drag-handle:hover { opacity: 1; }
 .drag-handle:active { cursor: grabbing; }
@@ -99,7 +97,7 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
 .buy-markers-list { padding: 0 1rem 0.5rem; }
 .buy-marker-row {
   display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.62rem;
+  padding: 0.35rem 0; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 0.62rem;
 }
 .buy-marker-row:last-child { border-bottom: none; }
 .bm-label { color: var(--accent); flex-shrink: 0; }
@@ -107,11 +105,16 @@ body { min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 0 0 14rem; 
 .bm-invested { color: var(--muted); }
 .bm-ret { font-weight: 600; }
 .bm-ret.pos { color: var(--green); } .bm-ret.neg { color: var(--red); }
-.bm-del { background: none; border: none; cursor: pointer; color: var(--muted); padding: 0 0.2rem; font-size: 0.9rem; margin-left: auto; transition: color 0.12s; }
-.bm-del:hover { color: var(--red); }
+.bm-del {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  color: var(--muted); padding: 0.12rem 0.32rem; font-size: 0.65rem;
+  border-radius: 3px; margin-left: auto; transition: all 0.12s; line-height: 1;
+  font-family: var(--mono); flex-shrink: 0;
+}
+.bm-del:hover { color: var(--red); border-color: rgba(255,95,95,0.4); }
 
 .lots-list { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-.lots-list.open { max-height: 600px; }
+.lots-list.open { max-height: 800px; }
 
 .lot-row {
   display: grid; grid-template-columns: 1fr auto auto;
@@ -166,51 +169,9 @@ canvas { display: block; width: 100% !important; }
 
 /* ── NEWS PANEL within position ── */
 .pos-news-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-.pos-news-panel.open { max-height: 800px; }
+.pos-news-panel.open { max-height: 1200px; }
 .pos-news-inner { padding: 0.5rem 1rem 0.75rem; border-top: 1px solid var(--border); }
 .pos-news-loading { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); padding: 0.4rem 0; }
-
-/* ── EXPERT OVERLAY ── */
-.expert-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 200;
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 1rem; overflow-y: auto;
-  opacity: 0; pointer-events: none; transition: opacity 0.2s;
-}
-.expert-overlay.open { opacity: 1; pointer-events: all; }
-.expert-panel {
-  background: var(--surface); border: 1px solid var(--border-hover); border-radius: 12px;
-  width: 100%; max-width: 520px; padding: 1.5rem; margin: auto;
-  transform: translateY(16px); transition: transform 0.2s;
-}
-.expert-overlay.open .expert-panel { transform: translateY(0); }
-.expert-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
-.expert-title { font-size: 0.9rem; font-weight: 800; }
-.expert-sym { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); margin-left: 0.5rem; }
-.expert-close {
-  background: none; border: 1px solid var(--border); color: var(--muted);
-  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.05em; text-transform: uppercase;
-  padding: 0.22rem 0.5rem; border-radius: 4px; cursor: pointer; transition: all 0.15s;
-}
-.expert-close:hover { color: var(--text); border-color: var(--border-hover); }
-.expert-ticker-row {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem;
-}
-.expert-card {
-  background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
-  padding: 0.6rem 0.75rem;
-}
-.expert-card-label { font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.18rem; }
-.expert-card-val { font-family: var(--mono); font-size: 0.82rem; font-weight: 700; }
-.expert-card-val.pos { color: var(--green); }
-.expert-card-val.neg { color: var(--red); }
-.expert-section { margin-bottom: 1rem; }
-.expert-section-title { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
-.expert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 1rem; }
-.expert-row { display: flex; justify-content: space-between; align-items: baseline; padding: 0.18rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-.expert-row-label { font-family: var(--mono); font-size: 0.58rem; color: var(--muted); }
-.expert-row-val { font-family: var(--mono); font-size: 0.62rem; font-weight: 600; }
-.expert-loading { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-align: center; padding: 2rem; }
 
 /* ── INFO MODAL ── */
 .info-modal-backdrop {
@@ -466,7 +427,7 @@ canvas { display: block; width: 100% !important; }
 .dd-name { font-size: 0.72rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dd-exch { font-family: var(--mono); font-size: 0.55rem; color: var(--muted); flex-shrink: 0; }
 
-/* Search result / selected ticker detail */
+/* Search result detail */
 .search-result-detail {
   display: none; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
   padding: 0.65rem 0.85rem; margin-bottom: 0.48rem;
@@ -478,12 +439,21 @@ canvas { display: block; width: 100% !important; }
 .srd-x { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; transition: color 0.12s; }
 .srd-x:hover { color: var(--text); }
 .srd-price { font-family: var(--mono); font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
-.srd-change { font-family: var(--mono); font-size: 0.72rem; }
+.srd-change { font-family: var(--mono); font-size: 0.72rem; margin-bottom: 0.5rem; }
 .srd-change.up { color: var(--green); } .srd-change.down { color: var(--red); }
-.srd-chart-wrap { height: 100px; position: relative; margin: 0.5rem 0 0.5rem; }
+
+/* Search chart tabs */
+.srd-chart-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.45rem; flex-wrap: wrap; }
+.srd-chart-tab {
+  font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.05em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  padding: 0.14rem 0.34rem; border-radius: 3px; cursor: pointer; transition: all 0.12s;
+}
+.srd-chart-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.srd-chart-wrap { height: 100px; position: relative; margin-bottom: 0.5rem; }
 .srd-chart-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.62rem; color: var(--muted); }
 
-/* FIX: Watchlist button always visible and enabled when ticker selected */
 .add-watch-btn {
   width: 100%; background: var(--accent); border: none; border-radius: 6px; color: #0c0c0f;
   font-family: var(--mono); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
@@ -503,7 +473,6 @@ canvas { display: block; width: 100% !important; }
 }
 .news-main-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
-/* Category selector */
 .news-cat-row { display: flex; gap: 0.2rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
 .news-cat-btn {
   font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.05em; text-transform: uppercase;
@@ -511,36 +480,26 @@ canvas { display: block; width: 100% !important; }
   padding: 0.18rem 0.4rem; border-radius: 3px; cursor: pointer; transition: all 0.12s;
 }
 .news-cat-btn.active { background: rgba(200,240,96,0.08); border-color: rgba(200,240,96,0.3); color: var(--accent); }
-.news-sub-cat-row { display: flex; gap: 0.2rem; flex-wrap: wrap; margin-bottom: 0.5rem; min-height: 22px; }
-.news-sub-btn {
-  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.04em; text-transform: uppercase;
-  background: none; border: 1px solid rgba(255,255,255,0.05); color: var(--muted);
-  padding: 0.15rem 0.35rem; border-radius: 3px; cursor: pointer; transition: all 0.12s;
-}
-.news-sub-btn.active { border-color: rgba(200,240,96,0.25); color: var(--accent); background: rgba(200,240,96,0.06); }
 
 .news-feed-container { overflow-y: auto; max-height: 340px; }
 .bottom-panel.fullscreen .news-feed-container { max-height: none; flex: 1; overflow-y: auto; }
 
+/* News items — more spacious */
 .news-item {
-  display: flex; gap: 0.5rem; padding: 0.55rem 0; border-bottom: 1px solid var(--border);
+  display: flex; gap: 0.7rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border);
   cursor: pointer; transition: background 0.1s; align-items: flex-start;
   text-decoration: none; color: inherit;
 }
 .news-item:last-child { border-bottom: none; }
-.news-item:hover { background: var(--surface); margin: 0 -0.75rem; padding: 0.55rem 0.75rem; border-radius: 4px; }
-.news-thumb { width: 52px; height: 40px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
-.news-thumb-placeholder { width: 52px; height: 40px; border-radius: 4px; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.news-item:hover { background: var(--surface); margin: 0 -0.75rem; padding: 0.85rem 0.75rem; border-radius: 4px; }
+.news-thumb { width: 64px; height: 48px; border-radius: 5px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
+.news-thumb-placeholder { width: 64px; height: 48px; border-radius: 5px; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
 .news-content { flex: 1; min-width: 0; }
-.news-title { font-size: 0.72rem; font-weight: 600; line-height: 1.35; margin-bottom: 0.18rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.news-title { font-size: 0.78rem; font-weight: 600; line-height: 1.45; margin-bottom: 0.3rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .news-meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-.news-source { font-family: var(--mono); font-size: 0.52rem; color: var(--accent); }
-.news-time { font-family: var(--mono); font-size: 0.5rem; color: var(--muted); }
-.news-cluster-badge {
-  font-family: var(--mono); font-size: 0.46rem; letter-spacing: 0.04em; text-transform: uppercase;
-  background: rgba(200,240,96,0.08); border: 1px solid rgba(200,240,96,0.2); color: var(--accent);
-  padding: 0.08rem 0.28rem; border-radius: 3px;
-}
+.news-source { font-family: var(--mono); font-size: 0.55rem; color: var(--accent); }
+.news-time { font-family: var(--mono); font-size: 0.52rem; color: var(--muted); }
+
 .news-loading { text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--muted); padding: 1.5rem; }
 .news-empty { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); padding: 1rem 0; }
 
@@ -588,8 +547,7 @@ canvas { display: block; width: 100% !important; }
     display: flex; flex-direction: column;
   }
   .bottom-panel.fullscreen {
-    position: fixed; inset: 0; left: 0; width: 100%; height: 100vh;
-    border-left: none;
+    position: fixed; inset: 0; left: 0; width: 100%; height: 100vh; border-left: none;
   }
   .panel-body { flex: 1; padding: 1rem 1.25rem 1.25rem; overflow-y: auto; }
   .news-feed-container, .portfolio-news-container { max-height: none; }
@@ -621,9 +579,7 @@ canvas { display: block; width: 100% !important; }
   <div class="header-btns">
     <button class="hbtn" id="syncBtn" onclick="openSyncModal()">Sync</button>
     <button class="hbtn" id="expandAllBtn" onclick="toggleAll()">Aufklappen</button>
-    <button class="hbtn" id="expertModeBtn" onclick="toggleExpertMode()">Experte</button>
     <button class="hbtn" onclick="openSettingsModal()">RSS</button>
-    <!-- FIX 3: Vollbild-Button speichert nur den Tab, kein sofortiges Vollbild -->
     <button class="hbtn" onclick="openFsSettingsModal()">Vollbild</button>
     <button class="hbtn" onclick="resetConfirm()" style="color:var(--red);border-color:rgba(255,95,95,0.3)">Reset</button>
   </div>
@@ -679,17 +635,6 @@ canvas { display: block; width: 100% !important; }
   </div>
 </div>
 
-<!-- Expert Overlay -->
-<div class="expert-overlay" id="expertOverlay" onclick="closeExpertOverlay(event)">
-  <div class="expert-panel" id="expertPanel">
-    <div class="expert-header">
-      <div><span class="expert-title">Experten-Ansicht</span><span class="expert-sym" id="expertSym"></span></div>
-      <button class="expert-close" onclick="document.getElementById('expertOverlay').classList.remove('open')">Schließen</button>
-    </div>
-    <div id="expertContent"><div class="expert-loading">Lade Daten…</div></div>
-  </div>
-</div>
-
 <!-- Settings Modal -->
 <div class="settings-modal-backdrop" id="settingsModal">
   <div class="settings-modal">
@@ -704,11 +649,11 @@ canvas { display: block; width: 100% !important; }
   </div>
 </div>
 
-<!-- FIX 3: Vollbild-Einstellungs-Modal (kein Start-Modal mehr beim Laden) -->
+<!-- Vollbild Settings Modal -->
 <div class="modal-backdrop" id="fsSettingsModal" onclick="if(event.target===this)closeFsSettingsModal()">
   <div class="modal">
     <div class="modal-title">Vollbild-Einstellungen</div>
-    <div class="modal-sub">Wähle welcher Tab beim nächsten Seitenaufruf automatisch im Vollbild geöffnet wird. Oder deaktiviere das Auto-Vollbild.</div>
+    <div class="modal-sub">Wähle welcher Tab beim nächsten Seitenaufruf automatisch im Vollbild geöffnet wird.</div>
     <div class="modal-section-label">Standard-Tab beim Start</div>
     <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem">
       <button class="sync-action-btn" id="fss-none" onclick="setFsDefault('none')">Kein Vollbild</button>
@@ -732,13 +677,13 @@ canvas { display: block; width: 100% !important; }
     <button class="panel-tab" id="tab-news" onclick="switchTab('news')">News</button>
     <button class="fullscreen-toggle" id="fsToggleBtn" onclick="togglePanelFullscreen()">⛶</button>
   </div>
+
   <!-- Search Tab -->
   <div class="panel-body" id="panel-search">
     <div class="search-wrap">
       <input class="search-input" id="searchInput" placeholder="Ticker suchen (z. B. Apple, NVDA…)" autocomplete="off" oninput="onSearch(this.value)" onfocus="onSearchFocus()" />
       <div class="dropdown" id="searchDropdown"></div>
     </div>
-    <!-- Search result detail with chart -->
     <div class="search-result-detail" id="searchResultDetail">
       <div class="srd-top">
         <span class="srd-sym" id="srdSym"></span>
@@ -747,20 +692,31 @@ canvas { display: block; width: 100% !important; }
       </div>
       <div class="srd-price" id="srdPrice">–</div>
       <div class="srd-change" id="srdChange">–</div>
+      <!-- Chart tabs for search -->
+      <div class="srd-chart-tabs" id="srdChartTabs">
+        <button class="srd-chart-tab active" data-range="1d" onclick="switchSrdTab(this,'1d')">1T</button>
+        <button class="srd-chart-tab" data-range="5d" onclick="switchSrdTab(this,'5d')">5T</button>
+        <button class="srd-chart-tab" data-range="1mo" onclick="switchSrdTab(this,'1mo')">1M</button>
+        <button class="srd-chart-tab" data-range="3mo" onclick="switchSrdTab(this,'3mo')">3M</button>
+        <button class="srd-chart-tab" data-range="1y" onclick="switchSrdTab(this,'1y')">1J</button>
+        <button class="srd-chart-tab" data-range="5y" onclick="switchSrdTab(this,'5y')">5J</button>
+        <button class="srd-chart-tab" data-range="max" onclick="switchSrdTab(this,'max')">Max</button>
+      </div>
       <div class="srd-chart-wrap">
         <div class="srd-chart-loading" id="srdChartLoading">laden…</div>
         <canvas id="srdCanvas" height="100"></canvas>
       </div>
-      <!-- FIX 2: Button ohne disabled-Attribut, wird per JS gesteuert -->
       <button class="add-watch-btn" id="addWatchBtn" onclick="addToWatchlist()">+ Zur Watchlist</button>
     </div>
   </div>
+
   <!-- Portfolio News Tab -->
   <div class="panel-body hidden-body" id="panel-portfolio-news">
     <div class="portfolio-news-container" id="portfolioNewsContainer">
       <div class="news-loading">Watchlist leer oder keine Feeds konfiguriert.</div>
     </div>
   </div>
+
   <!-- News Tab -->
   <div class="panel-body news-panel-body hidden-body" id="panel-news">
     <div class="news-main-tabs">
@@ -770,7 +726,6 @@ canvas { display: block; width: 100% !important; }
       <button class="news-main-tab" id="nmtab-politik" onclick="switchNewsMainTab('politik')">Politik</button>
     </div>
     <div class="news-cat-row" id="newsCatRow"></div>
-    <div class="news-sub-cat-row" id="newsSubCatRow"></div>
     <div class="news-feed-container" id="newsFeedContainer">
       <div class="news-loading">Konfiguriere RSS Feeds unter ⚙ RSS.</div>
     </div>
@@ -784,8 +739,7 @@ const API = 'https://stock-worker.stock-worker.workers.dev';
 const SK = 'watchlist_v1';
 const SYNC_CODE_KEY = 'watchlist_sync_code';
 const RSS_SETTINGS_KEY = 'watchlist_rss_v2';
-const EXPERT_MODE_KEY = 'watchlist_expert';
-const FS_DEFAULT_KEY = 'watchlist_fs_default'; // 'none' | 'search' | 'portfolio-news' | 'news'
+const FS_DEFAULT_KEY = 'watchlist_fs_default';
 
 // ── RSS FEED CATEGORIES ──────────────────────────────────────
 const DEFAULT_RSS_CONFIG = {
@@ -875,11 +829,10 @@ let priceCache = {};
 let infoCache = {};
 let newsCache = {};
 let srdChart = null;
-let expertMode = localStorage.getItem(EXPERT_MODE_KEY) === 'true';
+let srdCurrentRange = '1d';
 let panelFullscreen = false;
 let activeNewsMainTab = 'alles';
 let activeNewsCat = 'welt';
-let activeNewsSub = null;
 let currentSettingsTab = 'portfolio';
 let dragSrc = null;
 
@@ -992,15 +945,14 @@ function getOrderedWatchlist() {
   return ordered;
 }
 
-// ── FIX 2: addToWatchlist — robuste Version ──────────────────
+// ── ADD TO WATCHLIST ──────────────────────────────────────────
 function addToWatchlist() {
-  if (!selectedTicker) {
-    console.warn('Kein Ticker ausgewählt');
-    return;
-  }
+  if (!selectedTicker) return;
   const sym = selectedTicker.symbol;
   if (state.watchlist.find(w => w.symbol === sym)) {
-    alert('Bereits in der Watchlist.');
+    const btn = document.getElementById('addWatchBtn');
+    if (btn) { btn.textContent = '✓ Bereits in der Watchlist'; }
+    setTimeout(() => { if (btn) btn.textContent = '+ Zur Watchlist'; }, 1500);
     return;
   }
   const item = {
@@ -1017,14 +969,18 @@ function addToWatchlist() {
   save();
   silentPush();
 
-  // Reset Suche
+  // Show success on button but keep selection visible
   const btn = document.getElementById('addWatchBtn');
-  if (btn) btn.textContent = '✓ Hinzugefügt';
-  setTimeout(() => {
-    clearSearchSelection();
-  }, 600);
+  if (btn) {
+    btn.textContent = '✓ Hinzugefügt';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = '+ Zur Watchlist';
+      btn.style.background = '';
+    }, 1800);
+  }
 
-  // Render
+  // Re-render positions
   document.getElementById('positionsList').innerHTML = '';
   Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
   charts = {};
@@ -1158,6 +1114,7 @@ function renderPositions() {
             <button class="chart-tab" onclick="loadChart('${item.symbol}','3mo',this)">3M</button>
             <button class="chart-tab" onclick="loadChart('${item.symbol}','1y',this)">1J</button>
             <button class="chart-tab" onclick="loadChart('${item.symbol}','5y',this)">5J</button>
+            <button class="chart-tab" onclick="loadChart('${item.symbol}','max',this)">Max</button>
           </div>
           <div class="chart-canvas-wrap">
             <div class="chart-loading" id="loading-${item.symbol}">laden…</div>
@@ -1196,27 +1153,38 @@ function buildMarkersHtml(item, markers, cp) {
     </div>`;
 }
 
+// FIX: Marker calculations use NATIVE price (not CHF-converted)
+// A marker stores the buy price in the stock's native currency
+// We compare native buy price vs native current price for % return
+// Then use invested CHF to show absolute CHF gain/loss
 function buildMarkersListHtml(item, markers, cp) {
   if (!markers.length) return '';
   return markers.map((m, i) => {
     let retHtml = '';
+    // cp is the native price of the stock (e.g. USD for AAPL)
+    // m.price is the buy price also in native currency
+    // m.invested is always in CHF (user input)
     if (cp && m.price > 0) {
       const ret = ((cp - m.price) / m.price) * 100;
-      const curVal = m.invested ? m.invested * (cp / m.price) : null;
-      const retAbs = m.invested ? (curVal - m.invested) : null;
       const cls = ret >= 0 ? 'pos' : 'neg';
       retHtml = `<span class="bm-ret ${cls}">${fmtPct(ret)}</span>`;
-      if (retAbs !== null) retHtml += ` <span class="bm-ret ${cls}">(${retAbs >= 0 ? '+' : ''}${fmtNum(retAbs)})</span>`;
+      if (m.invested) {
+        const retAbsChf = m.invested * (ret / 100);
+        retHtml += ` <span class="bm-ret ${cls}">(${retAbsChf >= 0 ? '+' : ''}${fmtNum(retAbsChf)} CHF)</span>`;
+      }
     } else if (m.price === 0) {
       retHtml = `<span style="color:var(--muted);font-size:0.58rem">Dummy</span>`;
     }
+    const currency = item.currency || 'USD';
+    const displayPrice = m.price > 0 ? `${fmtNum(m.price)} ${currency}` : '–';
+    const investedDisplay = m.invested ? `${fmtNum(m.invested)} CHF` : '';
     return `
       <div class="buy-marker-row" data-sym="${item.symbol}" data-idx="${i}" onmouseenter="showMarkerTooltip(event,'${item.symbol}',${i})" onmouseleave="hideMarkerTooltip()">
         <span class="bm-label">▸ Kauf</span>
-        <span class="bm-price">${m.price > 0 ? fmtNum(m.price) : '–'}</span>
-        ${m.invested ? `<span class="bm-invested">· ${fmtNum(m.invested)} CHF inv.</span>` : ''}
+        <span class="bm-price">${displayPrice}</span>
+        ${investedDisplay ? `<span class="bm-invested">· ${investedDisplay}</span>` : ''}
         ${retHtml}
-        <button class="bm-del" onclick="removeBuyMarker('${item.symbol}',${i})">×</button>
+        <button class="bm-del" onclick="removeBuyMarker('${item.symbol}',${i})" title="Marker entfernen">×</button>
       </div>`;
   }).join('');
 }
@@ -1234,19 +1202,17 @@ function addBuyMarker(sym) {
   if (isNaN(price) || price < 0) { alert('Ungültiger Preis. 0 für Dummy-Marker.'); return; }
   if (!state.buyMarkers) state.buyMarkers = {};
   if (!state.buyMarkers[sym]) state.buyMarkers[sym] = [];
+  // price is stored in the stock's native currency (as displayed/entered)
   state.buyMarkers[sym].push({ price, invested: invested > 0 ? invested : null, addedAt: new Date().toISOString() });
   pEl.value = ''; iEl.value = '';
   document.getElementById('mform-' + sym).style.display = 'none';
   save(); silentPush();
-  const item = state.watchlist.find(w => w.symbol === sym);
-  const markers = state.buyMarkers[sym];
-  const markEl = document.getElementById('markers-' + sym);
-  if (markEl && item) markEl.innerHTML = buildMarkersListHtml(item, markers, item.currentPrice);
+  refreshMarkersDisplay(sym);
+  // Reload chart if open to show new marker line
   const activeTab = document.querySelector('#tabs-' + sym + ' .chart-tab.active');
-  if (activeTab) {
-    const range = activeTab.textContent === '1T' ? '1d' : activeTab.textContent === '5T' ? '5d' :
-      activeTab.textContent === '1M' ? '1mo' : activeTab.textContent === '3M' ? '3mo' :
-      activeTab.textContent === '1J' ? '1y' : '5y';
+  if (activeTab && document.getElementById('chart-' + sym)?.classList.contains('open')) {
+    const rangeMap = {'1T':'1d','5T':'5d','1M':'1mo','3M':'3mo','1J':'1y','5J':'5y','Max':'max'};
+    const range = rangeMap[activeTab.textContent] || '1d';
     loadChart(sym, range, activeTab);
   }
 }
@@ -1255,8 +1221,12 @@ function removeBuyMarker(sym, idx) {
   if (!state.buyMarkers || !state.buyMarkers[sym]) return;
   state.buyMarkers[sym].splice(idx, 1);
   save(); silentPush();
+  refreshMarkersDisplay(sym);
+}
+
+function refreshMarkersDisplay(sym) {
   const item = state.watchlist.find(w => w.symbol === sym);
-  const markers = state.buyMarkers[sym];
+  const markers = (state.buyMarkers || {})[sym] || [];
   const markEl = document.getElementById('markers-' + sym);
   if (markEl && item) markEl.innerHTML = buildMarkersListHtml(item, markers, item.currentPrice);
 }
@@ -1267,19 +1237,21 @@ function showMarkerTooltip(event, sym, idx) {
   const m = markers[idx];
   if (!m || !item) return;
   const tt = document.getElementById('markerTooltip');
-  const cp = item.currentPrice;
+  const cp = item.currentPrice; // native price
+  const currency = item.currency || 'USD';
   document.getElementById('mtTitle').textContent = item.symbol + ' Kauf-Marker';
-  document.getElementById('mtBuyPrice').textContent = m.price > 0 ? fmtNum(m.price) + ' ' + (item.currency || '') : 'Dummy';
-  document.getElementById('mtCurPrice').textContent = cp ? fmtNum(cp) + ' ' + (item.currency || '') : '–';
+  document.getElementById('mtBuyPrice').textContent = m.price > 0 ? `${fmtNum(m.price)} ${currency}` : 'Dummy';
+  document.getElementById('mtCurPrice').textContent = cp ? `${fmtNum(cp)} ${currency}` : '–';
   document.getElementById('mtInvested').textContent = m.invested ? fmtNum(m.invested) + ' CHF' : '–';
   const retEl = document.getElementById('mtRet');
   const curValEl = document.getElementById('mtCurVal');
   if (cp && m.price > 0 && m.invested) {
     const ret = ((cp - m.price) / m.price) * 100;
-    const curVal = m.invested * (cp / m.price);
-    retEl.textContent = fmtPct(ret) + ' (' + (curVal - m.invested >= 0 ? '+' : '') + fmtNum(curVal - m.invested) + ' CHF)';
+    const curValChf = m.invested * (1 + ret / 100);
+    const retAbsChf = curValChf - m.invested;
+    retEl.textContent = fmtPct(ret) + ' (' + (retAbsChf >= 0 ? '+' : '') + fmtNum(retAbsChf) + ' CHF)';
     retEl.className = 'mt-ret ' + (ret >= 0 ? 'pos' : 'neg');
-    curValEl.textContent = fmtNum(curVal) + ' CHF';
+    curValEl.textContent = fmtNum(curValChf) + ' CHF';
   } else if (cp && m.price > 0) {
     const ret = ((cp - m.price) / m.price) * 100;
     retEl.textContent = fmtPct(ret);
@@ -1297,8 +1269,7 @@ function hideMarkerTooltip() { document.getElementById('markerTooltip').classLis
 
 // ── DRAG & DROP ──────────────────────────────────────────────
 function onDragStart(e) {
-  dragSrc = this;
-  this.classList.add('dragging');
+  dragSrc = this; this.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', this.dataset.sym);
 }
@@ -1356,7 +1327,7 @@ function toggleAll() {
 }
 
 function intervalForRange(r) {
-  return {'1d':'5m','5d':'30m','1mo':'1d','3mo':'1d','1y':'1wk','5y':'1mo'}[r] || '1d';
+  return {'1d':'5m','5d':'30m','1mo':'1d','3mo':'1d','1y':'1wk','5y':'1mo','max':'3mo'}[r] || '1d';
 }
 
 async function loadChart(sym, range, tabEl) {
@@ -1395,13 +1366,14 @@ async function loadChart(sym, range, tabEl) {
         const diff = Math.abs(p.time * 1000 - buyTime);
         if (diff < minDiff) { minDiff = diff; closestIdx = i; }
       });
+      // Marker line shows the buy price converted to CHF for the chart
       const priceChfVal = toChf(m.price, currency);
       annotations['buy_' + idx] = {
         type: 'line', xMin: closestIdx, xMax: closestIdx,
         borderColor: 'rgba(200,240,96,0.7)', borderWidth: 1.5, borderDash: [3,3],
         label: {
           display: true,
-          content: fmtNum(priceChfVal), position: 'start',
+          content: fmtNum(m.price) + ' ' + currency, position: 'start',
           backgroundColor: 'rgba(12,12,15,0.85)', color: '#c8f060',
           font: { family:"'Syne Mono',monospace", size:9 },
           padding: { top:2, bottom:2, left:4, right:4 }, borderRadius: 3, yAdjust: 6
@@ -1455,7 +1427,7 @@ async function openInfoModal(sym) {
   const item = state.watchlist.find(w => w.symbol === sym);
   document.getElementById('infoSym').textContent = sym;
   document.getElementById('infoName').textContent = item ? item.name : '';
-  document.getElementById('infoContent').innerHTML = '<div class="expert-loading">Lade Daten…</div>';
+  document.getElementById('infoContent').innerHTML = '<div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);padding:1rem 0">Lade Daten…</div>';
   modal.classList.add('open');
   const q = await fetchInfo(sym);
   if (!q) { document.getElementById('infoContent').innerHTML = '<p style="color:var(--muted);font-family:var(--mono);font-size:0.65rem">Keine Daten verfügbar.</p>'; return; }
@@ -1495,75 +1467,6 @@ function fmtLargeNum(n) {
   return fmtNum(n);
 }
 
-// ── EXPERT MODE ──────────────────────────────────────────────
-function toggleExpertMode() {
-  expertMode = !expertMode;
-  localStorage.setItem(EXPERT_MODE_KEY, expertMode);
-  document.getElementById('expertModeBtn').className = 'hbtn' + (expertMode ? ' expert-active' : '');
-  if (expertMode) { openExpertOverview(); }
-  else { document.getElementById('expertOverlay').classList.remove('open'); }
-}
-
-async function openExpertOverview() {
-  const overlay = document.getElementById('expertOverlay');
-  const content = document.getElementById('expertContent');
-  document.getElementById('expertSym').textContent = 'Watchlist';
-  content.innerHTML = '<div class="expert-loading">Lade Experten-Daten…</div>';
-  overlay.classList.add('open');
-  const items = getOrderedWatchlist();
-  if (!items.length) { content.innerHTML = '<div class="expert-loading">Keine Positionen.</div>'; return; }
-
-  let rows = '';
-  for (const item of items.slice(0, 8)) {
-    const q = await fetchPrice(item.symbol);
-    if (!q) continue;
-    const cp = q.price || 0;
-    const prev = q.previousClose || 0;
-    const chgPct = prev > 0 ? ((cp - prev)/prev)*100 : 0;
-    const hi52 = q.fiftyTwoWeekHigh; const lo52 = q.fiftyTwoWeekLow;
-    const posIn52 = (hi52 && lo52 && hi52 > lo52) ? Math.round(((cp - lo52)/(hi52 - lo52))*100) : null;
-    const markers = (state.buyMarkers || {})[item.symbol] || [];
-    let markersHtml = '';
-    for (const m of markers) {
-      if (m.price > 0) {
-        const ret = ((cp - m.price)/m.price)*100;
-        const cls = ret >= 0 ? 'pos' : 'neg';
-        markersHtml += `<div class="expert-row"><span class="expert-row-label">Marker ${fmtNum(m.price)}</span><span class="expert-row-val ${cls}">${fmtPct(ret)}</span></div>`;
-      }
-    }
-    rows += `
-      <div class="expert-section">
-        <div class="expert-section-title">${item.symbol} — ${item.name}</div>
-        <div class="expert-ticker-row">
-          <div class="expert-card"><div class="expert-card-label">Kurs</div><div class="expert-card-val">${fmtNum(cp)}</div></div>
-          <div class="expert-card"><div class="expert-card-label">Tagesänd.</div><div class="expert-card-val ${pnlClass(chgPct,'pos','neg')}">${fmtPct(chgPct)}</div></div>
-          <div class="expert-card"><div class="expert-card-label">CHF</div><div class="expert-card-val">${fmtNum(toChf(cp, item.currency))}</div></div>
-        </div>
-        <div class="expert-grid">
-          ${hi52 ? `<div class="expert-row"><span class="expert-row-label">52W Hoch</span><span class="expert-row-val">${fmtNum(hi52)}</span></div>` : ''}
-          ${lo52 ? `<div class="expert-row"><span class="expert-row-label">52W Tief</span><span class="expert-row-val">${fmtNum(lo52)}</span></div>` : ''}
-          ${posIn52 !== null ? `<div class="expert-row"><span class="expert-row-label">Pos. in 52W</span><span class="expert-row-val">${posIn52}%</span></div>` : ''}
-          ${q.marketCap ? `<div class="expert-row"><span class="expert-row-label">Marktk.</span><span class="expert-row-val">${fmtLargeNum(q.marketCap)}</span></div>` : ''}
-          ${q.volume ? `<div class="expert-row"><span class="expert-row-label">Volumen</span><span class="expert-row-val">${fmtLargeNum(q.volume)}</span></div>` : ''}
-          ${q.pe ? `<div class="expert-row"><span class="expert-row-label">KGV</span><span class="expert-row-val">${q.pe.toFixed(1)}</span></div>` : ''}
-          ${q.eps ? `<div class="expert-row"><span class="expert-row-label">EPS</span><span class="expert-row-val">${fmtNum(q.eps)}</span></div>` : ''}
-          ${q.dividendYield ? `<div class="expert-row"><span class="expert-row-label">Dividende</span><span class="expert-row-val">${(q.dividendYield*100).toFixed(2)}%</span></div>` : ''}
-        </div>
-        ${markersHtml ? `<div style="margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid var(--border)">${markersHtml}</div>` : ''}
-      </div>`;
-  }
-  content.innerHTML = rows || '<div class="expert-loading">Keine Daten.</div>';
-}
-
-function closeExpertOverlay(e) {
-  if (e.target === document.getElementById('expertOverlay')) {
-    document.getElementById('expertOverlay').classList.remove('open');
-    expertMode = false;
-    localStorage.setItem(EXPERT_MODE_KEY, false);
-    document.getElementById('expertModeBtn').className = 'hbtn';
-  }
-}
-
 // ── PER-POSITION NEWS ────────────────────────────────────────
 async function togglePosNews(sym, btn) {
   const panel = document.getElementById('pos-news-' + sym);
@@ -1573,60 +1476,99 @@ async function togglePosNews(sym, btn) {
   if (isOpen) { panel.classList.remove('open'); return; }
   panel.classList.add('open');
   inner.innerHTML = '<div class="pos-news-loading">Lade News…</div>';
-  const feeds = (rssConfig.portfolio && rssConfig.portfolio.feeds) || [
-    'https://finance.yahoo.com/rss/headline?s={TICKER}',
-    'https://news.google.com/rss/search?q={TICKER}+stock&hl=en-US&gl=US&ceid=US:en'
-  ];
-  const resolvedFeeds = feeds.map(f => f.replace(/\{TICKER\}/g, sym));
-  const items = await fetchMultipleFeeds(resolvedFeeds, 12);
+
+  // Use multiple strategies for stock news
+  const feeds = [];
+  // Portfolio RSS feeds with ticker substitution
+  const portFeeds = (rssConfig.portfolio && rssConfig.portfolio.feeds) || [];
+  portFeeds.forEach(f => feeds.push(f.replace(/\{TICKER\}/g, sym)));
+  // Additional fallback feeds
+  feeds.push(`https://news.google.com/rss/search?q=${encodeURIComponent(sym)}+Aktie&hl=de&gl=DE&ceid=DE:de`);
+  feeds.push(`https://news.google.com/rss/search?q=${encodeURIComponent(sym)}+stock&hl=en-US&gl=US&ceid=US:en`);
+
+  const items = await fetchMultipleFeeds([...new Set(feeds)], 15);
   if (!items.length) {
-    inner.innerHTML = '<div class="pos-news-loading">Keine News gefunden.</div>';
+    inner.innerHTML = '<div class="pos-news-loading">Keine News gefunden. Prüfe die Portfolio-Feeds unter RSS.</div>';
     return;
   }
-  inner.innerHTML = items.map(n => renderNewsItem(n)).join('');
+  inner.innerHTML = items.map(n => renderNewsItem(n, true)).join('');
 }
 
 // ── RSS FEED LOADING ─────────────────────────────────────────
-const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
-const RSS_PROXY2 = 'https://api.allorigins.win/get?url=';
+// Multiple CORS proxies to try in order
+const RSS_PROXIES = [
+  url => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://cors-anywhere.herokuapp.com/${url}`,
+];
 
-async function fetchRssFeed(url, timeout = 8000) {
+async function fetchRssFeed(url, timeout = 10000) {
   const cacheKey = 'rss_' + url;
   const cached = newsCache[cacheKey];
   if (cached && Date.now() - cached.ts < 300000) return cached.items;
 
+  // Try rss2json first (returns parsed JSON)
   try {
-    const proxyUrl = RSS_PROXY + encodeURIComponent(url);
+    const proxyUrl = RSS_PROXIES[0](url);
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), timeout);
     const r = await fetch(proxyUrl, { signal: ctrl.signal });
     clearTimeout(tid);
-    const d = await r.json();
-    if (d.status === 'ok' && d.items) {
-      const items = d.items.map(item => ({
-        title: item.title || '',
-        link: item.link || '',
-        source: item.author || d.feed?.title || extractDomain(url),
-        pubDate: item.pubDate || '',
-        thumbnail: item.thumbnail || item.enclosure?.link || extractImageFromContent(item.content || item.description || ''),
-        description: item.description || ''
-      }));
-      newsCache[cacheKey] = { ts: Date.now(), items };
-      return items;
+    if (r.ok) {
+      const d = await r.json();
+      if (d.status === 'ok' && d.items && d.items.length > 0) {
+        const items = d.items.map(item => ({
+          title: item.title || '',
+          link: item.link || '',
+          source: item.author || d.feed?.title || extractDomain(url),
+          pubDate: item.pubDate || '',
+          thumbnail: item.thumbnail || item.enclosure?.link || extractImageFromContent(item.content || item.description || ''),
+          description: item.description || ''
+        })).filter(i => i.title && i.link);
+        if (items.length > 0) {
+          newsCache[cacheKey] = { ts: Date.now(), items };
+          return items;
+        }
+      }
     }
   } catch(e) {}
 
+  // Try allorigins (returns raw XML)
   try {
-    const proxyUrl = RSS_PROXY2 + encodeURIComponent(url);
+    const proxyUrl = RSS_PROXIES[1](url);
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), timeout);
     const r = await fetch(proxyUrl, { signal: ctrl.signal });
     clearTimeout(tid);
-    const d = await r.json();
-    if (d.contents) {
-      const items = parseRssXml(d.contents, url);
-      newsCache[cacheKey] = { ts: Date.now(), items };
-      return items;
+    if (r.ok) {
+      const d = await r.json();
+      if (d.contents) {
+        const items = parseRssXml(d.contents, url);
+        if (items.length > 0) {
+          newsCache[cacheKey] = { ts: Date.now(), items };
+          return items;
+        }
+      }
+    }
+  } catch(e) {}
+
+  // Try corsproxy.io (returns raw content)
+  try {
+    const proxyUrl = RSS_PROXIES[2](url);
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), timeout);
+    const r = await fetch(proxyUrl, { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (r.ok) {
+      const text = await r.text();
+      if (text && (text.includes('<rss') || text.includes('<feed') || text.includes('<item') || text.includes('<entry'))) {
+        const items = parseRssXml(text, url);
+        if (items.length > 0) {
+          newsCache[cacheKey] = { ts: Date.now(), items };
+          return items;
+        }
+      }
     }
   } catch(e) {}
 
@@ -1643,24 +1585,67 @@ function parseRssXml(xml, sourceUrl) {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, 'text/xml');
-    const items = [...doc.querySelectorAll('item')];
-    const channelTitle = doc.querySelector('channel > title')?.textContent || extractDomain(sourceUrl);
-    return items.slice(0, 20).map(item => {
-      const title = item.querySelector('title')?.textContent?.trim() || '';
-      const link = item.querySelector('link')?.textContent?.trim() || '';
-      const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
-      const desc = item.querySelector('description')?.textContent || '';
+
+    // Handle both RSS <item> and Atom <entry> formats
+    let items = [...doc.querySelectorAll('item')];
+    let isAtom = false;
+    if (items.length === 0) {
+      items = [...doc.querySelectorAll('entry')];
+      isAtom = true;
+    }
+
+    const channelTitle = doc.querySelector('channel > title')?.textContent?.trim()
+      || doc.querySelector('feed > title')?.textContent?.trim()
+      || extractDomain(sourceUrl);
+
+    return items.slice(0, 25).map(item => {
+      let title = '', link = '', pubDate = '', desc = '', thumbnail = null;
+
+      title = item.querySelector('title')?.textContent?.trim() || '';
+
+      if (isAtom) {
+        // Atom: <link href="..."> or <link>...</link>
+        const linkEl = item.querySelector('link[href]') || item.querySelector('link');
+        link = linkEl?.getAttribute('href') || linkEl?.textContent?.trim() || '';
+        pubDate = item.querySelector('updated')?.textContent?.trim()
+          || item.querySelector('published')?.textContent?.trim() || '';
+        desc = item.querySelector('summary')?.textContent?.trim()
+          || item.querySelector('content')?.textContent?.trim() || '';
+      } else {
+        // RSS: <link> as text node or <guid>
+        const linkEl = item.querySelector('link');
+        // In some RSS, <link> is a text node between tags or has CDATA
+        link = linkEl?.textContent?.trim() || '';
+        if (!link) {
+          // Try to get link from next sibling text or guid
+          const guid = item.querySelector('guid');
+          if (guid && guid.getAttribute('isPermaLink') !== 'false') {
+            link = guid.textContent?.trim() || '';
+          }
+        }
+        pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
+        desc = item.querySelector('description')?.textContent?.trim() || '';
+      }
+
+      // Try to extract thumbnail from various locations
       const enclosure = item.querySelector('enclosure');
-      const mediaThumb = item.querySelector('thumbnail') || item.getElementsByTagNameNS('*','thumbnail')[0];
-      const mediaContent = item.getElementsByTagNameNS('*','content')[0];
-      let thumbnail = null;
-      if (mediaThumb) thumbnail = mediaThumb.getAttribute('url') || mediaThumb.textContent;
-      else if (mediaContent) thumbnail = mediaContent.getAttribute('url');
+      const mediaThumb = item.querySelector('thumbnail')
+        || item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')[0]
+        || item.getElementsByTagNameNS('*', 'thumbnail')[0];
+      const mediaContent = item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'content')[0]
+        || item.getElementsByTagNameNS('*', 'content')[0];
+
+      if (mediaThumb) thumbnail = mediaThumb.getAttribute('url') || mediaThumb.textContent?.trim();
+      else if (mediaContent && mediaContent.getAttribute('type')?.startsWith('image')) thumbnail = mediaContent.getAttribute('url');
       else if (enclosure && enclosure.getAttribute('type')?.startsWith('image')) thumbnail = enclosure.getAttribute('url');
       else thumbnail = extractImageFromContent(desc);
+
       return { title, link, source: channelTitle, pubDate, thumbnail, description: desc };
     }).filter(i => i.title && i.link);
-  } catch(e) { return []; }
+  } catch(e) {
+    console.warn('RSS parse error:', e);
+    return [];
+  }
 }
 
 function extractDomain(url) {
@@ -1691,9 +1676,14 @@ function normalizeTitle(t) {
   return t.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 40);
 }
 
-function renderNewsItem(n) {
-  const img = n.thumbnail ? `<img class="news-thumb" src="${n.thumbnail}" onerror="this.style.display='none'" loading="lazy" alt="">` : `<div class="news-thumb-placeholder">📰</div>`;
-  return `<a class="news-item" href="${n.link}" target="_blank" rel="noopener">
+function renderNewsItem(n, compact = false) {
+  const img = n.thumbnail
+    ? `<img class="news-thumb" src="${n.thumbnail}" onerror="this.style.display='none'" loading="lazy" alt="">`
+    : `<div class="news-thumb-placeholder">📰</div>`;
+  const style = compact
+    ? 'padding:0.65rem 0;border-bottom:1px solid var(--border)'
+    : '';
+  return `<a class="news-item" href="${n.link}" target="_blank" rel="noopener" ${style ? `style="${style}"` : ''}>
     ${img}
     <div class="news-content">
       <div class="news-title">${n.title}</div>
@@ -1710,32 +1700,27 @@ function openSettingsModal() {
   renderSettingsModal();
   document.getElementById('settingsModal').classList.add('open');
 }
-
 function closeSettingsModal() {
   document.getElementById('settingsModal').classList.remove('open');
   saveRss();
 }
-
 function renderSettingsModal() {
   const tabsEl = document.getElementById('settingsTabs');
   const contentsEl = document.getElementById('settingsTabContents');
   tabsEl.innerHTML = '';
   contentsEl.innerHTML = '';
-
   const tabs = [
     { key: 'portfolio', label: 'Portfolio' },
     { key: 'allgemein', label: 'Allgemein' },
     { key: 'wirtschaft', label: 'Wirtschaft' },
     { key: 'politik', label: 'Politik' }
   ];
-
   tabs.forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'settings-tab' + (currentSettingsTab === t.key ? ' active' : '');
     btn.textContent = t.label;
     btn.onclick = () => { currentSettingsTab = t.key; renderSettingsModal(); };
     tabsEl.appendChild(btn);
-
     const div = document.createElement('div');
     div.className = 'settings-tab-content' + (currentSettingsTab === t.key ? ' active' : '');
     div.id = 'stab-' + t.key;
@@ -1743,39 +1728,33 @@ function renderSettingsModal() {
     contentsEl.appendChild(div);
   });
 }
-
 function buildSettingsTabContent(catKey) {
   const cat = rssConfig[catKey];
   if (!cat) return '';
-
   if (cat.isPortfolio) {
-    return `
-      <div class="country-section">
-        <div class="country-title">Portfolio-News Feeds (Platzhalter: {TICKER})</div>
-        <div id="pfeed-list">${(cat.feeds||[]).map((f, i) => buildFeedItem(f, 'portfolio', null, i)).join('')}</div>
-        <div class="add-feed-row">
-          <input class="add-feed-input" id="pfeed-input" placeholder="https://…/{TICKER}…" onkeydown="if(event.key==='Enter')addFeed('portfolio',null,this.id)" />
-          <button class="add-feed-btn" onclick="addFeed('portfolio',null,'pfeed-input')">+ Hinzufügen</button>
-        </div>
-      </div>`;
+    return `<div class="country-section">
+      <div class="country-title">Portfolio-News Feeds (Platzhalter: {TICKER})</div>
+      <div id="pfeed-list">${(cat.feeds||[]).map((f, i) => buildFeedItem(f, 'portfolio', null, i)).join('')}</div>
+      <div class="add-feed-row">
+        <input class="add-feed-input" id="pfeed-input" placeholder="https://…/{TICKER}…" onkeydown="if(event.key==='Enter')addFeed('portfolio',null,this.id)" />
+        <button class="add-feed-btn" onclick="addFeed('portfolio',null,'pfeed-input')">+ Hinzufügen</button>
+      </div>
+    </div>`;
   }
-
   const countries = cat.countries || {};
   return Object.entries(countries).map(([cKey, country]) => {
     const feedsId = `feeds-${catKey}-${cKey}`;
     const inputId = `finput-${catKey}-${cKey}`;
-    return `
-      <div class="country-section">
-        <div class="country-title">${country.label}</div>
-        <div id="${feedsId}">${(country.feeds||[]).map((f,i) => buildFeedItem(f, catKey, cKey, i)).join('')}</div>
-        <div class="add-feed-row">
-          <input class="add-feed-input" id="${inputId}" placeholder="https://…" onkeydown="if(event.key==='Enter')addFeed('${catKey}','${cKey}','${inputId}')" />
-          <button class="add-feed-btn" onclick="addFeed('${catKey}','${cKey}','${inputId}')">+ Hinzufügen</button>
-        </div>
-      </div>`;
+    return `<div class="country-section">
+      <div class="country-title">${country.label}</div>
+      <div id="${feedsId}">${(country.feeds||[]).map((f,i) => buildFeedItem(f, catKey, cKey, i)).join('')}</div>
+      <div class="add-feed-row">
+        <input class="add-feed-input" id="${inputId}" placeholder="https://…" onkeydown="if(event.key==='Enter')addFeed('${catKey}','${cKey}','${inputId}')" />
+        <button class="add-feed-btn" onclick="addFeed('${catKey}','${cKey}','${inputId}')">+ Hinzufügen</button>
+      </div>
+    </div>`;
   }).join('');
 }
-
 function buildFeedItem(url, catKey, countryKey, idx) {
   const escapedUrl = url.replace(/"/g, '&quot;');
   return `<div class="feed-item" id="fitem-${catKey}-${countryKey||'p'}-${idx}">
@@ -1784,7 +1763,6 @@ function buildFeedItem(url, catKey, countryKey, idx) {
     <button class="feed-del-btn" onclick="deleteFeed('${catKey}','${countryKey}','${idx}')">×</button>
   </div>`;
 }
-
 function addFeed(catKey, countryKey, inputId) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -1799,30 +1777,22 @@ function addFeed(catKey, countryKey, inputId) {
     if (!rssConfig[catKey].countries[countryKey]) rssConfig[catKey].countries[countryKey] = { label: countryKey, feeds: [] };
     urls.forEach(u => { if (!rssConfig[catKey].countries[countryKey].feeds.includes(u)) rssConfig[catKey].countries[countryKey].feeds.push(u); });
   }
-  saveRss();
-  input.value = '';
+  saveRss(); input.value = '';
   renderSettingsModal();
 }
-
 function deleteFeed(catKey, countryKey, idx) {
-  if (catKey === 'portfolio') {
-    rssConfig.portfolio.feeds.splice(idx, 1);
-  } else if (rssConfig[catKey] && rssConfig[catKey].countries && rssConfig[catKey].countries[countryKey]) {
-    rssConfig[catKey].countries[countryKey].feeds.splice(idx, 1);
-  }
-  saveRss();
-  renderSettingsModal();
+  if (catKey === 'portfolio') { rssConfig.portfolio.feeds.splice(idx, 1); }
+  else if (rssConfig[catKey]?.countries?.[countryKey]) { rssConfig[catKey].countries[countryKey].feeds.splice(idx, 1); }
+  saveRss(); renderSettingsModal();
 }
-
 async function testFeed(url, catKey, countryKey, idx) {
   const btn = document.getElementById(`ftest-${catKey}-${countryKey}-${idx}`);
   if (!btn) return;
   btn.textContent = '…'; btn.className = 'feed-test-btn';
-  const items = await fetchRssFeed(url, 5000);
+  const items = await fetchRssFeed(url, 8000);
   if (items.length > 0) { btn.textContent = '✓ ' + items.length; btn.className = 'feed-test-btn ok'; }
   else { btn.textContent = 'Fehler'; btn.className = 'feed-test-btn err'; }
 }
-
 async function preloadAllFeeds() {
   const btn = document.querySelector('.settings-preload-btn');
   if (btn) { btn.textContent = 'Lädt…'; btn.disabled = true; }
@@ -1830,7 +1800,6 @@ async function preloadAllFeeds() {
   await Promise.allSettled(allUrls.map(u => fetchRssFeed(u, 8000)));
   if (btn) { btn.textContent = 'Geladen ✓'; setTimeout(() => { btn.textContent = 'Vorladen'; btn.disabled = false; }, 2000); }
 }
-
 function collectAllFeedUrls(excludePortfolio = true) {
   const urls = [];
   Object.entries(rssConfig).forEach(([catKey, cat]) => {
@@ -1847,26 +1816,24 @@ function switchNewsMainTab(tab) {
     const el = document.getElementById('nmtab-' + t);
     if (el) el.className = 'news-main-tab' + (t === tab ? ' active' : '');
   });
-  activeNewsCat = 'welt'; activeNewsSub = null;
+  activeNewsCat = 'welt';
   renderNewsCatRow();
   loadNewsFeed();
 }
 
 function renderNewsCatRow() {
   const catRow = document.getElementById('newsCatRow');
-  const subRow = document.getElementById('newsSubCatRow');
-  if (activeNewsMainTab === 'alles') { catRow.innerHTML = ''; subRow.innerHTML = ''; return; }
+  if (activeNewsMainTab === 'alles') { catRow.innerHTML = ''; return; }
   const cat = rssConfig[activeNewsMainTab];
-  if (!cat || !cat.countries) { catRow.innerHTML = ''; subRow.innerHTML = ''; return; }
+  if (!cat || !cat.countries) { catRow.innerHTML = ''; return; }
   const countries = Object.entries(cat.countries);
   catRow.innerHTML = countries.map(([cKey, c]) =>
     `<button class="news-cat-btn ${activeNewsCat === cKey ? 'active' : ''}" onclick="selectNewsCat('${cKey}')">${c.label}</button>`
   ).join('');
-  subRow.innerHTML = '';
 }
 
 function selectNewsCat(cKey) {
-  activeNewsCat = cKey; activeNewsSub = null;
+  activeNewsCat = cKey;
   renderNewsCatRow();
   loadNewsFeed();
 }
@@ -1893,7 +1860,7 @@ async function loadNewsFeed() {
   urls = [...new Set(urls)];
   if (!urls.length) { container.innerHTML = '<div class="news-empty">Keine Feeds konfiguriert.</div>'; return; }
   const items = await fetchMultipleFeeds(urls, 40);
-  if (!items.length) { container.innerHTML = '<div class="news-empty">Keine Artikel geladen. Überprüfe die RSS Feeds.</div>'; return; }
+  if (!items.length) { container.innerHTML = '<div class="news-empty">Keine Artikel geladen. Überprüfe die RSS Feeds unter dem RSS-Button.</div>'; return; }
   container.innerHTML = items.map(n => renderNewsItem(n)).join('');
 }
 
@@ -1934,40 +1901,26 @@ function togglePanelFullscreen() {
   document.getElementById('fsToggleBtn').textContent = panelFullscreen ? '✕' : '⛶';
   document.body.style.overflow = panelFullscreen ? 'hidden' : '';
 }
-
-// FIX 3: Vollbild-Button öffnet Einstellungs-Modal statt sofort Vollbild
 function openFsSettingsModal() {
-  // Highlight current default
   const cur = localStorage.getItem(FS_DEFAULT_KEY) || 'none';
   ['none','search','portfolio-news','news'].forEach(k => {
     const btn = document.getElementById('fss-' + k);
-    if (btn) {
-      btn.style.borderColor = (cur === k) ? 'var(--accent)' : '';
-      btn.style.color = (cur === k) ? 'var(--accent)' : '';
-    }
+    if (btn) { btn.style.borderColor = (cur === k) ? 'var(--accent)' : ''; btn.style.color = (cur === k) ? 'var(--accent)' : ''; }
   });
   const statusEl = document.getElementById('fsSettingsStatus');
   if (statusEl) statusEl.textContent = cur === 'none' ? 'Auto-Vollbild deaktiviert.' : 'Auto-Vollbild: ' + cur;
   document.getElementById('fsSettingsModal').classList.add('open');
 }
-
-function closeFsSettingsModal() {
-  document.getElementById('fsSettingsModal').classList.remove('open');
-}
-
+function closeFsSettingsModal() { document.getElementById('fsSettingsModal').classList.remove('open'); }
 function setFsDefault(tab) {
   localStorage.setItem(FS_DEFAULT_KEY, tab);
   ['none','search','portfolio-news','news'].forEach(k => {
     const btn = document.getElementById('fss-' + k);
-    if (btn) {
-      btn.style.borderColor = (k === tab) ? 'var(--accent)' : '';
-      btn.style.color = (k === tab) ? 'var(--accent)' : '';
-    }
+    if (btn) { btn.style.borderColor = (k === tab) ? 'var(--accent)' : ''; btn.style.color = (k === tab) ? 'var(--accent)' : ''; }
   });
   const statusEl = document.getElementById('fsSettingsStatus');
-  if (statusEl) statusEl.textContent = tab === 'none' ? '✓ Auto-Vollbild deaktiviert.' : '✓ Wird beim nächsten Start automatisch geöffnet: ' + tab;
+  if (statusEl) statusEl.textContent = tab === 'none' ? '✓ Auto-Vollbild deaktiviert.' : '✓ Beim nächsten Start: ' + tab;
 }
-
 function applyFsNow() {
   const tab = localStorage.getItem(FS_DEFAULT_KEY) || 'search';
   closeFsSettingsModal();
@@ -1975,23 +1928,17 @@ function applyFsNow() {
   switchTab(tab);
   if (!panelFullscreen) togglePanelFullscreen();
 }
-
-// FIX 3: Beim Laden automatisch Vollbild starten wenn konfiguriert
 function checkAutoFullscreen() {
   const saved = localStorage.getItem(FS_DEFAULT_KEY);
   if (saved && saved !== 'none') {
     switchTab(saved);
-    // Kurze Verzögerung damit das DOM bereit ist
-    setTimeout(() => {
-      if (!panelFullscreen) togglePanelFullscreen();
-    }, 150);
+    setTimeout(() => { if (!panelFullscreen) togglePanelFullscreen(); }, 150);
   }
 }
 
 // ── SEARCH ───────────────────────────────────────────────────
 async function onSearch(q) {
   clearTimeout(searchTimeout);
-  // FIX 2: clearSearchSelection nur wenn wirklich nichts eingegeben
   if (q.length < 2) { closeDropdown(); return; }
   searchTimeout = setTimeout(async () => {
     try {
@@ -2001,7 +1948,6 @@ async function onSearch(q) {
     } catch(e) {}
   }, 300);
 }
-
 function renderDropdown(results) {
   const dd = document.getElementById('searchDropdown');
   if (!results.length) { dd.classList.remove('visible'); return; }
@@ -2013,20 +1959,14 @@ function renderDropdown(results) {
     </div>`).join('');
   dd.classList.add('visible');
 }
-
 function closeDropdown() { document.getElementById('searchDropdown').classList.remove('visible'); }
 function onSearchFocus() { if (searchResults.length) renderDropdown(searchResults); }
 
-// FIX 1+2: selectTicker — lädt Preis und Chart, hält selectedTicker gesetzt
 async function selectTicker(i) {
   selectedTicker = searchResults[i];
   closeDropdown();
+  document.getElementById('searchInput').value = '';
 
-  // Input leeren ohne oninput auszulösen
-  const input = document.getElementById('searchInput');
-  input.value = '';
-
-  // Detail-Panel zeigen
   const detail = document.getElementById('searchResultDetail');
   detail.classList.add('visible');
   document.getElementById('srdSym').textContent = selectedTicker.symbol;
@@ -2037,16 +1977,21 @@ async function selectTicker(i) {
 
   const btn = document.getElementById('addWatchBtn');
   btn.textContent = '+ Zur Watchlist';
-  btn.disabled = false;
-  btn.style.opacity = '1';
+  btn.style.background = '';
 
-  // Chart-Bereich zurücksetzen
+  // Reset chart
   const srdLoading = document.getElementById('srdChartLoading');
   const srdCanvas = document.getElementById('srdCanvas');
   if (srdLoading) { srdLoading.style.display = 'flex'; srdLoading.textContent = 'laden…'; }
   if (srdCanvas) srdCanvas.style.display = 'none';
 
-  // Kurs laden
+  // Reset chart tab selection
+  document.querySelectorAll('.srd-chart-tab').forEach(t => t.classList.remove('active'));
+  const firstTab = document.querySelector('.srd-chart-tab[data-range="1d"]');
+  if (firstTab) firstTab.classList.add('active');
+  srdCurrentRange = '1d';
+
+  // Load price
   try {
     const q = await fetchPrice(selectedTicker.symbol);
     if (q && q.price) {
@@ -2064,42 +2009,44 @@ async function selectTicker(i) {
     document.getElementById('srdPrice').textContent = 'Fehler beim Laden';
   }
 
-  // Chart laden (unabhängig vom Kursergebnis)
-  loadSrdChart(selectedTicker.symbol);
+  loadSrdChart(selectedTicker.symbol, '1d');
 }
 
-// FIX 1: loadSrdChart mit robuster Fehlerbehandlung
-async function loadSrdChart(sym) {
+function switchSrdTab(tabEl, range) {
+  document.querySelectorAll('.srd-chart-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  srdCurrentRange = range;
+  if (selectedTicker) loadSrdChart(selectedTicker.symbol, range);
+}
+
+async function loadSrdChart(sym, range) {
   const loading = document.getElementById('srdChartLoading');
   const canvas = document.getElementById('srdCanvas');
   if (!loading || !canvas) return;
-
   loading.style.display = 'flex';
   loading.textContent = 'Chart laden…';
   canvas.style.display = 'none';
-
   if (srdChart) { try { srdChart.destroy(); } catch(e){} srdChart = null; }
-
+  const interval = intervalForRange(range);
   try {
-    const r = await fetch(API + '/api/chart?symbol=' + encodeURIComponent(sym) + '&range=1d&interval=5m');
+    const r = await fetch(API + '/api/chart?symbol=' + encodeURIComponent(sym) + '&range=' + range + '&interval=' + interval);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
     if (!d.points || !d.points.length) throw new Error('Keine Datenpunkte');
-
     const item = state.watchlist.find(w => w.symbol === sym);
     const currency = (item && item.currency) || (selectedTicker && selectedTicker.currency) || 'USD';
-
     const labels = d.points.map(p => {
       const dt = new Date(p.time * 1000);
-      return dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
+      if (range === '1d') return dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
+      if (range === '5d') return dt.toLocaleDateString('de-CH', { weekday:'short' }) + ' ' + dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
+      if (range === '5y' || range === 'max') return dt.toLocaleDateString('de-CH', { year:'2-digit', month:'short' });
+      return dt.toLocaleDateString('de-CH', { month:'short', day:'numeric' });
     });
     const values = d.points.map(p => toChf(p.value, currency));
     const isUp = values[values.length-1] >= values[0];
     const color = isUp ? '#5dca8c' : '#ff5f5f';
-
     loading.style.display = 'none';
     canvas.style.display = 'block';
-
     srdChart = new Chart(canvas, {
       type: 'line',
       data: { labels, datasets: [{
@@ -2107,8 +2054,7 @@ async function loadSrdChart(sym) {
         backgroundColor: ctx => {
           const g2 = ctx.chart.ctx.createLinearGradient(0, 0, 0, 100);
           g2.addColorStop(0, isUp ? 'rgba(93,202,140,0.18)' : 'rgba(255,95,95,0.18)');
-          g2.addColorStop(1, 'rgba(0,0,0,0)');
-          return g2;
+          g2.addColorStop(1, 'rgba(0,0,0,0)'); return g2;
         }, tension: 0.3
       }]},
       options: {
@@ -2136,11 +2082,9 @@ async function loadSrdChart(sym) {
       }
     });
   } catch(e) {
-    // Chart nicht verfügbar — aber das ist ok, Ticker ist trotzdem ausgewählt
     loading.textContent = 'Kein Chart verfügbar';
     loading.style.display = 'flex';
     canvas.style.display = 'none';
-    // selectedTicker bleibt gesetzt, Button bleibt aktiv
   }
 }
 
@@ -2148,8 +2092,9 @@ function clearSearchSelection() {
   selectedTicker = null;
   document.getElementById('searchResultDetail').classList.remove('visible');
   const btn = document.getElementById('addWatchBtn');
-  if (btn) { btn.textContent = '+ Zur Watchlist'; btn.disabled = false; }
+  if (btn) { btn.textContent = '+ Zur Watchlist'; btn.style.background = ''; }
   if (srdChart) { try { srdChart.destroy(); } catch(e){} srdChart = null; }
+  document.getElementById('searchInput').value = '';
 }
 
 document.addEventListener('click', e => {
@@ -2267,7 +2212,6 @@ async function init() {
   renderAll();
   await autoPullOnLoad();
   await refreshPrices();
-  // FIX 3: Auto-Vollbild nach dem Laden prüfen
   checkAutoFullscreen();
   setInterval(refreshPrices, 60000);
   setInterval(getFxRate, 300000);
