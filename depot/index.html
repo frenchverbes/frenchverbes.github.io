@@ -1221,7 +1221,6 @@ function toggleMarkerForm(sym) {
 function addBuyMarker(sym) {
   const sEl = document.getElementById('mShares-' + sym);
   const shares = parseInt(sEl.value);
-  if (!shares || shares < 1) { alert('Bitte ganze Anzahl Aktien eingeben (mind. 1).'); return; }
   const item = state.watchlist.find(w => w.symbol === sym);
   const currentPrice = item && item.currentPrice;
   if (!currentPrice) { alert('Kurs noch nicht geladen. Bitte kurz warten.'); return; }
@@ -2311,11 +2310,15 @@ function generateSyncCode() {
 function getSavedCode() { return localStorage.getItem(SYNC_CODE_KEY) || null; }
 function setSavedCode(code) { localStorage.setItem(SYNC_CODE_KEY, code); }
 
+function buildSyncPayload() {
+  return { ...state, rssConfig };
+}
+
 async function silentPush() {
   const code = getSavedCode(); if (!code) return;
   try {
     await fetch(API + '/api/sync?code=' + encodeURIComponent(code), {
-      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(state)
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(buildSyncPayload())
     });
   } catch(e) {}
 }
@@ -2327,7 +2330,9 @@ async function autoPullOnLoad() {
     if (!res.ok) return;
     const remote = await res.json();
     if (remote.watchlist && remote.watchlist.length >= (state.watchlist||[]).length) {
-      state = remote; save();
+      const { rssConfig: remoteRss, ...remoteState } = remote;
+      state = remoteState; save();
+      if (remoteRss) { rssConfig = remoteRss; saveRss(); }
       document.getElementById('positionsList').innerHTML = '';
       Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} }); charts = {};
       renderAll();
@@ -2373,7 +2378,7 @@ async function pushToCloud() {
   pushBtn.disabled = true; pushBtn.textContent = 'Lädt…';
   try {
     const res = await fetch(API + '/api/sync?code=' + encodeURIComponent(code), {
-      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(state)
+      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(buildSyncPayload())
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     setSyncStatus('✓ Hochgeladen — ' + new Date().toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'}), 'ok');
@@ -2391,8 +2396,10 @@ async function loadFromCode() {
     if (res.status === 404) { setSyncStatus('Code nicht gefunden.', 'err'); return; }
     if (!res.ok) throw new Error();
     const loaded = await res.json();
-    if (!confirm('Watchlist von "' + raw + '" laden?')) return;
-    state = loaded; save(); setSavedCode(raw);
+    if (!confirm('Watchlist von "' + raw + '" laden? (inkl. RSS-Feeds)')) return;
+    const { rssConfig: loadedRss, ...loadedState } = loaded;
+    state = loadedState; save(); setSavedCode(raw);
+    if (loadedRss) { rssConfig = loadedRss; saveRss(); }
     document.getElementById('syncCodeInput').value = '';
     Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} }); charts = {};
     document.getElementById('positionsList').innerHTML = '';
