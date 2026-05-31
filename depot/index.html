@@ -484,21 +484,41 @@ canvas { display: block; width: 100% !important; }
 .news-feed-container { overflow-y: auto; max-height: 340px; }
 .bottom-panel.fullscreen .news-feed-container { max-height: none; flex: 1; overflow-y: auto; }
 
-/* News items — more spacious */
+/* News items — spacious and readable */
 .news-item {
-  display: flex; gap: 0.7rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border);
+  display: flex; gap: 0.85rem; padding: 1rem 0; border-bottom: 1px solid var(--border);
   cursor: pointer; transition: background 0.1s; align-items: flex-start;
   text-decoration: none; color: inherit;
 }
 .news-item:last-child { border-bottom: none; }
-.news-item:hover { background: var(--surface); margin: 0 -0.75rem; padding: 0.85rem 0.75rem; border-radius: 4px; }
-.news-thumb { width: 64px; height: 48px; border-radius: 5px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
-.news-thumb-placeholder { width: 64px; height: 48px; border-radius: 5px; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.news-item:hover { background: var(--surface); margin: 0 -0.75rem; padding: 1rem 0.75rem; border-radius: 6px; }
+.news-thumb { width: 72px; height: 54px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
+.news-thumb-placeholder { width: 72px; height: 54px; border-radius: 6px; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
 .news-content { flex: 1; min-width: 0; }
-.news-title { font-size: 0.78rem; font-weight: 600; line-height: 1.45; margin-bottom: 0.3rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.news-meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-.news-source { font-family: var(--mono); font-size: 0.55rem; color: var(--accent); }
-.news-time { font-family: var(--mono); font-size: 0.52rem; color: var(--muted); }
+.news-title { font-size: 0.82rem; font-weight: 600; line-height: 1.5; margin-bottom: 0.4rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.news-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.news-source { font-family: var(--mono); font-size: 0.56rem; color: var(--accent); }
+.news-time { font-family: var(--mono); font-size: 0.53rem; color: var(--muted); }
+
+/* Drag-to-measure overlay on charts */
+.chart-measure-overlay {
+  position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  display: none;
+}
+.chart-measure-selection {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(200,240,96,0.08); border-left: 1px dashed rgba(200,240,96,0.6);
+  border-right: 1px dashed rgba(200,240,96,0.6); pointer-events: none;
+}
+.chart-measure-badge {
+  position: absolute; top: 4px;
+  background: #0c0c0f; border: 1px solid var(--accent); border-radius: 5px;
+  padding: 0.3rem 0.55rem; font-family: var(--mono); font-size: 0.65rem;
+  white-space: nowrap; pointer-events: none; transform: translateX(-50%);
+  z-index: 10;
+}
+.chart-measure-badge.up { color: var(--green); border-color: var(--green); }
+.chart-measure-badge.down { color: var(--red); border-color: var(--red); }
 
 .news-loading { text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--muted); padding: 1.5rem; }
 .news-empty { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); padding: 1rem 0; }
@@ -702,9 +722,13 @@ canvas { display: block; width: 100% !important; }
         <button class="srd-chart-tab" data-range="5y" onclick="switchSrdTab(this,'5y')">5J</button>
         <button class="srd-chart-tab" data-range="max" onclick="switchSrdTab(this,'max')">Max</button>
       </div>
-      <div class="srd-chart-wrap">
+      <div class="srd-chart-wrap" id="srdWrap">
         <div class="srd-chart-loading" id="srdChartLoading">laden…</div>
         <canvas id="srdCanvas" height="100"></canvas>
+        <div class="chart-measure-overlay" id="measure-srd">
+          <div class="chart-measure-selection" id="measure-sel-srd"></div>
+          <div class="chart-measure-badge" id="measure-badge-srd"></div>
+        </div>
       </div>
       <button class="add-watch-btn" id="addWatchBtn" onclick="addToWatchlist()">+ Zur Watchlist</button>
     </div>
@@ -1116,9 +1140,13 @@ function renderPositions() {
             <button class="chart-tab" onclick="loadChart('${item.symbol}','5y',this)">5J</button>
             <button class="chart-tab" onclick="loadChart('${item.symbol}','max',this)">Max</button>
           </div>
-          <div class="chart-canvas-wrap">
+          <div class="chart-canvas-wrap" id="wrap-${item.symbol}">
             <div class="chart-loading" id="loading-${item.symbol}">laden…</div>
             <canvas id="canvas-${item.symbol}" height="150"></canvas>
+            <div class="chart-measure-overlay" id="measure-${item.symbol}">
+              <div class="chart-measure-selection" id="measure-sel-${item.symbol}"></div>
+              <div class="chart-measure-badge" id="measure-badge-${item.symbol}"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1144,8 +1172,7 @@ function buildMarkersHtml(item, markers, cp) {
       ${buildMarkersListHtml(item, markers, cp)}
     </div>
     <div class="add-marker-form" id="mform-${item.symbol}" style="display:none">
-      <input type="number" placeholder="Kaufpreis (0 = Dummy)" id="mPrice-${item.symbol}" step="any" min="0" />
-      <input type="number" placeholder="Investiert (CHF)" id="mInvested-${item.symbol}" step="any" min="0" />
+      <input type="number" placeholder="Anzahl Aktien (ganze Zahl)" id="mShares-${item.symbol}" step="1" min="1" />
       <button class="add-marker-btn" onclick="addBuyMarker('${item.symbol}')">+ Marker</button>
     </div>
     <div style="padding:0.3rem 1rem 0.5rem">
@@ -1153,36 +1180,33 @@ function buildMarkersHtml(item, markers, cp) {
     </div>`;
 }
 
-// FIX: Marker calculations use NATIVE price (not CHF-converted)
-// A marker stores the buy price in the stock's native currency
-// We compare native buy price vs native current price for % return
-// Then use invested CHF to show absolute CHF gain/loss
 function buildMarkersListHtml(item, markers, cp) {
   if (!markers.length) return '';
   return markers.map((m, i) => {
+    // m.price = native price at time of adding marker (current price when added)
+    // m.shares = integer number of shares
+    // invested = shares * buyPrice (in native), then converted to CHF at time of addition
+    const currency = item.currency || 'USD';
     let retHtml = '';
-    // cp is the native price of the stock (e.g. USD for AAPL)
-    // m.price is the buy price also in native currency
-    // m.invested is always in CHF (user input)
+    const displayPrice = m.price > 0 ? `${fmtNum(m.price)} ${currency}` : '–';
+    const investedChf = m.shares && m.price > 0 ? toChf(m.shares * m.price, currency) : null;
+
     if (cp && m.price > 0) {
       const ret = ((cp - m.price) / m.price) * 100;
       const cls = ret >= 0 ? 'pos' : 'neg';
       retHtml = `<span class="bm-ret ${cls}">${fmtPct(ret)}</span>`;
-      if (m.invested) {
-        const retAbsChf = m.invested * (ret / 100);
+      if (investedChf) {
+        const retAbsChf = investedChf * (ret / 100);
         retHtml += ` <span class="bm-ret ${cls}">(${retAbsChf >= 0 ? '+' : ''}${fmtNum(retAbsChf)} CHF)</span>`;
       }
-    } else if (m.price === 0) {
-      retHtml = `<span style="color:var(--muted);font-size:0.58rem">Dummy</span>`;
     }
-    const currency = item.currency || 'USD';
-    const displayPrice = m.price > 0 ? `${fmtNum(m.price)} ${currency}` : '–';
-    const investedDisplay = m.invested ? `${fmtNum(m.invested)} CHF` : '';
+    const sharesLabel = m.shares ? `${m.shares} Stk.` : '';
     return `
       <div class="buy-marker-row" data-sym="${item.symbol}" data-idx="${i}" onmouseenter="showMarkerTooltip(event,'${item.symbol}',${i})" onmouseleave="hideMarkerTooltip()">
         <span class="bm-label">▸ Kauf</span>
         <span class="bm-price">${displayPrice}</span>
-        ${investedDisplay ? `<span class="bm-invested">· ${investedDisplay}</span>` : ''}
+        ${sharesLabel ? `<span class="bm-invested">· ${sharesLabel}</span>` : ''}
+        ${investedChf ? `<span class="bm-invested">· ${fmtNum(investedChf)} CHF</span>` : ''}
         ${retHtml}
         <button class="bm-del" onclick="removeBuyMarker('${item.symbol}',${i})" title="Marker entfernen">×</button>
       </div>`;
@@ -1195,20 +1219,25 @@ function toggleMarkerForm(sym) {
 }
 
 function addBuyMarker(sym) {
-  const pEl = document.getElementById('mPrice-' + sym);
-  const iEl = document.getElementById('mInvested-' + sym);
-  const price = parseFloat(pEl.value);
-  const invested = parseFloat(iEl.value) || 0;
-  if (isNaN(price) || price < 0) { alert('Ungültiger Preis. 0 für Dummy-Marker.'); return; }
+  const sEl = document.getElementById('mShares-' + sym);
+  const shares = parseInt(sEl.value);
+  if (!shares || shares < 1) { alert('Bitte ganze Anzahl Aktien eingeben (mind. 1).'); return; }
+  const item = state.watchlist.find(w => w.symbol === sym);
+  const currentPrice = item && item.currentPrice;
+  if (!currentPrice) { alert('Kurs noch nicht geladen. Bitte kurz warten.'); return; }
   if (!state.buyMarkers) state.buyMarkers = {};
   if (!state.buyMarkers[sym]) state.buyMarkers[sym] = [];
-  // price is stored in the stock's native currency (as displayed/entered)
-  state.buyMarkers[sym].push({ price, invested: invested > 0 ? invested : null, addedAt: new Date().toISOString() });
-  pEl.value = ''; iEl.value = '';
+  // Store native price at time of marker creation
+  state.buyMarkers[sym].push({
+    price: currentPrice,   // native currency price
+    shares,
+    addedAt: new Date().toISOString()
+  });
+  sEl.value = '';
   document.getElementById('mform-' + sym).style.display = 'none';
   save(); silentPush();
   refreshMarkersDisplay(sym);
-  // Reload chart if open to show new marker line
+  // Reload chart if open
   const activeTab = document.querySelector('#tabs-' + sym + ' .chart-tab.active');
   if (activeTab && document.getElementById('chart-' + sym)?.classList.contains('open')) {
     const rangeMap = {'1T':'1d','5T':'5d','1M':'1mo','3M':'3mo','1J':'1y','5J':'5y','Max':'max'};
@@ -1219,6 +1248,7 @@ function addBuyMarker(sym) {
 
 function removeBuyMarker(sym, idx) {
   if (!state.buyMarkers || !state.buyMarkers[sym]) return;
+  hideMarkerTooltip();
   state.buyMarkers[sym].splice(idx, 1);
   save(); silentPush();
   refreshMarkersDisplay(sym);
@@ -1237,37 +1267,126 @@ function showMarkerTooltip(event, sym, idx) {
   const m = markers[idx];
   if (!m || !item) return;
   const tt = document.getElementById('markerTooltip');
-  const cp = item.currentPrice; // native price
+  const cp = item.currentPrice;
   const currency = item.currency || 'USD';
   document.getElementById('mtTitle').textContent = item.symbol + ' Kauf-Marker';
-  document.getElementById('mtBuyPrice').textContent = m.price > 0 ? `${fmtNum(m.price)} ${currency}` : 'Dummy';
+  document.getElementById('mtBuyPrice').textContent = m.price > 0 ? `${fmtNum(m.price)} ${currency}` : '–';
   document.getElementById('mtCurPrice').textContent = cp ? `${fmtNum(cp)} ${currency}` : '–';
-  document.getElementById('mtInvested').textContent = m.invested ? fmtNum(m.invested) + ' CHF' : '–';
+  const investedChf = m.shares && m.price > 0 ? toChf(m.shares * m.price, currency) : null;
+  document.getElementById('mtInvested').textContent = investedChf ? `${m.shares} Stk. · ${fmtNum(investedChf)} CHF` : (m.shares ? `${m.shares} Stk.` : '–');
   const retEl = document.getElementById('mtRet');
   const curValEl = document.getElementById('mtCurVal');
-  if (cp && m.price > 0 && m.invested) {
+  if (cp && m.price > 0) {
     const ret = ((cp - m.price) / m.price) * 100;
-    const curValChf = m.invested * (1 + ret / 100);
-    const retAbsChf = curValChf - m.invested;
-    retEl.textContent = fmtPct(ret) + ' (' + (retAbsChf >= 0 ? '+' : '') + fmtNum(retAbsChf) + ' CHF)';
+    const curValChf = investedChf ? investedChf * (1 + ret / 100) : null;
+    const retAbsChf = curValChf ? curValChf - investedChf : null;
+    retEl.textContent = fmtPct(ret) + (retAbsChf !== null ? ` (${retAbsChf >= 0 ? '+' : ''}${fmtNum(retAbsChf)} CHF)` : '');
     retEl.className = 'mt-ret ' + (ret >= 0 ? 'pos' : 'neg');
-    curValEl.textContent = fmtNum(curValChf) + ' CHF';
-  } else if (cp && m.price > 0) {
-    const ret = ((cp - m.price) / m.price) * 100;
-    retEl.textContent = fmtPct(ret);
-    retEl.className = 'mt-ret ' + (ret >= 0 ? 'pos' : 'neg');
-    curValEl.textContent = '–';
+    curValEl.textContent = curValChf ? fmtNum(curValChf) + ' CHF' : '–';
   } else {
-    retEl.textContent = '–'; curValEl.textContent = '–';
+    retEl.textContent = '–'; retEl.className = 'mt-ret'; curValEl.textContent = '–';
   }
-  const rect = event.target.getBoundingClientRect();
+  const rect = event.currentTarget.getBoundingClientRect();
   tt.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
   tt.style.top = (rect.top - 10) + 'px';
   tt.classList.add('visible');
 }
 function hideMarkerTooltip() { document.getElementById('markerTooltip').classList.remove('visible'); }
 
-// ── DRAG & DROP ──────────────────────────────────────────────
+// ── CHART DRAG-TO-MEASURE ─────────────────────────────────────
+function attachMeasureDrag(canvasId, overlayId, selId, badgeId, chartRef) {
+  const canvas = document.getElementById(canvasId);
+  const overlay = document.getElementById(overlayId);
+  const sel = document.getElementById(selId);
+  const badge = document.getElementById(badgeId);
+  if (!canvas || !overlay || !sel || !badge) return;
+
+  let dragging = false;
+  let startX = 0;
+
+  function getDataIndex(px) {
+    const chart = chartRef();
+    if (!chart) return null;
+    const area = chart.chartArea;
+    const labels = chart.data.labels;
+    if (!labels || !labels.length) return null;
+    const relX = Math.max(0, Math.min(px - area.left, area.right - area.left));
+    return Math.round((relX / (area.right - area.left)) * (labels.length - 1));
+  }
+
+  function getPxForIndex(idx) {
+    const chart = chartRef();
+    if (!chart) return 0;
+    const area = chart.chartArea;
+    const labels = chart.data.labels;
+    return area.left + (idx / Math.max(labels.length - 1, 1)) * (area.right - area.left);
+  }
+
+  function getValueAt(idx) {
+    const chart = chartRef();
+    if (!chart) return null;
+    const data = chart.data.datasets[0].data;
+    return (idx >= 0 && idx < data.length) ? data[idx] : null;
+  }
+
+  canvas.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    const chart = chartRef();
+    if (!chart) return;
+    const rect = canvas.getBoundingClientRect();
+    const area = chart.chartArea;
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    if (relY < area.top - 4 || relY > area.bottom + 4) return;
+    if (relX < area.left || relX > area.right) return;
+    dragging = true;
+    startX = relX;
+    overlay.style.display = 'block';
+    sel.style.left = startX + 'px';
+    sel.style.width = '0';
+    badge.style.display = 'none';
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    const chart = chartRef();
+    if (!chart) return;
+    const area = chart.chartArea;
+    const curX = Math.max(area.left, Math.min(e.clientX - rect.left, area.right));
+    const x1 = Math.min(startX, curX);
+    const x2 = Math.max(startX, curX);
+    sel.style.left = x1 + 'px';
+    sel.style.width = (x2 - x1) + 'px';
+
+    const iStart = getDataIndex(x1);
+    const iEnd = getDataIndex(x2);
+    if (iStart === null || iEnd === null || iStart === iEnd) { badge.style.display = 'none'; return; }
+    const vStart = getValueAt(iStart);
+    const vEnd = getValueAt(iEnd);
+    if (vStart == null || vEnd == null) { badge.style.display = 'none'; return; }
+
+    const chg = vEnd - vStart;
+    const pct = (chg / Math.abs(vStart)) * 100;
+    const midPx = (getPxForIndex(iStart) + getPxForIndex(iEnd)) / 2;
+    badge.textContent = (chg >= 0 ? '+' : '') + fmtNum(chg) + ' (' + fmtPct(pct) + ')';
+    badge.className = 'chart-measure-badge ' + (chg >= 0 ? 'up' : 'down');
+    badge.style.left = Math.max(30, Math.min(midPx, (canvas.getBoundingClientRect().width || 300) - 30)) + 'px';
+    badge.style.display = 'block';
+  });
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    overlay.style.display = 'none';
+    badge.style.display = 'none';
+  }
+
+  canvas.addEventListener('mouseup', endDrag);
+  canvas.addEventListener('mouseleave', endDrag);
+  document.addEventListener('mouseup', endDrag, { once: false });
+}
 function onDragStart(e) {
   dragSrc = this; this.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
@@ -1350,8 +1469,11 @@ async function loadChart(sym, range, tabEl) {
     const labels = d.points.map(p => {
       const dt = new Date(p.time * 1000);
       if (range === '1d') return dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
-      if (range === '5d') return dt.toLocaleDateString('de-CH', { weekday:'short' }) + ' ' + dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
-      return dt.toLocaleDateString('de-CH', { month:'short', day:'numeric' });
+      if (range === '5d') return dt.toLocaleDateString('de-CH', { weekday:'short', day:'2-digit', month:'2-digit' });
+      if (range === '1mo' || range === '3mo') return dt.toLocaleDateString('de-CH', { day:'2-digit', month:'short' });
+      if (range === '1y') return dt.toLocaleDateString('de-CH', { month:'short', year:'2-digit' });
+      // 5y, max: show year + quarter or just year
+      return dt.toLocaleDateString('de-CH', { year:'numeric', month:'short' });
     });
     const values = d.points.map(p => toChf(p.value, currency));
     const isUp = values[values.length-1] >= values[0];
@@ -1415,6 +1537,14 @@ async function loadChart(sym, range, tabEl) {
         }
       }
     });
+    // Attach drag-to-measure
+    attachMeasureDrag(
+      'canvas-' + sym,
+      'measure-' + sym,
+      'measure-sel-' + sym,
+      'measure-badge-' + sym,
+      () => charts[sym]
+    );
   } catch(e) {
     if (loading) { loading.textContent = 'Keine Daten'; loading.style.display = 'flex'; }
     canvas.style.display = 'none';
@@ -1434,27 +1564,91 @@ async function openInfoModal(sym) {
   const cp = q.price || 0;
   const prev = q.previousClose || 0;
   const chgPct = prev > 0 ? ((cp - prev) / prev) * 100 : 0;
+  const cur = q.currency || '';
+  const na = '–';
+
+  function infoRow(label, val, cls = '') {
+    return `<div class="info-detail-row">
+      <span class="info-detail-label">${label}</span>
+      <span class="info-detail-val${cls ? ' ' + cls : ''}">${val}</span>
+    </div>`;
+  }
+
+  function sectionHead(title) {
+    return `<div class="info-section-head">${title}</div>`;
+  }
+
+  // 52W range bar
+  const range52 = (q.fiftyTwoWeekLow && q.fiftyTwoWeekHigh && q.fiftyTwoWeekHigh > q.fiftyTwoWeekLow)
+    ? Math.round(((cp - q.fiftyTwoWeekLow) / (q.fiftyTwoWeekHigh - q.fiftyTwoWeekLow)) * 100)
+    : null;
+
+  const dayLow = q.dayLow || q.regularMarketDayLow;
+  const dayHigh = q.dayHigh || q.regularMarketDayHigh;
+  const open = q.open || q.regularMarketOpen;
+  const bid = q.bid; const ask = q.ask;
+  const vol = q.volume || q.regularMarketVolume;
+  const avgVol = q.averageVolume || q.averageDailyVolume10Day;
+  const mktCap = q.marketCap;
+  const beta = q.beta;
+  const peRatio = q.trailingPE || q.forwardPE;
+  const eps = q.trailingEps || q.epsTrailingTwelveMonths;
+  const earningsDate = q.earningsTimestamp ? new Date(q.earningsTimestamp * 1000).toLocaleDateString('de-CH') : null;
+  const divYield = q.dividendYield;
+  const divRate = q.dividendRate || q.trailingAnnualDividendRate;
+  const exDiv = q.exDividendDate ? new Date(q.exDividendDate * 1000).toLocaleDateString('de-CH') : null;
+  const target1y = q.targetMeanPrice || q.targetHighPrice;
+
   document.getElementById('infoContent').innerHTML = `
-    <div class="info-grid">
-      <div class="info-card"><div class="info-card-label">Kurs</div><div class="info-card-val">${fmtNum(cp)} ${q.currency||''}</div></div>
-      <div class="info-card"><div class="info-card-label">Tagesänd.</div><div class="info-card-val ${pnlClass(chgPct,'pos','neg')}">${fmtPct(chgPct)}</div></div>
-      <div class="info-card"><div class="info-card-label">Vortag</div><div class="info-card-val">${prev ? fmtNum(prev) : '–'}</div></div>
-      <div class="info-card"><div class="info-card-label">Währung</div><div class="info-card-val">${q.currency||'–'}</div></div>
-      <div class="info-card"><div class="info-card-label">Börse</div><div class="info-card-val">${q.exchange||'–'}</div></div>
-      <div class="info-card"><div class="info-card-label">CHF Kurs</div><div class="info-card-val">${fmtNum(toChf(cp, q.currency))}</div></div>
+    <style>
+      .info-detail-row { display:flex; justify-content:space-between; align-items:baseline; padding:0.28rem 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+      .info-detail-row:last-child { border-bottom:none; }
+      .info-detail-label { font-family:var(--mono); font-size:0.55rem; color:var(--muted); padding-right:0.5rem; flex-shrink:0; }
+      .info-detail-val { font-family:var(--mono); font-size:0.65rem; font-weight:600; text-align:right; }
+      .info-detail-val.pos { color:var(--green); }
+      .info-detail-val.neg { color:var(--red); }
+      .info-section-head { font-family:var(--mono); font-size:0.48rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); padding:0.6rem 0 0.25rem; border-top:1px solid var(--border); margin-top:0.2rem; }
+      .info-section-head:first-child { border-top:none; padding-top:0; margin-top:0; }
+    </style>
+    ${sectionHead('Kurs & Tageshandel')}
+    ${infoRow('Kurs', `${fmtNum(cp)} ${cur}`)}
+    ${infoRow('Tagesänderung', `${fmtPct(chgPct)} (${(cp-prev>=0?'+':'')}${fmtNum(cp-prev)} ${cur})`, pnlClass(chgPct,'pos','neg'))}
+    ${infoRow('Vortagesschluss', prev ? `${fmtNum(prev)} ${cur}` : na)}
+    ${infoRow('Eröffnung', open ? `${fmtNum(open)} ${cur}` : na)}
+    ${bid != null ? infoRow('Geldkurs (Bid)', `${fmtNum(bid)} ${cur}`) : ''}
+    ${ask != null ? infoRow('Briefkurs (Ask)', `${fmtNum(ask)} ${cur}`) : ''}
+    ${(dayLow && dayHigh) ? infoRow('Tagesspanne', `${fmtNum(dayLow)} – ${fmtNum(dayHigh)} ${cur}`) : ''}
+    ${infoRow('CHF-Kurs', fmtNum(toChf(cp, cur)))}
+
+    ${(q.fiftyTwoWeekLow && q.fiftyTwoWeekHigh) ? `
+    ${sectionHead('52-Wochen-Spanne')}
+    <div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0">
+      <span style="font-family:var(--mono);font-size:0.6rem;color:var(--red)">${fmtNum(q.fiftyTwoWeekLow)}</span>
+      <div style="flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;position:relative">
+        <div style="position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,var(--red),var(--green));width:${range52 ?? 50}%;border-radius:3px"></div>
+        ${range52 !== null ? `<div style="position:absolute;top:50%;left:${range52}%;transform:translate(-50%,-50%);width:8px;height:8px;background:var(--text);border-radius:50%;border:1.5px solid var(--bg)"></div>` : ''}
+      </div>
+      <span style="font-family:var(--mono);font-size:0.6rem;color:var(--green)">${fmtNum(q.fiftyTwoWeekHigh)}</span>
     </div>
-    ${q.marketCap ? `<div class="info-card" style="margin-bottom:0.4rem"><div class="info-card-label">Marktkapitalisierung</div><div class="info-card-val" style="font-size:0.7rem">${fmtLargeNum(q.marketCap)}</div></div>` : ''}
-    ${q.fiftyTwoWeekLow && q.fiftyTwoWeekHigh ? `
-      <div style="padding:0.5rem 0;border-top:1px solid var(--border)">
-        <div style="font-family:var(--mono);font-size:0.5rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem">52-Wochen-Range</div>
-        <div style="display:flex;align-items:center;gap:0.4rem">
-          <span style="font-family:var(--mono);font-size:0.62rem;color:var(--red)">${fmtNum(q.fiftyTwoWeekLow)}</span>
-          <div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;position:relative">
-            <div style="position:absolute;left:0;top:0;height:100%;background:linear-gradient(90deg,var(--red),var(--green));width:${Math.round(((cp - q.fiftyTwoWeekLow)/(q.fiftyTwoWeekHigh - q.fiftyTwoWeekLow)) * 100)}%;border-radius:2px"></div>
-          </div>
-          <span style="font-family:var(--mono);font-size:0.62rem;color:var(--green)">${fmtNum(q.fiftyTwoWeekHigh)}</span>
-        </div>
-      </div>` : ''}`;
+    ${range52 !== null ? infoRow('Position in 52W-Range', range52 + '%') : ''}
+    ` : ''}
+
+    ${sectionHead('Volumen & Markt')}
+    ${vol ? infoRow('Handelsvolumen', fmtLargeNum(vol)) : ''}
+    ${avgVol ? infoRow('Ø Volumen (10T)', fmtLargeNum(avgVol)) : ''}
+    ${mktCap ? infoRow('Marktkapitalisierung', fmtLargeNum(mktCap)) : ''}
+    ${beta != null ? infoRow('Beta (5J monatlich)', beta.toFixed(2)) : ''}
+    ${infoRow('Börse', q.exchange || na)}
+    ${infoRow('Währung', cur || na)}
+
+    ${sectionHead('Bewertung & Dividende')}
+    ${peRatio != null ? infoRow('KGV (TTM)', peRatio.toFixed(2)) : ''}
+    ${eps != null ? infoRow('EPS (TTM)', `${fmtNum(eps)} ${cur}`) : ''}
+    ${earningsDate ? infoRow('Quartalszahlen', earningsDate) : ''}
+    ${(divRate || divYield) ? infoRow('Dividende & Rendite', `${divRate ? fmtNum(divRate) + ' ' + cur : na} / ${divYield ? (divYield * 100).toFixed(2) + '%' : na}`) : ''}
+    ${exDiv ? infoRow('Ex-Dividenden-Tag', exDiv) : ''}
+    ${target1y ? infoRow('Kursziel (1J)', `${fmtNum(target1y)} ${cur}`, pnlClass(target1y - cp, 'pos', 'neg')) : ''}
+  `;
 }
 function closeInfoModal(e) {
   if (e.target === document.getElementById('infoModal')) document.getElementById('infoModal').classList.remove('open');
@@ -2038,9 +2232,10 @@ async function loadSrdChart(sym, range) {
     const labels = d.points.map(p => {
       const dt = new Date(p.time * 1000);
       if (range === '1d') return dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
-      if (range === '5d') return dt.toLocaleDateString('de-CH', { weekday:'short' }) + ' ' + dt.toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' });
-      if (range === '5y' || range === 'max') return dt.toLocaleDateString('de-CH', { year:'2-digit', month:'short' });
-      return dt.toLocaleDateString('de-CH', { month:'short', day:'numeric' });
+      if (range === '5d') return dt.toLocaleDateString('de-CH', { weekday:'short', day:'2-digit', month:'2-digit' });
+      if (range === '1mo' || range === '3mo') return dt.toLocaleDateString('de-CH', { day:'2-digit', month:'short' });
+      if (range === '1y') return dt.toLocaleDateString('de-CH', { month:'short', year:'2-digit' });
+      return dt.toLocaleDateString('de-CH', { year:'numeric', month:'short' });
     });
     const values = d.points.map(p => toChf(p.value, currency));
     const isUp = values[values.length-1] >= values[0];
@@ -2081,6 +2276,7 @@ async function loadSrdChart(sym, range) {
         }
       }
     });
+    attachMeasureDrag('srdCanvas', 'measure-srd', 'measure-sel-srd', 'measure-badge-srd', () => srdChart);
   } catch(e) {
     loading.textContent = 'Kein Chart verfügbar';
     loading.style.display = 'flex';
